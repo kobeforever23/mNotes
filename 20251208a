@@ -1,0 +1,288 @@
+### **Executive Summary: What is Schedule F?**
+
+**Schedule F (Trading)** is a specific component of the **FR Y-14Q** regulatory report filed quarterly by large U.S. banks (typically those with >$100B in assets).
+
+* **Purpose:** It captures granular **risk sensitivities** (Greeks) and **market value** data for the bank's **Trading Book** (plus Private Equity and FVO Loan Hedges).
+* **Usage:** The Federal Reserve uses this data to run the **Global Market Shock (GMS)** component of CCAR/DFAST. They take your reported sensitivities (e.g., "we lose $10M if rates rise 1bp") and multiply them by their supervisory shock scenarios to estimate your instantaneous trading losses.
+
+---
+
+### **Detailed Granularity: The "Tabs" of Schedule F**
+
+To build a **Stress Scenario Designer**, you must understand the specific "worksheets" or sub-schedules. Your scenario engine must generate shocks that map 1-to-1 with these risk buckets.
+
+The schedule is generally organized by **Asset Class** and **Risk Type**.
+
+#### **1. Equity**
+* **What is reported:**
+    * **Delta (Spot):** Sensitivity to equity price changes.
+    * **Vega:** Sensitivity to equity volatility changes.
+    * **Granularity:** Broken down by **Region** (US, EUR, APAC, etc.), **Sector** (Tech, Energy, Financials), and **Cap Size** (Large vs. Small).
+    * **Scenario Design Need:** Your scenario must output shocks for Equity Indices (e.g., S&P 500, Euro Stoxx) and potentially sector-level shocks.
+
+#### **2. Rates (Fixed Income)**
+* **What is reported:**
+    * **DV01 (Delta):** Sensitivity to interest rate curves (Swaps, Treasuries, Sovereign curves).
+    * **Vega:** Sensitivity to interest rate volatility (Swaptions, Caps/Floors).
+    * **Granularity:** Highly granular. Broken down by **Currency** (USD, EUR, JPY, GBP) and **Tenor** (3M, 2Y, 5Y, 10Y, 30Y).
+    * **Scenario Design Need:** You need full yield curve shocks (parallel shifts, steepeners, flatteners) and volatility surface shocks for major currencies.
+
+#### **3. Credit (Corporate & Sovereign)**
+* **What is reported:**
+    * **CS01 (Spread Sensitivity):** Sensitivity to credit spread widening.
+    * **IDR (Incremental Default Risk):** Jump-to-default risk for specific issuers.
+    * **Granularity:** Broken down by **Rating** (AAA to CCC), **Sector**, **Geography**, and **Tenor**. It also separates **Index** products (CDX/iTraxx) from **Single Name** exposures.
+    * **Scenario Design Need:** Your scenario must provide credit spread widening shocks tiered by rating (e.g., "High Yield spreads widen 500bps, Investment Grade widens 150bps").
+
+#### **4. Foreign Exchange (FX)**
+* **What is reported:**
+    * **Delta:** Sensitivity to spot FX rate changes.
+    * **Vega:** Sensitivity to FX volatility.
+    * **Granularity:** Major currency pairs (EURUSD, USDJPY) vs. Emerging Markets.
+    * **Scenario Design Need:** Shocks for spot rates (e.g., USD strengthens 10% vs EUR) and vol shocks.
+
+#### **5. Commodities**
+* **What is reported:** Spot and Volatility sensitivities.
+* **Granularity:** Energy (Oil, Gas), Metals (Gold, Copper), Agriculture.
+* **Scenario Design Need:** Shocks for key commodity futures prices.
+
+#### **6. Private Equity (PE) & Other Fair Value Assets**
+* **What is reported:** Market value and type of investment (Public vs. Private, Fund vs. Direct).
+* **Scenario Design Need:** Specific shocks for "Alternative Investments" (e.g., "Private Equity portfolio drops 25%").
+
+---
+
+### **How to Leverage This for a "Stress Scenario Designer"**
+
+If you are building a tool to design stress scenarios based on Schedule F, you need to build a **"Reverse Mapping" Engine**.
+
+**The Logic:**
+The Fed calculates Loss = $\sum (\text{Sensitivity}_i \times \text{Shock}_i)$.
+Since you know the Sensitivities (from Schedule F), your tool allows users to define the **Shocks**.
+
+**Design Requirements for Your Tool:**
+
+1.  **Input Layer (The "Knobs"):**
+    * Create a dashboard where users can input macro shocks (e.g., "Recession Scenario").
+    * **Example Input:** "US Rates Parallel Shift: +100bps".
+
+2.  **Mapping Layer (The "Translation"):**
+    * Map that simple input to the granular Schedule F buckets.
+    * *User Input:* "+100bps Rates" $\rightarrow$ *System Action:* Apply +100bps shock to **every** tenor bucket (3M, 2Y... 30Y) in the **Rates DV01** tab of Schedule F.
+
+3.  **Calculation Layer (The "P&L"):**
+    * Import the actual Schedule F XML/Data.
+    * Calculate: `[Rate DV01 10Y] * [10Y Shock] + [Equity Delta] * [Equity Shock]...`
+    * **Result:** A preview of the "Trading Loss" for that specific scenario.
+
+### **Summary of "Schedule F" Granularity**
+
+| Risk Class | Key Metric | Granularity Dimension |
+| :--- | :--- | :--- |
+| **Rates** | DV01, Vega | Currency, Curve (Govt/Swap), Tenor (1M-30Y) |
+| **Credit** | CS01, IDR | Rating (IG/HY), Sector, Index vs. Single Name |
+| **Equity** | Delta, Vega | Region, Sector, Cap Size |
+| **FX** | Delta, Vega | Currency Pair (G10 vs EM) |
+| **Private Equity**| Market Value | Fund Type, Geography, Public/Private status |
+| **Securitized** | CS01 | Asset Type (CLO, CMBS, RMBS), Rating |
+
+**Next Step:** Would you like me to create a mock **JSON schema** or **Python dictionary** structure that represents a "Schedule F" data object, so you can see exactly how the data fields would look in code?
+
+
+
+
+
+
+
+### **Schedule F Data Model (JSON Structure)**
+
+To build your Scenario Designer, you need two distinct data objects:
+
+1.  **The Portfolio State (Schedule F Input):** The sensitivities currently sitting on your books.
+2.  **The Stress Scenario (The Overlay):** The shocks you want to apply.
+
+Here is a mock JSON structure designed for a developer building this engine.
+
+#### **1. Portfolio State (`schedule_f_data.json`)**
+
+This represents the aggregation of the "Trading Book" sensitivities as they would appear in the 14Q report.
+
+```json
+{
+  "report_date": "2025-09-30",
+  "firm_id": "YOUR_BANK_ID",
+  "trading_book_sensitivities": {
+    
+    "rates": {
+      "description": "Interest Rate Risk (DV01)",
+      "currency_buckets": {
+        "USD": {
+          "curve_type": "swap", 
+          "sensitivities": {
+            "3m": -50000,   // Gained if rates drop
+            "2y": 250000,   // Loss if rates rise
+            "5y": 1200000,
+            "10y": 4500000,
+            "30y": 900000
+          }
+        },
+        "EUR": {
+          "curve_type": "govt",
+          "sensitivities": {
+            "2y": 150000,
+            "10y": 800000
+          }
+        }
+      }
+    },
+
+    "credit_corporate": {
+      "description": "Corporate Credit Spread Risk (CS01)",
+      "buckets": [
+        {
+          "sector": "financials",
+          "rating": "IG", // Investment Grade
+          "tenor": "5y",
+          "sensitivity_val": 3500000 // Loss if spreads widen 1bp
+        },
+        {
+          "sector": "energy",
+          "rating": "HY", // High Yield
+          "tenor": "5y",
+          "sensitivity_val": 1200000
+        }
+      ]
+    },
+
+    "equity": {
+      "description": "Equity Price Risk (Delta)",
+      "regional_buckets": {
+        "US": {
+          "large_cap": 5000000,  // Long Delta
+          "small_cap": -200000   // Short Delta
+        },
+        "EM_ASIA": {
+          "aggregate": 1500000
+        }
+      }
+    },
+
+    "securitized_products": {
+      "description": "Securitized Assets (CS01)",
+      "buckets": [
+        {
+          "asset_class": "CLO",
+          "rating": "AAA",
+          "sensitivity_val": 250000
+        },
+        {
+          "asset_class": "CMBS",
+          "rating": "BBB",
+          "sensitivity_val": 600000
+        }
+      ]
+    }
+  }
+}
+```
+
+-----
+
+#### **2. The Scenario Definition (`stress_scenario.json`)**
+
+This is the file your "Designer Tool" would generate. It maps shocks to the keys in the Portfolio State above.
+
+```json
+{
+  "scenario_name": "Severe Global Recession 2025",
+  "shocks": {
+    
+    "rates": {
+      "USD": {
+        "shock_type": "parallel_shift",
+        "value_bps": -100.0, // Rates drop 100bps
+        "volatility_shock_pct": 20.0 // Volatility increases 20%
+      },
+      "EUR": {
+        "shock_type": "steepener",
+        "short_end_bps": -50.0,
+        "long_end_bps": 10.0
+      }
+    },
+
+    "credit_corporate": {
+      "IG": {
+        "spread_widening_bps": 150.0 // IG spreads +150bps
+      },
+      "HY": {
+        "spread_widening_bps": 600.0 // HY spreads +600bps
+      }
+    },
+
+    "equity": {
+      "US": {
+        "price_shock_pct": -35.0, // Stocks down 35%
+        "vol_shock_pts": 15.0 // VIX +15 points
+      },
+      "EM_ASIA": {
+        "price_shock_pct": -45.0
+      }
+    },
+
+    "securitized_products": {
+      "CLO": {
+        "AAA_shock_bps": 50.0,
+        "BBB_shock_bps": 400.0
+      }
+    }
+  }
+}
+```
+
+-----
+
+### **3. Python Logic: The "Engine"**
+
+This pseudo-code shows how you calculate the P\&L by matching the keys.
+
+```python
+def calculate_stress_pnl(portfolio, scenario):
+    total_pnl = 0
+    
+    # --- 1. Calculate Rates P&L ---
+    # Formula: Sensitivity * Shock
+    # Note: DV01 is usually "Dollar Value of 01 basis point"
+    
+    usd_sensitivities = portfolio['trading_book_sensitivities']['rates']['currency_buckets']['USD']['sensitivities']
+    usd_shock_bps = scenario['shocks']['rates']['USD']['value_bps']
+    
+    for tenor, dv01 in usd_sensitivities.items():
+        # DV01 is value of 1bp. Shock is in bps.
+        pnl_impact = dv01 * usd_shock_bps
+        total_pnl += pnl_impact
+        print(f"USD Rates {tenor}: {pnl_impact:,.2f}")
+
+    # --- 2. Calculate Equity P&L ---
+    # Formula: Delta ($) * % Shock
+    
+    us_equity_delta = portfolio['trading_book_sensitivities']['equity']['regional_buckets']['US']['large_cap']
+    us_shock_pct = scenario['shocks']['equity']['US']['price_shock_pct'] / 100.0
+    
+    equity_pnl = us_equity_delta * us_shock_pct
+    total_pnl += equity_pnl
+    print(f"US Large Cap Equity: {equity_pnl:,.2f}")
+
+    return total_pnl
+```
+
+### **Critical Design Note for Your Tool**
+
+To make your "Scenario Designer" robust, you must handle **Basis Risk** in the mapping layer.
+
+  * **Example:** Your Schedule F data has a bucket for `CLO AAA` and `CLO BBB`.
+  * **User Input:** The user might just type "CLO Spreads widen 200bps."
+  * **Your Logic:** You need a **mapping table** that interprets that single input and applies it (perhaps with a multiplier) to the granular keys:
+      * `CLO AAA` gets 0.2 \* 200bps = 40bps shock.
+      * `CLO BBB` gets 1.5 \* 200bps = 300bps shock.
+
+**Next Step:** Would you like to see the **Python logic for that "Mapping/Translation Layer"** so you can handle high-level user inputs converting into granular Schedule F shocks?
