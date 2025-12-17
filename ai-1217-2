@@ -1,0 +1,412 @@
+# AI‑Led Equity Market Correction Stress Scenarios (Moderate & Severe)
+
+**Scope:** SPX + QQQ (with cohort‑level shock library for portfolio application)
+**Design standard:** Fed‑facing, SR 11‑7 defensible (traceable assumptions, empirical anchors, horizon discipline, internal coherence)
+
+---
+
+## Executive summary (intuitive, governance‑ready)
+
+We designed **Moderate** and **Severe** **AI‑related equity correction** scenarios to capture a **growth‑optimism → uncertainty / de‑risking** regime transition driven by **AI monetization disappointment** and a **hyperscaler/data‑center capex digestion**, producing **valuation dispersion collapse** and a **step‑up in equity risk premium (ERP)**. The scenarios enforce **time‑horizon discipline**: **prices/multiples/ERP reprice over weeks to months**, while **EPS and long‑run growth expectations reset over quarters (up to 12 months)**. Calibration is **empirically anchored** to (i) the **Q4‑2018** “near‑bear” correction speed/magnitude (S&P 500 down **19.8%** from Sep 20 to Dec 24, 2018) and tech‑led drawdown behavior (Nasdaq‑100 down **23%** at the Dec 24, 2018 nadir), (ii) **2022** long‑duration growth de‑rating evidence (Nasdaq‑100 P/E falling to **24.8** by May 20, 2022 and having peaked **just under 40** in late 2020), and (iii) **ERP regime shifts** from Damodaran’s implied ERP history (e.g., **2017 4.75% → 2018 5.55%** and **2000 2.87% → 2002 4.73%**). ([Los Angeles Times][1])
+**Outputs:** SPX **≈ −19% (Moderate)** / **≈ −44% (Severe)**; QQQ **≈ −30% (Moderate)** / **≈ −60% (Severe)**, each decomposed explicitly as **EPS + multiple/ERP/growth + contagion**, with Severe introducing **new mechanisms** (forced deleveraging, near‑unity correlation) rather than linear scaling.
+
+---
+
+## 1) Scenario boundary conditions (fixed framing honored)
+
+### What this scenario **is**
+
+An **AI‑led equity market correction** (not a generic recession) characterized by:
+
+* **AI monetization disappoints** (revenue/operating leverage fails to meet embedded expectations)
+* **Hyperscaler/data‑center capex digests** (order normalization, delayed buildouts, margin pressure through the stack)
+* **Valuation dispersion collapses** (AI‑beta becomes dominant; cross‑section compresses)
+* **ERP reprices higher** (uncertainty + confidence shock)
+* **Growth‑optimism → uncertainty / de‑risking regime shift**
+
+### What this scenario **is not**
+
+* Pandemic shutdown mechanics
+* War/commodity shock mechanics
+* 2008‑style funding freeze / systemic liquidity collapse
+
+---
+
+## 2) Mandatory time‑horizon discipline (no mixing)
+
+### Horizon A — **Shock realization (weeks → months)**
+
+**What moves here:** spot equity levels, multiples, ERP, implied vol, correlations, and (in Severe) forced‑selling effects.
+
+* **Moderate:** **6–10 weeks** peak‑to‑trough (orderly repricing)
+* **Severe:** **4–6 months** peak‑to‑trough (two‑leg: repricing then forced de‑risking)
+
+### Horizon B — **Economic transmission (quarters → 12 months)**
+
+**What moves here:** EPS revisions, longer‑run growth expectations (Δg), capex/earnings propagation through supply chain.
+
+* **Moderate:** **2–3 quarters**
+* **Severe:** **3–4 quarters**
+
+**Critical enforcement rule:**
+
+* **Multiples/ERP reprice first** (shock horizon)
+* **EPS follows** (transmission horizon)
+
+---
+
+## 3) Historical analog set (mechanics‑aligned) and what is reused
+
+| Analog window                               | Why relevant to AI mechanics                              | What we reuse                                     | What we do **not** reuse                  | Key numeric anchors used                                                                                                      |
+| ------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Q4‑2018 correction**                      | Fast growth‑led repricing without multi‑year depression   | Speed to trough; multiple/ERP repricing dominance | Specific catalysts (Fed/trade headlines)  | S&P 500 down **19.8%** from Sep 20 to Dec 24, 2018. ([Los Angeles Times][1])                                                  |
+| **Nasdaq‑100 in Q4‑2018**                   | Tech‑heavy index stress behavior in an orderly correction | Tech drawdown feasibility and timing              | Macro causes                              | Nasdaq‑100 down **23%** at Dec 24, 2018 nadir. ([Nasdaq][2])                                                                  |
+| **2022 long‑duration growth de‑rating**     | Evidence that growth multiples can compress materially    | Magnitude plausibility for multiple compression   | Inflation/war narrative as primary driver | Nasdaq‑100 trailing P/E **24.8** on May 20, 2022; peaked **just under 40** in late 2020. ([Nasdaq][2])                        |
+| **ERP regime shifts (implied ERP history)** | Non‑arbitrary calibration for ERP step‑ups                | +80 bps “orderly” vs ~+180 bps “disorderly”       | Exact catalysts                           | Damodaran implied ERP: **2017 4.75% → 2018 5.55%**; **2000 2.87% → 2002 4.73%**. ([Stern School of Business][3])              |
+| **Correlation behavior in down markets**    | Dispersion collapse / correlation convergence in stress   | Severe correlation regime (near‑unity)            | Claiming permanent correlation unity      | CME: “exception… during down markets, when stocks tend to become more highly correlated.” ([CME Group][4])                    |
+| **Volatility feasibility (VIX)**            | Ensures cross‑asset intuition (vol↑ with severity)        | Moderate vs Severe vol zones                      | Narrative source (tariffs etc.)           | CBOE notes VIX hit **36.07** in 2018. ([Cboe Global Markets][5]); Reuters example VIX **45.56** (Apr 4, 2025). ([Reuters][6]) |
+
+---
+
+## 4) Required mathematical decomposition (index level)
+
+For each index (i \in {\text{SPX}, \text{QQQ}}):
+
+[
+\Delta \ln(P_i) ;=; \Delta \ln(\text{EPS}*i);+;\Delta \ln(P/E_i);+;\Delta P*{\text{contagion},i}
+]
+
+Multiple (valuation) repricing is modeled via a duration‑style linearization:
+
+[
+\Delta \ln(P/E_i) \approx -D_{\text{eq},i}\cdot\big(\Delta r + \Delta ERP - \Delta g_i\big)
+]
+
+**Parameter meaning**
+
+* (D_{\text{eq}}): equity duration proxy (higher for long‑duration growth / QQQ)
+* (\Delta r): long‑end risk‑free discount component shock (shock horizon)
+* (\Delta ERP): equity risk premium step‑up (shock horizon; persists)
+* (\Delta g): long‑run growth expectation reset (finalizes over quarters)
+* (\Delta P_{\text{contagion}}): non‑fundamental forced‑selling/liquidity premium (shock horizon)
+
+**Duration rationale (regime‑consistent):**
+
+* Use fixed (D_{\text{eq}}) by index to avoid hidden nonlinearities.
+* Tech indices have pronounced sensitivity to valuation discounting (long‑duration cash flows). CME explicitly discusses Nasdaq‑100 sensitivity to long‑term yields and “value in perpetuity.” ([CME Group][4])
+
+**Calibration constants used**
+
+* (D_{\text{eq,SPX}} = 15)
+* (D_{\text{eq,QQQ}} = 22)
+
+---
+
+## 5) Cohort shock library (portfolio‑usable “cohort → index” structure)
+
+### 5.1 Cohorts (minimal, risk‑meaningful)
+
+* **C1 — AI Core:** dominant AI monetizers / mega‑cap platforms
+* **C2 — AI Enablers:** semis, networking, data‑center infra & capex beneficiaries
+* **C3 — AI Fringe:** high‑multiple AI apps / low cash‑flow quality (long‑duration)
+* **C4 — Broad ex‑AI:** diversified non‑AI large cap
+* **C5 — Defensives:** staples/utilities/healthcare quality tilt
+
+### 5.2 Exposure sanity checks (why QQQ is the epicenter)
+
+* QQQ is structurally tech‑heavy (Invesco reports Technology **64.03%** as of 09/30/2025). ([Invesco][7])
+* Broad S&P 500 proxy has materially lower IT weight (SPDR Portfolio S&P 500 ETF shows IT **34.23%**, as of Dec 16, 2025). ([SSGA][8])
+
+These exposures justify:
+
+* **Higher (D_{\text{eq}})** for QQQ than SPX
+* Larger (\Delta g) and EPS sensitivity for QQQ‑linked cohorts
+* More severe contagion in AI‑linked cohorts under forced unwinds
+
+### 5.3 Cohort return shocks (peak‑to‑trough), by severity
+
+These are **portfolio‑level shock targets** consistent with the index anchors and the regime narrative.
+
+| Cohort             | Shock realization horizon | Transmission horizon |           Moderate |             Severe | Structural rationale                                                       |
+| ------------------ | ------------------------: | -------------------: | -----------------: | -----------------: | -------------------------------------------------------------------------- |
+| **C1 AI Core**     |                  6–10 wks |             2–3 qtrs |         **≈ −30%** |         **≈ −60%** | Partial monetization miss vs full de‑rating + crowd unwind                 |
+| **C2 AI Enablers** |                  6–10 wks |             2–4 qtrs |         **≈ −35%** |         **≈ −65%** | Capex digestion vs capex bust propagation                                  |
+| **C3 AI Fringe**   |                  6–12 wks |             3–4 qtrs |         **≈ −45%** | **≈ −70% to −75%** | Highest duration/valuation convexity; forced selling worst                 |
+| **C4 Broad ex‑AI** |                  6–10 wks |             2–3 qtrs |         **≈ −19%** |         **≈ −44%** | Must remain coherent with SPX anchors                                      |
+| **C5 Defensives**  |                  4–10 wks |             2–3 qtrs | **≈ −10% to −12%** | **≈ −35% to −40%** | Severe correlation regime reduces diversification benefit ([CME Group][4]) |
+
+> **Non‑linearity:** Severe is not “2×.” It adds **forced deleveraging** + **correlation convergence** + **broader EPS reset**, i.e., new mechanisms.
+
+---
+
+## 6) Market‑wide regime settings (ERP, rates, vol, correlation)
+
+### 6.1 ERP shock (primary scenario “price of risk” driver)
+
+* **Moderate:** (\Delta ERP = +80) bps
+  Anchored to Damodaran implied ERP **2017 4.75% → 2018 5.55%** (≈ +80 bps). ([Stern School of Business][3])
+* **Severe:** (\Delta ERP = +180) bps
+  Anchored to implied ERP **2000 2.87% → 2002 4.73%** (≈ +186 bps). ([Stern School of Business][3])
+
+### 6.2 Risk‑free long rate shock (secondary; sign‑coherent)
+
+* **Moderate:** (\Delta r = -25) bps (flight‑to‑quality)
+* **Severe:** (\Delta r = -50) bps
+
+This keeps the scenario **AI‑led** (not “rates‑driven macro recession”) while maintaining cross‑asset intuition: equities ↓, safe rates ↓, but **net discount rate rises** because ERP dominates.
+
+### 6.3 Volatility regime (implementation targets)
+
+* **Moderate:** VIX **30–40** zone; anchor: CBOE notes VIX hit **36.07** in 2018. ([Cboe Global Markets][5])
+* **Severe:** VIX **45–55** zone; feasibility: Reuters reports VIX **45.56** (Apr 4, 2025). ([Reuters][6])
+
+### 6.4 Correlation regime
+
+* **Moderate:** elevated correlation (dispersion compresses, but not unity)
+* **Severe:** near‑unity equity correlation at peak stress (explicitly modeled via contagion + correlation uplift)
+
+Empirical anchor: CME notes correlations rise in down markets. ([CME Group][4])
+
+---
+
+## 7) Index calibration (SPX, QQQ) — full tables and decomposition
+
+### 7.1 SPX calibration
+
+#### SPX input table (by channel, with horizons)
+
+| Parameter                     |                Horizon | Moderate | Severe | Anchor / rationale                                    |
+| ----------------------------- | ---------------------: | -------: | -----: | ----------------------------------------------------- |
+| (D_{\text{eq}})               |             Structural |       15 |     15 | Broad market shorter duration than QQQ                |
+| (\Delta ERP)                  |         Shock: 2–8 wks |   +0.80% | +1.80% | Implied ERP step‑ups. ([Stern School of Business][3]) |
+| (\Delta r)                    |           Shock: weeks |   −0.25% | −0.50% | Flight‑to‑quality sign                                |
+| (\Delta g)                    | Transmission: 2–4 qtrs |   −0.25% | −0.75% | AI growth optimism resets → uncertainty               |
+| (\Delta \ln(\text{EPS}))      | Transmission: 2–4 qtrs |      −6% |   −15% | Partial miss vs broad reset (capex spillover)         |
+| (\Delta P_{\text{contagion}}) |         Shock: 1–6 wks |      −3% |   −10% | Severe adds forced selling (new mechanism)            |
+
+#### SPX implied multiple compression
+
+[
+\Delta \ln(P/E)= -15\cdot(\Delta r+\Delta ERP-\Delta g)
+]
+
+* **Moderate:** (-15\cdot( -0.25% + 0.80% - (-0.25%)) = -0.120)
+* **Severe:** (-15\cdot( -0.50% + 1.80% - (-0.75%)) = -0.308)
+
+#### SPX full return decomposition (peak‑to‑trough)
+
+| Term                          |    Moderate (ln) | Moderate (%) |      Severe (ln) |   Severe (%) |
+| ----------------------------- | ---------------: | -----------: | ---------------: | -----------: |
+| (\Delta \ln(\text{EPS}))      | ln(0.94)=−0.0619 |        −6.0% | ln(0.85)=−0.1625 |       −15.0% |
+| (\Delta \ln(P/E))             |          −0.1200 |       −11.3% |          −0.3080 |       −26.5% |
+| (\Delta P_{\text{contagion}}) | ln(0.97)=−0.0305 |        −3.0% | ln(0.90)=−0.1054 |       −10.0% |
+| **Total (\Delta \ln(P))**     |      **−0.2123** | **≈ −19.1%** |      **−0.5759** | **≈ −43.8%** |
+
+**Moderate alignment check:** S&P 500’s Q4‑2018 drawdown magnitude **−19.8%** is the anchor for a fast, non‑depression correction regime. ([Los Angeles Times][1])
+
+---
+
+### 7.2 QQQ calibration
+
+#### QQQ input table (by channel, with horizons)
+
+| Parameter                     |                Horizon | Moderate | Severe | Anchor / rationale                                   |
+| ----------------------------- | ---------------------: | -------: | -----: | ---------------------------------------------------- |
+| (D_{\text{eq}})               |             Structural |       22 |     22 | Higher duration (growth/tech concentration)          |
+| (\Delta ERP)                  |         Shock: 2–8 wks |   +0.80% | +1.80% | Same marketwide ERP regime                           |
+| (\Delta r)                    |           Shock: weeks |   −0.25% | −0.50% | Flight‑to‑quality sign                               |
+| (\Delta g)                    | Transmission: 2–4 qtrs |   −0.50% | −1.25% | Larger long‑run growth reset under AI disappointment |
+| (\Delta \ln(\text{EPS}))      | Transmission: 2–4 qtrs |      −8% |   −20% | Tech/AI earnings sensitivity + capex digestion       |
+| (\Delta P_{\text{contagion}}) |         Shock: 1–6 wks |      −4% |   −12% | Forced deleveraging heavier in crowded AI factor     |
+
+#### QQQ implied multiple compression
+
+[
+\Delta \ln(P/E)= -22\cdot(\Delta r+\Delta ERP-\Delta g)
+]
+
+* **Moderate:** (-22\cdot( -0.25% + 0.80% - (-0.50%)) = -0.231)
+* **Severe:** (-22\cdot( -0.50% + 1.80% - (-1.25%)) = -0.561)
+
+#### QQQ full return decomposition (peak‑to‑trough)
+
+| Term                          |    Moderate (ln) | Moderate (%) |      Severe (ln) |   Severe (%) |
+| ----------------------------- | ---------------: | -----------: | ---------------: | -----------: |
+| (\Delta \ln(\text{EPS}))      | ln(0.92)=−0.0834 |        −8.0% | ln(0.80)=−0.2231 |       −20.0% |
+| (\Delta \ln(P/E))             |          −0.2310 |       −20.6% |          −0.5610 |       −42.9% |
+| (\Delta P_{\text{contagion}}) | ln(0.96)=−0.0408 |        −4.0% | ln(0.88)=−0.1278 |       −12.0% |
+| **Total (\Delta \ln(P))**     |      **−0.3552** | **≈ −29.9%** |      **−0.9120** | **≈ −59.8%** |
+
+**Multiple plausibility checks (empirical anchoring):**
+
+* Nasdaq‑100 trailing P/E was **24.8** on May 20, 2022 and “peaked in late 2020 at just under 40.” ([Nasdaq][2])
+* Dot‑com era provides an upper bound conceptually (Nasdaq‑100 drawdown reached **−81.76%** by Aug 5, 2002), keeping our Severe QQQ shock large but **below regime‑collapse extremes** and without importing multi‑year dynamics. ([CME Group][4])
+
+---
+
+## 8) “Accuracy” and alignment — what is historical fact vs scenario assumption
+
+### Historical facts used as anchors (verifiable)
+
+* **S&P 500 −19.8%** from Sep 20 close to Dec 24, 2018. ([Los Angeles Times][1])
+* **Nasdaq‑100 −23%** at Dec 24, 2018 nadir. ([Nasdaq][2])
+* **Nasdaq‑100 trailing P/E 24.8** (May 20, 2022) and **late‑2020 peak just under 40**. ([Nasdaq][2])
+* **Implied ERP regime shifts** (Damodaran): 2017 **4.75%**, 2018 **5.55%**; 2000 **2.87%**, 2002 **4.73%**. ([Stern School of Business][3])
+* **Down‑market correlation behavior:** correlations tend to rise during down markets. ([CME Group][4])
+* **VIX feasibility:** VIX hit **36.07** in 2018 (CBOE). ([Cboe Global Markets][5])
+
+### Scenario assumptions (chosen, not “facts,” but non‑arbitrary)
+
+* (D_{\text{eq}}) values (15 / 22), (\Delta g) magnitudes, EPS shocks, and contagion wedges are **explicit design choices** calibrated to:
+
+  1. match the narrative mechanics,
+  2. land in empirically plausible ranges,
+  3. remain horizon‑coherent and non‑double‑counted.
+
+### Alignment logic (why the scenario outputs are defensible)
+
+* **SPX Moderate ≈ −19%** intentionally matches the Q4‑2018 magnitude anchor (−19.8%). ([Los Angeles Times][1])
+* **QQQ Moderate ≈ −30%** is intentionally **worse than** Nasdaq‑100’s Q4‑2018 −23% because this is **AI‑epicenter** stress (concentration + Δg + contagion), but remains consistent with 2022‑style valuation compression feasibility (P/E falling materially; long‑duration sensitivity). ([Nasdaq][2])
+* **Severe shocks** remain below dot‑com collapse bounds (Nasdaq‑100 −81.76%), preventing accidental import of multi‑year depression dynamics while still reflecting a genuine regime shift. ([CME Group][4])
+
+---
+
+## 9) Betas, “stress beta,” correlation and dispersion (the “betas and stuff” package)
+
+### 9.1 Baseline beta reference (for context, not calibration driver)
+
+QQQ’s **Beta (5Y monthly) ≈ 1.19** (Yahoo risk page snippet). ([Yahoo Finance][9])
+This is a *normal‑regime statistic*, and we do **not** rely on it to set stress magnitudes.
+
+### 9.2 Scenario‑implied effective beta (stress regime)
+
+Using the scenario outputs:
+
+* **Moderate effective beta:**
+  [
+  \beta_{\text{eff}} \approx \frac{29.9%}{19.1%} \approx 1.56
+  ]
+* **Severe effective beta:**
+  [
+  \beta_{\text{eff}} \approx \frac{59.8%}{43.8%} \approx 1.37
+  ]
+
+**Interpretation (regime‑consistent):**
+
+* Moderate: AI epicenter → QQQ behaves like a high‑beta sleeve.
+* Severe: correlation/contagion pulls SPX down harder too, **compressing relative dispersion** (QQQ still worse, but gap narrows), consistent with “dispersion collapses.”
+
+### 9.3 Correlation regime implementation (portfolio engines)
+
+* **Moderate:** uplift equity‑equity correlations (e.g., +0.10 to +0.20 absolute; cap ~0.75)
+* **Severe:** push toward near‑unity at peak stress (e.g., 0.85–0.95) and reduce idiosyncratic variance contribution
+
+Anchor: CME explicitly notes the exception that in down markets, stocks tend to become more highly correlated. ([CME Group][4])
+
+### 9.4 Volatility regime implementation
+
+* **Moderate:** VIX 30–40 (anchored by 2018 VIX ~36.07). ([Cboe Global Markets][5])
+* **Severe:** VIX 45–55 (feasible; Reuters example VIX 45.56). ([Reuters][6])
+
+---
+
+## 10) Coherence checks (explicit PASS/FAIL)
+
+### A) Cross‑horizon coherence — **PASS**
+
+* Multiples/ERP/contagion reprice **first** (weeks→months).
+* EPS resets **later** (quarters).
+  This is enforced by parameter assignment and the decomposition structure.
+
+### B) Cross‑severity coherence — **PASS**
+
+Severe is not “2× Moderate.” It introduces new mechanisms:
+
+| Channel              | Moderate        | Severe                                                             |
+| -------------------- | --------------- | ------------------------------------------------------------------ |
+| ERP repricing        | Orderly +80 bps | Disorderly +180 bps (regime shift) ([Stern School of Business][3]) |
+| EPS impact           | Partial miss    | Broad reset (capex bust spillover)                                 |
+| Multiple compression | Normalization   | Regime shift (bigger Δg + duration convexity) ([Nasdaq][2])        |
+| Correlation          | Elevated        | Near‑unity at peak stress ([CME Group][4])                         |
+| Liquidity            | Manageable      | Forced deleveraging (explicit contagion wedge)                     |
+
+### C) Cross‑asset intuition — **PASS**
+
+* Equity ↓ ⇒ ERP ↑ (explicit; anchored). ([Stern School of Business][3])
+* Vol ↑ with severity (explicit; anchored). ([Cboe Global Markets][5])
+* Correlation ↑ with severity (explicit; anchored). ([CME Group][4])
+
+---
+
+## 11) Why this is **not** double counting (SR 11‑7 defensibility)
+
+We prevent double counting by separating **distinct economic objects**:
+
+1. **(\Delta \ln(\text{EPS}))**
+   Captures **near‑term earnings level** (2–4 quarters).
+
+2. **(\Delta g)** inside **(\Delta \ln(P/E))**
+   Captures **long‑run growth expectations** (terminal/steady state), *not* the same as next‑year EPS.
+
+3. **(\Delta ERP)** inside **(\Delta \ln(P/E))**
+   Captures **risk compensation** (uncertainty premium), independent of growth level.
+
+4. **(\Delta P_{\text{contagion}})**
+   Captures **non‑fundamental price pressure** (forced selling, liquidity premium), which is **structurally small** in Moderate and **structurally large** in Severe.
+
+---
+
+## 12) Implementation notes (how to apply this in a bank stress framework)
+
+### 12.1 Risk factor shock set (minimum)
+
+* **Equity level shocks:** SPX, QQQ (and internal equity factors / sectors / cohorts)
+* **Implied vol shocks:** VIX‑linked surfaces (Moderate vs Severe targets)
+* **Correlation matrix regime:** uplift to match dispersion collapse assumption
+* **Liquidity / haircuts:** add forced‑selling wedge only in Severe (e.g., haircut add‑ons, widening bid‑ask, reduced market depth proxies)
+
+### 12.2 How to “roll up” cohorts to indices (governable)
+
+* Use **cohort mapping** at position level (issuer → cohort) and apply:
+
+  1. cohort return shock
+  2. stress correlation regime
+  3. volatility regime
+* Validate that the **portfolio‑weighted** implied shocks to SPX/QQQ proxies remain within tolerance of the anchor outputs (−19/−44; −30/−60).
+  Deviations become a documented “portfolio composition effect,” not a model error.
+
+---
+
+## 13) Assumption register (condensed, audit‑ready)
+
+| Parameter                     |        Moderate |     Severe |      Horizon | Source/anchor                                                             |
+| ----------------------------- | --------------: | ---------: | -----------: | ------------------------------------------------------------------------- |
+| SPX target return             |            −19% |       −44% | weeks→months | Q4‑2018 magnitude anchor (−19.8%). ([Los Angeles Times][1])               |
+| QQQ target return             |            −30% |       −60% | weeks→months | Tech drawdown feasibility; valuation reset evidence. ([Nasdaq][2])        |
+| ΔERP                          |         +80 bps |   +180 bps | weeks→months | Damodaran implied ERP history. ([Stern School of Business][3])            |
+| Nasdaq‑100 P/E reference      | 24.8 (May 2022) |          — |       anchor | Nasdaq research article. ([Nasdaq][2])                                    |
+| Nasdaq‑100 late‑2020 P/E peak | “just under 40” |          — |       anchor | Nasdaq research article. ([Nasdaq][2])                                    |
+| VIX regime                    |           30–40 |      45–55 |    immediate | CBOE (36.07 in 2018); Reuters (45.56 example). ([Cboe Global Markets][5]) |
+| Correlation regime            |        elevated | near‑unity |    immediate | CME down‑market correlation statement. ([CME Group][4])                   |
+| QQQ concentration             |       Tech ~64% |          — |   structural | Invesco QQQ sector allocation. ([Invesco][7])                             |
+| SPX concentration proxy       |       IT 34.23% |          — |   structural | SPDR S&P 500 sector breakdown. ([SSGA][8])                                |
+
+---
+
+## Final governance‑ready paragraph (Risk Committee / Fed / Model Validation)
+
+This AI‑led equity stress scenario set calibrates **Moderate** and **Severe** outcomes for SPX and QQQ using an explicit decomposition ( \Delta\ln(P)=\Delta\ln(EPS)+\Delta\ln(P/E)+\Delta P_{\text{contagion}} ) with duration‑based valuation attribution ( \Delta\ln(P/E)\approx -D_{\text{eq}}(\Delta r+\Delta ERP-\Delta g) ). The design enforces horizon discipline: **ERP/multiples/contagion reprice over weeks to months**, while **EPS and long‑run growth expectations reset over 2–4 quarters**. Numerical anchors are empirical: Q4‑2018 provides the fast correction magnitude (S&P 500 **−19.8%**) and tech drawdown feasibility (Nasdaq‑100 **−23%** at the Dec‑24 nadir), 2022 provides valuation compression evidence (Nasdaq‑100 trailing P/E **24.8** on May‑20 and late‑2020 peak **just under 40**), and implied ERP regime shifts from Damodaran support +80 bps (orderly) and ~+180 bps (disorderly) step‑ups. ([Los Angeles Times][1]) Severe adds non‑linear mechanisms absent from Moderate—**forced deleveraging, dispersion collapse, and near‑unity correlation**—rather than scaling magnitudes linearly, with cross‑asset coherence enforced (ERP↑, vol↑, correlation↑). ([CME Group][4])
+
+---
+
+If you want, I can also produce this as a **one‑page SR 11‑7 scenario specification template** (assumption IDs, ownership, approval hooks, sensitivity ranges, validation tests, and “model risk” annotations) so it drops directly into your CCAR/ICAAP documentation pack.
+
+[1]: https://www.latimes.com/business/la-fi-markets-20181224-story.html?utm_source=chatgpt.com "Stocks slump, bringing the S&P 500 to the brink of a bear ..."
+[2]: https://www.nasdaq.com/articles/the-nasdaq-100r-index-meets-the-inflation-boogeyman%3A-what-happens-next "The Nasdaq-100® Index Meets The Inflation Boogeyman: What Happens Next? | Nasdaq"
+[3]: https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histimpl.html "pages.stern.nyu.edu"
+[4]: https://www.cmegroup.com/insights/economic-research/2024/nasdaqs-stellar-returns-potential-risks-ahead.html "Nasdaq's Stellar Returns, Potential Risks Ahead - CME Group"
+[5]: https://www.cboe.com/insights/posts/inside-volatility-trading-more-chaos-ahead-or-a-bottom-what-does-the-vix-index-say/?utm_source=chatgpt.com "Chaos Ahead – Or a Bottom? What Does the VIX Index Say?"
+[6]: https://www.reuters.com/markets/wall-street-fear-gauge-jumps-8-month-high-stocks-sell-off-2025-04-04/?utm_source=chatgpt.com "Fear grips financial markets as global trade war heats up"
+[7]: https://www.invesco.com/qqq-etf/en/about.html?utm_source=chatgpt.com "Holdings & Sector Allocations of Invesco QQQ"
+[8]: https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-portfolio-sp-500-etf-spym?utm_source=chatgpt.com "SPYM: State Street® SPDR® Portfolio S&P 500® ETF"
+[9]: https://finance.yahoo.com/quote/QQQ/risk/?utm_source=chatgpt.com "Invesco QQQ Trust (QQQ) Risk"
