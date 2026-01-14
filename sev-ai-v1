@@ -1,0 +1,374 @@
+Here’s a **simple, mechanical way** to “convert” any **base scenario** (e.g., a *Severe Rates Rally / flight-to-quality*) into the **AI Severe** scenario you want — **by asset class** and then **granularly** (indices → sectors/buckets → single names; plus credit + vol surface).
+
+The key idea is: **treat your target AI-Severe scenario as a shock vector**, and compute an **overlay (delta) vector** that you apply **on top of** the base scenario.
+
+---
+
+## 1) One rule that makes this easy
+
+### A. For anything that is a **price return** (equities, ETFs, indices)
+
+Use **multiplicative add-on returns** so you don’t break math on big moves:
+
+[
+R_{\text{add}} ;=; \frac{1+R_{\text{target}}}{1+R_{\text{base}}} - 1
+]
+
+Then the combined scenario is:
+
+[
+(1+R_{\text{base}})(1+R_{\text{add}}) - 1 ;=; R_{\text{target}}
+]
+
+This matters because going from “base −10%” to “target −50%” is **not** “add −40%” in a strictly correct sense.
+
+### B. For **rates / spreads in bps**
+
+Use simple additive deltas:
+
+[
+\Delta_{\text{add}} = \Delta_{\text{target}} - \Delta_{\text{base}}
+]
+
+### C. For **levels** (VIX, VVIX, MOVE, DXY level, etc.)
+
+Either:
+
+* **set-to-target** (cleanest), or
+* **additive**: `Level_add = Level_target − Level_base`
+
+### D. For **vol surfaces**
+
+Use a structured “shift”:
+
+* **ATM level shift** by tenor (e.g., +X vol points for 1M)
+* **skew steepening** (e.g., 25Δ put – ATM widens by +Y)
+* **term structure inversion** (front-end rises more than back-end)
+
+---
+
+## 2) Define the target: “AI Severe” shock vector (what you want to end at)
+
+Below is a clean **target** for the AI-Severe scenario (60 trading days), consistent with what you described:
+
+### Asset-class targets (AI Severe)
+
+**Rates / safe havens**
+
+* UST 10Y yield: **−80 bp**
+* UST 2Y yield: **−110 bp**
+* 2s10s: **steepen +60 bp** (because 2Y falls more)
+* DXY: **+6%**
+* Gold: **+15%**
+
+**Equities**
+
+* AI single names (NVDA, AMD, AVGO cohort): **−50%**
+* AI-exposed utilities (VST, CEG): **−30%**
+* QQQ: **≈ −50%**
+* SPX: **≈ −47%**
+
+**Credit spreads (OAS)**
+
+* IG overall: **+200 bp widening**
+* HY overall: **+420 bp widening**
+* Tech/Semis IG: **+260 bp**
+* Tech/Semis HY: **+600 bp**
+* Software IG: **+240 bp**
+* Utilities IG: **+150 bp**
+
+**Volatility**
+
+* VIX spot: **58**
+* VVIX: **~165** (ballpark for vol-of-vol stress)
+* SPX skew (1M):
+
+  * 25Δ put skew: **+8 vol pts steeper vs current**
+  * 10Δ put skew: **+12 vol pts steeper vs current**
+* Term structure: **deep inversion** (front > back, front/back ratio > 1.15)
+
+**Correlation regime**
+
+* SPX implied corr (1M): **0.85**
+* QQQ implied corr (1M): **0.88**
+* Intra-AI cohort corr: **0.95**
+
+---
+
+## 3) The “converter”: overlay your base scenario to hit AI-Severe
+
+### Step-by-step workflow
+
+1. **Write down your base scenario shocks** (the severe rates rally you already have) for:
+
+* 2Y, 10Y, curve
+* SPX, QQQ (or sector/index proxies)
+* IG/HY OAS (or CDX)
+* VIX / skew
+* DXY / gold
+
+2. **Compute the overlay** = Target − Base (or multiplicative add-on for returns)
+
+3. Apply:
+
+* Base shocks first
+* Then overlay shocks
+
+---
+
+## 4) By asset class: base → target → overlay (template + example)
+
+Below is a template you can literally copy into Excel.
+
+### 4A) Rates / FX / commodities (bps or % additive)
+
+| Factor  | Base “Severe Rates Rally” (example) | Target AI-Severe |             Overlay to apply |
+| ------- | ----------------------------------: | ---------------: | ---------------------------: |
+| UST 10Y |                             −100 bp |           −80 bp | **+20 bp** (undo some rally) |
+| UST 2Y  |                             −150 bp |          −110 bp |                   **+40 bp** |
+| 2s10s   |                              +50 bp |           +60 bp |                   **+10 bp** |
+| DXY     |                                 +3% |              +6% |                      **+3%** |
+| Gold    |                                +10% |             +15% |                      **+5%** |
+
+> If your base is different, just do: `Overlay = Target − Base`.
+
+---
+
+### 4B) Equity returns (use the multiplicative add-on)
+
+Let’s say your **base severe rates rally** implies (example):
+
+* SPX = −12%
+* QQQ = −15%
+
+Targets are:
+
+* SPX = −47%
+* QQQ = −50%
+
+Compute the add-on:
+
+[
+R_{\text{add}} = \frac{1+R_{\text{target}}}{1+R_{\text{base}}} - 1
+]
+
+**SPX add-on**
+
+* (R_{add} = 0.53/0.88 - 1 = -0.3977) → **−39.8%**
+
+**QQQ add-on**
+
+* (R_{add} = 0.50/0.85 - 1 = -0.4118) → **−41.2%**
+
+So you’d apply:
+
+* Base: SPX −12%, then overlay: SPX **−39.8%**
+* Base: QQQ −15%, then overlay: QQQ **−41.2%**
+
+This guarantees you land exactly on **−47%** and **−50%**.
+
+> If your base scenario has equities *up* (possible in a pure rates rally), this method still works and will produce a larger negative overlay, which is exactly what you need.
+
+---
+
+### 4C) Credit spreads (bps additive)
+
+Example base:
+
+* IG +60 bp
+* HY +200 bp
+
+Target AI-severe:
+
+* IG +200 bp
+* HY +420 bp
+
+Overlay:
+
+* IG: **+140 bp**
+* HY: **+220 bp**
+
+---
+
+### 4D) Vol levels (set-to-target is simplest)
+
+Example base:
+
+* VIX = 32
+
+Target:
+
+* VIX = 58
+
+Overlay:
+
+* **+26 VIX points** (or just “set VIX to 58”)
+
+For skew, you typically apply **relative** steepening vs ATM (more robust across regimes):
+
+* Add **+8 vol pts** to (25Δ put – ATM) at 1M
+* Add **+12 vol pts** to (10Δ put – ATM) at 1M
+* Enforce **front-end inversion**: 1W and 1M rise more than 6M and 1Y
+
+---
+
+## 5) More granular: equity shocks from “macro base” to “AI-Severe” target
+
+This is the part most people struggle with, so here’s a **clean hierarchy** you can implement.
+
+### 5A) Equity bucket map (targets)
+
+Use these buckets and targets (AI-Severe):
+
+**AI Infrastructure (binding / core)**
+
+* NVDA, AMD, AVGO: **−50%**
+
+**AI software / cloud exposed**
+
+* MSFT, CRM, PLTR, NOW: **−45%** (AI monetization + multiple compression)
+
+**AI enablers / power**
+
+* VST, CEG: **−30%** (binding constraint)
+
+**Mag-7 non-pure AI spillover**
+
+* AAPL, GOOGL, AMZN, META: **−40%**
+
+**Rest of QQQ**
+
+* **−35%**
+
+**Non-tech SPX remainder**
+
+* **−25%** (risk-off + correlation spike)
+
+Then aggregate should land you near:
+
+* **QQQ ~ −50%**
+* **SPX ~ −47%**
+
+### 5B) How to overlay from a base scenario at the bucket level
+
+If your base scenario already has (example) broad tech down −20%, you *don’t* want to double count.
+Compute an add-on per bucket using the same return formula:
+
+[
+R_{\text{add,bucket}} = \frac{1+R_{\text{target,bucket}}}{1+R_{\text{base,bucket}}} - 1
+]
+
+**Example**
+
+* Base “severe rates rally” says Semis bucket is −25%
+* Target AI severe says Semis bucket (NVDA/AMD/AVGO) is −50%
+
+Add-on:
+
+* (R_{add}=0.50/0.75-1=-0.333) → **−33.3% overlay** on that bucket
+
+This way the AI-specific crash is explicitly the overlay, not hidden in a mushy “tech down” factor.
+
+---
+
+## 6) More granular: credit overlay by sector (so tech gets hit harder)
+
+If your base scenario widens credit fairly uniformly (common), your AI scenario needs **sector beta**.
+
+Use a simple rule:
+
+* **Tech/Semis spreads widen = 1.3× to 1.5× IG widening**
+* **Utilities widen = 0.6× to 0.8× IG widening**
+
+### Target sector spread widenings (AI severe)
+
+* IG overall: +200
+* Tech/Semis IG: +260
+* Software IG: +240
+* Utilities IG: +150
+
+So if base has IG +60 and no sector differentiation:
+
+* Overlay IG = +140
+* Overlay Tech IG = +200 (to get from +60 → +260)
+* Overlay Utilities IG = +90 (to get from +60 → +150)
+
+Same logic for HY sector overlays.
+
+---
+
+## 7) More granular: vol surface overlay (simple but structured)
+
+Most risk engines do poorly if you just “set VIX.” So here’s a practical surface recipe.
+
+### 7A) SPX surface targets (AI severe)
+
+**ATM levels (illustrative structure)**
+
+* 1W IV: **~75–85**
+* 1M IV: **~55–60** (VIX ~58)
+* 3M IV: **~40–45**
+* 6M IV: **~32–36**
+* 1Y IV: **~28–32**
+
+**Skew**
+
+* 25Δ put – ATM (1M): **steepen by +8 vol pts**
+* 10Δ put – ATM (1M): **steepen by +12 vol pts**
+
+**Term structure**
+
+* Force inversion: (1M / 6M) ratio **> 1.15**
+
+### 7B) Single-name IV targets (AI severe)
+
+Apply by cohort (30D IV):
+
+* AI Infrastructure (NVDA/AMD/AVGO): **90–110%**
+* AI Software (CRM/PLTR/NOW): **75–95%**
+* AI Utilities (VST/CEG): **60–75%**
+* Mega-cap diversified (MSFT/GOOGL/AMZN): **55–70%**
+
+Overlay method (simple):
+
+* If base already lifts single-name IV by +15 vol points, and target needs +50:
+
+  * overlay **+35 vol points**
+* If your system uses multipliers, you can do: `IV_target = IV_base × k` with higher k in front-end.
+
+---
+
+## 8) If you want the *simplest operational implementation* (what many desks do)
+
+### “Two-layer scenario” approach
+
+1. **Run your base scenario** (“severe rates rally”) as-is
+2. Add a named overlay layer: **“AI Valuation Crash + Credit Contagion”**, which contains:
+
+* Equity bucket overrides (NVDA/AMD/AVGO = −50, etc.)
+* Sector spread differentials (tech wider than IG)
+* Vol surface inversion + skew steepening
+* Correlation regime set (SPX corr 0.85, AI corr 0.95)
+
+This is clean, auditable, and avoids fighting with whatever equity response your rates scenario implies.
+
+---
+
+## 9) Quick “cheat sheet” you can paste into a scenario note
+
+**To convert Base Severe Rates Rally → AI Severe:**
+
+* **Rates:** adjust to target (10Y −80bp, 2Y −110bp, curve +60bp) via additive bps deltas.
+* **Equities:** apply *multiplicative overlay returns* so you land exactly on:
+
+  * SPX −47%, QQQ −50%
+  * NVDA/AMD/AVGO −50%
+  * VST/CEG −30%
+  * AI software −45%, Mag7 spillover −40%, rest QQQ −35%, non-tech SPX −25%
+* **Credit:** widen to target with sector beta (Tech/Semis IG +260, HY +600; Utilities IG +150).
+* **Vol:** set VIX to 58 + force surface inversion + skew steepening (+8 vol pts at 25Δ; +12 at 10Δ).
+* **Correlation:** set SPX 0.85 / QQQ 0.88 / AI cohort 0.95.
+
+---
+
+If you share *your actual base scenario shock table* (even just: 2Y/10Y, SPX/QQQ, IG/HY, VIX, DXY, gold), I can compute the **exact overlay numbers** for each asset class and each equity/credit bucket using the formulas above, so you can drop it straight into your scenario library.
