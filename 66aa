@@ -1,0 +1,434 @@
+Below is the **intuitive “what you actually do”** breakdown. I’ll give you:
+
+* **What historical periods to use** for **equities (eq)**, **credit (cp)**, **commodities (co)**, and **equity vol** for a **60‑day AI Severe** (and how that naturally defines AI Moderate).
+* **What you do with the time series** (min/max vs percentile vs rolling window) and how to incorporate **time horizon** and **cohesiveness**.
+* **Two complete methods**:
+
+  1. **Simple + consistent** (fast, easy to implement)
+  2. **State‑of‑the‑art** (template + factor + constrained solve, “best practice”)
+
+---
+
+## First: the mental model (why this is easier than it feels)
+
+You already have a coherent macro backbone because:
+
+* **Rates + FX are locked** to your **Severe Rates Rally base scenario**.
+
+So your job is **only**:
+
+1. **Pick the final endpoints you want** for eq/cp/co/vol (including your binding constraints), and
+2. Compute **overlays** so that:
+
+[
+(1+R_{\text{final}})=(1+R_{\text{base}}),(1+R_{\text{overlay}})
+\quad\Rightarrow\quad
+R_{\text{overlay}}=\frac{1+R_{\text{target}}}{1+R_{\text{base}}}-1
+]
+
+…and for spreads in bp:
+
+[
+\Delta_{\text{overlay}}=\Delta_{\text{target}}-\Delta_{\text{base}}
+]
+
+**Historical data is used for:**
+
+* **Shape** (relative moves across sectors/assets)
+* **Plausibility bounds** (your targets shouldn’t be outside observed regimes)
+* **Filling in the non-prescribed stuff** (the many assets you didn’t explicitly shock)
+
+Your **binding constraints** are not “estimated from history”; they’re **hard-set**.
+
+---
+
+## Step-by-step: what you need to do (the common core)
+
+### Step 1) Label every driver as one of three types
+
+**Type A — Binding (hard-set):**
+
+* AI single names (your chosen list): **−40% / −50%**
+* AI power utilities (VST/CEG…): **−15% / −30%**
+
+**Type B — Prescribed targets (you stated desired numbers):**
+
+* Commodities: gold up, silver down, crude/NG down, copper/lithium/cobalt down, steel/aluminum down (your specified magnitudes)
+
+**Type C — Non-prescribed (must be derived):**
+
+* “Everything else”: non-AI tech, non-tech SPX, other sectors, sector credit, CDX/iTraxx if needed, etc.
+
+---
+
+### Step 2) Choose the “historical windows” you will use to derive *shape*
+
+This is the piece you’re asking about: *which periods and how granular*.
+
+You do **not** need one period for everything. In “good practice,” you use a **best analog per driver family**.
+
+Here is the clean mapping I recommend.
+
+---
+
+## Recommended historical windows (what to use for eq / cp / co / vol)
+
+### A) Equity vol surface (shape template) — **Apr 3–7, 2025**
+
+**Use for:** SPX vol surface shape (term structure inversion + skew steepening + correlation spike behavior).
+**Why:** It’s a modern “panic micro‑regime” and is exactly what you asked to anchor to.
+Evidence of the episode severity: SPX down sharply and VIX jumping hard; VIX hit ~60 intraday on Apr 7.
+
+**What you do with the data:**
+
+* Pull the **surface snapshot(s)** from that window:
+
+  * ATM vols: 1W/1M/3M/6M/1Y
+  * 1M skew: (25Δ put – ATM), (10Δ put – ATM)
+* Use it as **shape**, then **scale level** so your scenario hits VIX endpoints.
+
+This is *not* “min/max.” It’s “take the surface as observed.”
+
+---
+
+### B) Equity single-name & sector “AI compression” templates
+
+You asked: “how granular—single names in a period? utilities? non-prescribed stuff?”
+
+#### 1) AI Infrastructure (semis/compute) — **late 2021 peak → Oct 2022 trough**
+
+**Use for:** cross-sectional *shape* inside AI infrastructure (who is more/less volatile; relative drawdown tendencies).
+**Why:** Modern multiple compression + semi downcycle is the cleanest analog.
+Evidence: AMD peak-to-trough −65% in that window; SOX down ~45% Jan→Oct 2022 (modern precedent for large semi drawdowns).
+
+**What you do with the data:**
+
+* Compute **rolling 60‑day returns** for your AI‑infra proxy basket inside that window.
+* Use those to derive **relative ranking / dispersion**.
+* Then **force** your binding names to **−50%** (severe) and scale the rest consistently.
+
+> Important: you are **not** copying 2022’s exact levels. You’re using it to answer: “when semis get crushed, which ones move more/less, and by roughly what ratio?”
+
+#### 2) AI Software (SaaS/apps) — **calendar 2022**
+
+**Use for:** shape and relative performance across AI software/app names (CRM/NOW/PLTR-like names).
+**Why:** 2022 is the clean modern SaaS multiple reset. SaaS valuation multiples compressed dramatically.
+
+**What you do with the data:**
+
+* Rolling 60‑day returns in 2022 for your SaaS/app cohort
+* Use percentiles (below) to define moderate vs severe *shape*, then scale to your desired endpoints.
+
+#### 3) AI Power utilities (VST/CEG)
+
+**Use for:** these are **binding**, so history is used mainly for **plausibility** and for setting behavior of **other utilities**.
+
+* You hard-set **VST/CEG** to **−30%** in severe and **−15%** in moderate.
+* For “other utilities” (non-AI-power), use a **defensive risk-off** window like Q4 2018 (below).
+
+---
+
+### C) “Non-prescribed” equity sectors (non-tech SPX) — **Q4 2018 risk-off with falling yields**
+
+**Use for:** how defensives vs cyclicals behave in a risk-off where yields eventually fall.
+**Why:** Q4 2018 is a clean “risk assets down + yields dropped further” style regime (good complement to your rates rally base). BIS describes the selloff spreading with **lower yields** and higher volatility. ([Bank for International Settlements][1])
+
+**What you do with the data:**
+
+* Pull daily sector returns in that window
+* Compute rolling 10‑day and 60‑day sector moves
+* Use those as your **sector shape template** for “everything else” that you didn’t explicitly prescribe
+
+---
+
+### D) Credit spreads (cp) windows
+
+Credit needs two things:
+
+1. a **moderate analog** (widening but not systemic), and
+2. a **severe analog** (big widening) that you will likely scale down/up.
+
+**Moderate credit window:** **Q4 2018**
+
+* Consistent “risk-off + volatility jump” regime. BIS documents volatility/term premia jumping in this period. ([Bank for International Settlements][1])
+
+**Severe credit window:** **early 2020 risk-off** (used as tail template, scaled to your endpoints)
+
+* This is the simplest way to get a realistic “credit + equity + commodity” co-move shape.
+  (You then scale to your target widenings so you don’t “become COVID.”)
+
+**What you do with the data:**
+
+* Pull **IG OAS** and **HY OAS** time series (and sector OAS if you have it)
+* Compute rolling **ΔOAS over 60d** (and 10d)
+* Pick a percentile shock (95th/99th) OR use the period’s realized move as a **shape vector**
+* Then set your scenario endpoints (e.g., IG +200, HY +500) and compute overlays vs base
+
+---
+
+### E) Commodities (co) windows
+
+You gave explicit targets. Historical windows here are mainly for **justification and shape**.
+
+#### Energy (crude, nat gas) — **Oct–Dec 2018**
+
+**Why:** Oil fell ~30% since early Oct 2018 per IEA, a clean demand/growth scare analog. ([IEA][2])
+EIA also describes the sharp fall after Oct 3, 2018 highs. ([U.S. Energy Information Administration][3])
+
+**What you do with the data:**
+
+* Use this window for “oil down in risk-off” shape
+* Then set your endpoint (e.g., crude −30 severe) and compute overlay vs base
+
+#### Battery metals (lithium, cobalt) — **May 2022 → May 2025 (cobalt)** and **2022 peak → 2024/2025 trough (lithium)**
+
+**Why:** These markets have had real boom-bust cycles and oversupply-driven collapses.
+
+* Oxford Energy notes lithium spot prices fell ~80% from a historic high and spodumene ~90% (volatility context). ([oxfordenergy.org][4])
+* CSIS reports cobalt prices plunged ~59.5% from May 2022 to May 2025. ([CSIS][5])
+* Cobalt Institute notes cobalt prices fell 22% through 2024 amid oversupply. ([cobaltinstitute.org][6])
+
+**What you do with the data:**
+
+* Use 2022–2025 as the “battery-metals bust” regime shape
+* Then apply your chosen endpoints: copper/lithium/cobalt −20/−30 (mod/sev), etc.
+
+#### Industrial metals (copper, steel, aluminum)
+
+* Copper: treat as growth barometer; use growth-scare windows (2018Q4 and/or early 2020 if you want tail shape).
+* Steel/aluminum: use industrial cycle windows (2018Q4 works fine for shape).
+
+---
+
+## What to do with the time series (min/max vs average vs percentile)
+
+### The mistake to avoid
+
+* **Do not** take a single “min” or “max” daily move and call it the scenario.
+* **Do not** take an average return (it will understate tail risk and break coherence).
+
+### The standard practice that actually works
+
+For each driver series (X_t), you compute **rolling horizon moves**:
+
+#### Returns (equities, commodities)
+
+* For 60d horizon: compute rolling 60‑trading‑day cumulative returns
+* For 10d horizon: compute rolling 10‑trading‑day cumulative returns
+
+Then choose:
+
+* **Moderate = 95th percentile worst** (of the rolling distribution)
+* **Severe = 99th percentile worst** (of the rolling distribution)
+
+Why percentiles:
+
+* They are **stable** (min/max is noisy and regime-dependent)
+* They are **auditable** (you can show the distribution and your selected percentile)
+* They scale naturally across assets
+
+#### Spreads (credit)
+
+Same idea:
+
+* Rolling 60‑day changes in bp (and 10‑day)
+* Pick 95th/99th percentile widening
+
+#### Vol surface
+
+Not a rolling statistic. Use a **real surface snapshot** (Apr 3–7, 2025), then scale.
+
+---
+
+## How horizon enters (10d vs 60d) in a way that “makes sense”
+
+You do **not** need to guess a path if your engine only needs an endpoint. But if it needs dynamics:
+
+### Best practice for a 60d AI Severe path
+
+Split it into two phases:
+
+1. **Days 1–10: panic phase**
+
+   * Use Apr 3–7 2025 surface *shape* (inversion + skew + corr spike).
+2. **Days 11–60: grind / continuation**
+
+   * Use 2022-style multiple compression *shape* for tech/semis/software.
+
+This creates an intuitive story:
+
+* “We gap lower fast” (panic)
+* “Then we keep bleeding” (earnings + valuation reset)
+
+---
+
+## The big question you asked: “Do I scale the base driver shocks or use historical numbers?”
+
+### Correct answer (practical)
+
+You do **both**, but for different purposes:
+
+1. **Historical data** gives you:
+
+   * shape (who moves more/less),
+   * plausible severity bounds (what’s realistic),
+   * missing driver targets for non-prescribed items.
+
+2. **The base scenario** gives you:
+
+   * macro coherence for rates/FX,
+   * the starting point you must not double-count.
+
+3. **Scaling** is the bridge:
+
+   * You scale historical *templates* to hit your targets
+   * Then compute **overlay vs base** so final = target
+
+---
+
+# Two ways to build it
+
+## Method 1 — Simple & consistent (fastest, easiest to explain)
+
+This is what you do if you want something implementable in a day and easy to defend.
+
+### Idea
+
+Use **one coherent stress window per horizon** for “shape” across eq/cp/co, plus the required Apr 2025 vol surface.
+
+### Recommended windows
+
+* **Moderate (10d):** use a 10d window around **Apr 3–7, 2025** for “panic shape” (equities + vol), then use that same window for whatever credit/commodities you have available.
+* **Severe (60d):** use **Q4 2018** as the coherent “risk-off + yields lower” cross-asset shape base. BIS supports the regime characteristics (risk assets down, yields dropping further, volatility jumps). ([Bank for International Settlements][1])
+
+  * For energy/industrial commodities, Q4 2018 is also a clean “oil down hard” window (IEA: oil fell ~30% since early Oct). ([IEA][2])
+
+### What you do mechanically
+
+1. Pull daily series for your drivers in the chosen window(s).
+2. Compute rolling 10d and rolling 60d moves.
+3. Select:
+
+   * Moderate = 95th percentile worst 10d move
+   * Severe = 99th percentile worst 60d move
+4. Convert those into a **template shock vector** (across sectors, credit, commodities).
+5. **Override binding names** (NVDA/AMD/AVGO and VST/CEG) to mandated levels.
+6. **Scale the rest** with a single multiplier so SPX/QQQ land exactly where you want (while bindings stay fixed).
+7. Compute overlays vs base (so you don’t double count).
+
+### Why this works
+
+* Very explainable: “We used Q4 2018 as the cross-asset risk-off template, then scaled to our endpoints.”
+* Coherent across assets with minimal moving parts.
+* Easy to implement and audit.
+
+---
+
+## Method 2 — State-of-the-art (best practice, “perfect” build)
+
+This is what a top-tier risk function does when they want maximum rigor.
+
+### Idea
+
+Build a **multi-template, factor-based overlay** and solve for factor sizes with **constraints** (hard endpoints) and **penalties** (stay close to historical shapes).
+
+### The driver templates you use (best analog per family)
+
+* **Vol surface:** Apr 3–7, 2025 (shape template, scaled)
+* **AI semis shape:** late 2021 → Oct 2022 (cross-sectional drawdowns)
+* **AI software shape:** 2022 SaaS compression
+* **Non-tech risk-off shape:** Q4 2018 (defensives vs cyclicals; yields lower) ([Bank for International Settlements][1])
+* **Energy downshift shape:** Oct–Dec 2018 (oil down materially) ([IEA][2])
+* **Battery metals bust shape:** 2022–2025 for lithium/cobalt regimes ([oxfordenergy.org][4])
+
+### What you do with the market data
+
+1. For each template window, compute rolling 10d and 60d distributions for relevant drivers.
+
+2. Extract a **template vector** (F_k) for each factor (k), like:
+
+   * Broad risk-off equity factor
+   * AI valuation compression factor
+   * Credit risk premium factor
+   * Commodity growth factor
+   * Vol/correlation regime factor (from Apr 2025 surface)
+
+3. Solve for factor weights (a_k) that produce final shocks:
+
+[
+\text{Final Shock Vector} = \sum_k a_k F_k
+]
+
+subject to **hard constraints**:
+
+* NVDA/AMD/AVGO = −50 (severe), −40 (moderate)
+* VST/CEG = −30 (severe), −15 (moderate)
+* Your commodity endpoints (if you want them hard)
+
+and **soft constraints / penalties**:
+
+* Stay close to historical covariance (avoid weird cross-asset signs)
+* Keep sector ordering intuitive (cyclicals worse than defensives, etc.)
+
+4. Apply the overlay-vs-base math so final = base ⊕ overlay.
+
+### Why this is “perfect”
+
+* Maximally defensible: you can show each template factor and its history.
+* Produces coherent results even for large driver sets.
+* Naturally handles the “non-prescribed” universe.
+
+---
+
+## The simplest “do this now” checklist (what you literally do tomorrow)
+
+1. **Export your base scenario outputs** (Severe Rates Rally) for 10d and 60d for:
+
+   * SPX/QQQ, sectors, key single names
+   * IG/HY OAS (+ sector if you have)
+   * key commodities
+   * VIX + any term/skew points you store
+
+2. **Hard-set binding endpoints**:
+
+   * NVDA/AMD/AVGO: −40/−50
+   * VST/CEG: −15/−30
+
+3. **Choose your historical windows**:
+
+   * Vol surface: Apr 3–7 2025
+   * AI semis shape: late 2021–Oct 2022
+   * AI software shape: 2022
+   * Non-tech sectors: Q4 2018 ([Bank for International Settlements][1])
+   * Energy: Oct–Dec 2018 ([IEA][2])
+   * Battery metals: 2022–2025 bust regimes ([oxfordenergy.org][4])
+
+4. For non-prescribed drivers:
+
+   * compute rolling 10d/60d moves in those windows
+   * take 95th/99th percentile worst as your “raw” moderate/severe shapes
+   * scale to fit your scenario endpoints
+
+5. **Compute overlays vs base**:
+
+   * returns: (R_{overlay}=\frac{1+R_{target}}{1+R_{base}}-1)
+   * spreads: (\Delta_{overlay}=\Delta_{target}-\Delta_{base})
+   * vol: set-to-target (or Δ-points)
+
+6. **Final sanity checks**:
+
+   * AI names worst, then tech, then cyclicals, then defensives
+   * Credit widens more in tech/semis than broad IG
+   * Industrial/battery metals down in severe, gold up
+   * Vol surface inverted + skew steepened consistent with Apr 2025 template
+
+---
+
+If you want, paste (or upload) your **Severe Rates Rally base shock table** (even just a CSV) and I’ll output the **exact overlay shock table** you need—by driver, with the two methods applied side-by-side (simple template scaling vs state-of-the-art constrained factor solve).
+
+[1]: https://www.bis.org/publ/qtrpdf/r_qt1812a.pdf?utm_source=chatgpt.com "Yet more bumps on the path to normal"
+[2]: https://www.iea.org/reports/oil-market-report-december-2018?utm_source=chatgpt.com "Oil Market Report - December 2018 – Analysis"
+[3]: https://www.eia.gov/todayinenergy/detail.php?id=37832&utm_source=chatgpt.com "Energy commodity prices fell significantly in the last quarter ..."
+[4]: https://www.oxfordenergy.org/wpcms/wp-content/uploads/2024/02/Insight-145-Lithium-Price-Volatility.pdf?utm_source=chatgpt.com "Lithium price volatility"
+[5]: https://www.csis.org/analysis/stabilizing-cobalt-markets-price-floor-us-minerals-security?utm_source=chatgpt.com "Stabilizing Cobalt Markets: A Price Floor for U.S. Minerals ..."
+[6]: https://www.cobaltinstitute.org/wp-content/uploads/2025/05/Cobalt-Market-Report-2024.pdf?utm_source=chatgpt.com "Cobalt Market Report 2024"
