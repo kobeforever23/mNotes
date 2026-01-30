@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Risk Prompt Studio</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(255,255,255,0.03);
+            --bg-hover: rgba(255,255,255,0.06);
+            --border: rgba(255,255,255,0.1);
+            --text: #e5e7eb;
+            --text-muted: #6b7280;
+            --accent-cyan: #22d3ee;
+            --accent-purple: #a78bfa;
+            --accent-pink: #f472b6;
+            --accent-green: #4ade80;
+            --accent-yellow: #fbbf24;
+            --accent-red: #ef4444;
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header h1 { 
+            font-size: 1.8em; 
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header p { color: var(--text-muted); margin-top: 5px; }
+        
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            padding: 15px 20px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 95px;
+            z-index: 99;
+            flex-wrap: wrap;
+        }
+        .nav-tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        .nav-tab:hover { background: var(--bg-hover); color: var(--text); }
+        .nav-tab.active { 
+            background: rgba(34, 211, 238, 0.15); 
+            border-color: rgba(34, 211, 238, 0.3);
+            color: var(--accent-cyan);
+        }
+        
+        /* Container */
+        .container { max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
+        
+        /* Tab Content */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Section */
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .section h2 {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-number { font-size: 2em; font-weight: 700; color: var(--accent-cyan); }
+        .stat-label { font-size: 0.75em; color: var(--text-muted); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* Perspective Grid */
+        .perspective-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .perspective-card {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+        .perspective-card h3 {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .perspective-card h3 .icon { font-size: 1.2em; }
+        
+        .category-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .category-bar:last-child { border-bottom: none; }
+        .cat-name { flex: 1; font-size: 0.85em; color: var(--text); }
+        .cat-count { 
+            font-size: 0.8em; 
+            font-weight: 600;
+            color: var(--accent-cyan);
+            min-width: 30px;
+            text-align: right;
+        }
+        .cat-bar-bg {
+            width: 80px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .cat-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+        
+        /* Template Builder */
+        .template-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .template-selector {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .template-selector:hover { border-color: rgba(34, 211, 238, 0.3); background: var(--bg-hover); }
+        .template-selector.selected { border-color: var(--accent-cyan); background: rgba(34, 211, 238, 0.1); }
+        .template-selector h4 { color: var(--accent-cyan); margin-bottom: 8px; }
+        .template-selector p { font-size: 0.85em; color: var(--text-muted); }
+        .template-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+        .template-tag {
+            font-size: 0.65em;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .tag-functional { background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan); }
+        .tag-technical { background: rgba(167, 139, 250, 0.2); color: var(--accent-purple); }
+        .tag-pattern { background: rgba(244, 114, 182, 0.2); color: var(--accent-pink); }
+        .tag-workflow { background: rgba(74, 222, 128, 0.2); color: var(--accent-green); }
+        
+        /* Template Editor */
+        .template-editor {
+            display: none;
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.05), rgba(167, 139, 250, 0.05));
+            border: 1px solid rgba(34, 211, 238, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        .template-editor.active { display: block; }
+        .template-editor h3 { color: var(--accent-cyan); margin-bottom: 20px; }
+        
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .slot-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .slot-field label {
+            font-size: 0.8em;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .slot-field input, .slot-field select, .slot-field textarea {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text);
+            font-size: 0.9em;
+            transition: border-color 0.2s;
+        }
+        .slot-field input:focus, .slot-field select:focus, .slot-field textarea:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+        .slot-field textarea { min-height: 80px; resize: vertical; }
+        
+        .preview-section {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .preview-section h4 { 
+            color: var(--text-muted); 
+            font-size: 0.85em; 
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .preview-content {
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            color: #d1d5db;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .preview-content .slot-value { 
+            background: rgba(34, 211, 238, 0.2); 
+            color: var(--accent-cyan);
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .copy-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(34, 211, 238, 0.3); }
+        .copy-btn.copied { background: var(--accent-green); }
+        
+        /* Good Prompts Browser */
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .filter-group label { font-size: 0.75em; color: var(--text-muted); }
+        .filter-group select, .filter-group input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text);
+            font-size: 0.85em;
+            min-width: 150px;
+        }
+        
+        .prompt-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .prompt-card {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid var(--accent-cyan);
+            transition: background 0.2s;
+        }
+        .prompt-card:hover { background: rgba(0,0,0,0.3); }
+        .prompt-text {
+            font-size: 0.9em;
+            line-height: 1.6;
+            color: #d1d5db;
+            margin-bottom: 15px;
+        }
+        .prompt-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .meta-section {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-right: 15px;
+            border-right: 1px solid var(--border);
+        }
+        .meta-section:last-child { border-right: none; }
+        .meta-label { font-size: 0.7em; color: var(--text-muted); text-transform: uppercase; }
+        .meta-tag {
+            font-size: 0.7em;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .meta-tag.functional { background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan); }
+        .meta-tag.technical { background: rgba(167, 139, 250, 0.2); color: var(--accent-purple); }
+        .meta-tag.pattern { background: rgba(244, 114, 182, 0.2); color: var(--accent-pink); }
+        .meta-tag.workflow { background: rgba(74, 222, 128, 0.2); color: var(--accent-green); }
+        .meta-tag.quality { background: rgba(251, 191, 36, 0.2); color: var(--accent-yellow); }
+        .meta-tag.quality.excellent { background: rgba(74, 222, 128, 0.3); color: var(--accent-green); }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .pagination button {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+        }
+        .pagination button:hover { background: var(--bg-hover); }
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-info { color: var(--text-muted); font-size: 0.9em; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .perspective-grid { grid-template-columns: 1fr; }
+            .template-list { grid-template-columns: 1fr; }
+            .slots-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 Market Risk Prompt Studio</h1>
+        <p>Multi-Perspective Taxonomy • Interactive Templates • 58 Curated Good Prompts</p>
+    </div>
+    
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="showTab('perspectives')">📊 Perspectives</button>
+        <button class="nav-tab" onclick="showTab('builder')">🔧 Template Builder</button>
+        <button class="nav-tab" onclick="showTab('prompts')">📝 Good Prompts</button>
+        <button class="nav-tab" onclick="showTab('reference')">📚 Quick Reference</button>
+    </div>
+    
+    <div class="container">
+        <!-- Tab 1: Multi-Perspective Views -->
+        <div id="perspectives" class="tab-content active">
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-number">58</div>
+                    <div class="stat-label">Good Prompts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">Perspectives</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">Templates</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">50%</div>
+                    <div class="stat-label">Quality Filter</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🔍 View Prompts Through Different Lenses</h2>
+                <p style="color: var(--text-muted); margin-bottom: 25px;">
+                    The same prompts can be categorized multiple ways. Choose a perspective to see patterns.
+                </p>
+                <div class="perspective-grid" id="perspectiveGrid"></div>
+            </div>
+        </div>
+        
+        <!-- Tab 2: Template Builder -->
+        <div id="builder" class="tab-content">
+            <div class="section">
+                <h2>🔧 Select a Template</h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">
+                    Choose a template type, customize the fields, and copy your perfected prompt.
+                </p>
+                <div class="template-list" id="templateList"></div>
+            </div>
+            
+            <div class="template-editor" id="templateEditor">
+                <h3 id="editorTitle">Template Editor</h3>
+                <div class="slots-grid" id="slotsGrid"></div>
+                
+                <div class="preview-section">
+                    <h4>
+                        <span>📄 Generated Prompt</span>
+                        <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">Copy to Clipboard</button>
+                    </h4>
+                    <div class="preview-content" id="previewContent"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 3: Good Prompts Browser -->
+        <div id="prompts" class="tab-content">
+            <div class="section">
+                <h2>📝 Browse Good Prompts</h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">
+                    Only showing prompts with quality score ≥2 (good/excellent). Filter by any perspective.
+                </p>
+                
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>Functional</label>
+                        <select id="filterFunctional" onchange="filterPrompts()">
+                            <option value="">All Functions</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Technical</label>
+                        <select id="filterTechnical" onchange="filterPrompts()">
+                            <option value="">All Technical</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Design Pattern</label>
+                        <select id="filterPattern" onchange="filterPrompts()">
+                            <option value="">All Patterns</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Workflow</label>
+                        <select id="filterWorkflow" onchange="filterPrompts()">
+                            <option value="">All Stages</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Search</label>
+                        <input type="text" id="searchInput" placeholder="Keywords..." oninput="filterPrompts()">
+                    </div>
+                </div>
+                
+                <div class="prompt-grid" id="promptGrid"></div>
+                
+                <div class="pagination">
+                    <button onclick="prevPage()" id="prevBtn">← Previous</button>
+                    <span class="page-info" id="pageInfo">Page 1 of 1</span>
+                    <button onclick="nextPage()" id="nextBtn">Next →</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 4: Quick Reference -->
+        <div id="reference" class="tab-content">
+            <div class="section">
+                <h2>📚 Multi-Perspective Taxonomy Reference</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div class="perspective-card" style="border-left: 4px solid var(--accent-cyan);">
+                        <h3><span class="icon">⚙️</span> Functional Perspective</h3>
+                        <p style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 15px;">What business function does it serve?</p>
+                        <div style="font-size: 0.8em; line-height: 1.8;">
+                            <div><strong>risk_measurement</strong> - VaR, ES, quantify risk</div>
+                            <div><strong>risk_monitoring</strong> - Track, alert, limit checks</div>
+                            <div><strong>scenario_analysis</strong> - Stress, what-if, sensitivity</div>
+                            <div><strong>pricing_valuation</strong> - Price, MTM, fair value</div>
+                            <div><strong>hedging_optimization</strong> - Hedge, minimize, reduce</div>
+                            <div><strong>reporting_communication</strong> - Report, brief, present</div>
+                            <div><strong>data_analytics</strong> - SQL, query, transform</div>
+                            <div><strong>regulatory_capital</strong> - CCAR, Basel, compliance</div>
+                            <div><strong>market_research</strong> - Outlook, forecast, intel</div>
+                        </div>
+                    </div>
+                    
+                    <div class="perspective-card" style="border-left: 4px solid var(--accent-purple);">
+                        <h3><span class="icon">🔬</span> Technical Perspective</h3>
+                        <p style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 15px;">What technical approach/method?</p>
+                        <div style="font-size: 0.8em; line-height: 1.8;">
+                            <div><strong>quantitative_modeling</strong> - Monte Carlo, calibration</div>
+                            <div><strong>data_engineering</strong> - SQL, Python, pipeline</div>
+                            <div><strong>numerical_methods</strong> - Algorithm, optimization</div>
+                            <div><strong>statistical_analysis</strong> - Distribution, correlation</div>
+                            <div><strong>financial_mathematics</strong> - Greeks, stochastic</div>
+                            <div><strong>visualization_reporting</strong> - Chart, dashboard</div>
+                            <div><strong>api_integration</strong> - Bloomberg, real-time</div>
+                        </div>
+                    </div>
+                    
+                    <div class="perspective-card" style="border-left: 4px solid var(--accent-pink);">
+                        <h3><span class="icon">🏗️</span> Design Pattern Perspective</h3>
+                        <p style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 15px;">What structural pattern?</p>
+                        <div style="font-size: 0.8em; line-height: 1.8;">
+                            <div><strong>framework_architecture</strong> - System design</div>
+                            <div><strong>calculator_engine</strong> - Compute, price</div>
+                            <div><strong>etl_pipeline</strong> - Extract, transform, load</div>
+                            <div><strong>report_generator</strong> - Create, format output</div>
+                            <div><strong>monitor_alerter</strong> - Watch, trigger, notify</div>
+                            <div><strong>analyzer_insights</strong> - Identify, detect, assess</div>
+                            <div><strong>explainer_educator</strong> - Teach, intuition</div>
+                        </div>
+                    </div>
+                    
+                    <div class="perspective-card" style="border-left: 4px solid var(--accent-green);">
+                        <h3><span class="icon">🔄</span> Workflow Perspective</h3>
+                        <p style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 15px;">Where in the workflow?</p>
+                        <div style="font-size: 0.8em; line-height: 1.8;">
+                            <div><strong>data_acquisition</strong> - Pull, fetch, retrieve</div>
+                            <div><strong>data_transformation</strong> - Clean, prepare, normalize</div>
+                            <div><strong>calculation_core</strong> - Compute, model, simulate</div>
+                            <div><strong>validation_qa</strong> - Verify, test, backtest</div>
+                            <div><strong>output_delivery</strong> - Report, publish, present</div>
+                            <div><strong>decision_support</strong> - Recommend, advise</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>✨ Quality Elements Checklist</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                    <div style="padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+                        <div style="font-weight: 600; color: var(--accent-cyan); margin-bottom: 8px;">+1 Role Assignment</div>
+                        <div style="font-size: 0.85em; color: var(--text-muted);">"You are a senior quant..."</div>
+                    </div>
+                    <div style="padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+                        <div style="font-weight: 600; color: var(--accent-cyan); margin-bottom: 8px;">+1 Scope Definition</div>
+                        <div style="font-size: 0.85em; color: var(--text-muted);">Desks, books, asset classes</div>
+                    </div>
+                    <div style="padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+                        <div style="font-weight: 600; color: var(--accent-cyan); margin-bottom: 8px;">+1 Numbered Requirements</div>
+                        <div style="font-size: 0.85em; color: var(--text-muted);">1. First... 2. Second...</div>
+                    </div>
+                    <div style="padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+                        <div style="font-weight: 600; color: var(--accent-cyan); margin-bottom: 8px;">+1 Output Format</div>
+                        <div style="font-size: 0.85em; color: var(--text-muted);">JSON, table, code, doc</div>
+                    </div>
+                    <div style="padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+                        <div style="font-weight: 600; color: var(--accent-cyan); margin-bottom: 8px;">+1 Constraints</div>
+                        <div style="font-size: 0.85em; color: var(--text-muted);">Word limits, item counts</div>
+                    </div>
+                    <div style="padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+                        <div style="font-weight: 600; color: var(--accent-cyan); margin-bottom: 8px;">+1 Examples</div>
+                        <div style="font-size: 0.85em; color: var(--text-muted);">Sample output, references</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const data = {"total_good": 58, "perspectives": {"functional": {"risk_monitoring": 16, "pricing_valuation": 29, "reporting_communication": 15, "data_analytics": 10, "market_research": 24, "general": 9, "hedging_optimization": 5, "scenario_analysis": 19, "regulatory_capital": 7, "risk_measurement": 3}, "technical": {"data_engineering": 5, "visualization_reporting": 30, "general": 13, "numerical_methods": 8, "financial_mathematics": 9, "quantitative_modeling": 12, "api_integration": 10, "statistical_analysis": 6}, "design_pattern": {"report_generator": 29, "calculator_engine": 6, "etl_pipeline": 7, "general": 10, "explainer_educator": 17, "monitor_alerter": 11, "framework_architecture": 18, "analyzer_insights": 12}, "workflow": {"data_acquisition": 25, "output_delivery": 18, "data_transformation": 9, "general": 8, "calculation_core": 20, "validation_qa": 14, "decision_support": 11}, "asset_class": {"general": 6, "cross_asset": 12, "rates_ir": 29, "credit": 34, "fx_currency": 8, "equity": 11, "commodities": 8}}, "prompts": [{"content": "make a python program that can pull automated trading data like across markets to create like a market update sheet or table or something for a report that has up to date market info", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "format_specified"], "perspectives": {"functional": ["risk_monitoring", "pricing_valuation", "reporting_communication", "data_analytics", "market_research"], "technical": ["data_engineering", "visualization_reporting"], "design_pattern": ["report_generator"], "workflow": ["data_acquisition", "output_delivery"], "asset_class": ["general"]}, "finance_subcategories": ["trading_markets", "market_intelligence", "data_infrastructure"]}, {"content": "i have a round 1 phone interview with bridgewater associates for investment engineer role in their portfolio implementation team. how should i prep, this is what they wrote: You are confirmed to speak with Jackson at this time. No need to prepare anything for this conversation. We will focus on your background and experience, and share a bit more about the particular role and Bridgewater in order to answer any questions you may have.", "quality_level": "good", "quality_score": 3, "quality_factors": ["has_context", "specific_request", "role_assigned"], "perspectives": {"functional": ["general"], "technical": ["general"], "design_pattern": ["calculator_engine"], "workflow": ["data_transformation"], "asset_class": ["cross_asset"]}, "finance_subcategories": ["trading_markets"]}, {"content": "give me a full summary of principles by ray dalio and any pertinent information adn thtouhgts nad processes and fundamentals and eveyrthing i need to know if i am interviewing with them for an investment engineer position on their portfolio implementation team", "quality_level": "good", "quality_score": 3, "quality_factors": ["has_context", "specific_request", "format_specified"], "perspectives": {"functional": ["reporting_communication"], "technical": ["visualization_reporting"], "design_pattern": ["calculator_engine", "etl_pipeline", "report_generator"], "workflow": ["data_transformation"], "asset_class": ["cross_asset"]}, "finance_subcategories": ["trading_markets"]}, {"content": "give me a fully implementable algorithm for traading treasury futures and scalping and making good rteturn on it, whilst ensuring that we have minimal drawdowns and is configruablke and whatnot and perfect and be sure it is comprehensive and detailed and takes all thigns into consideration is configurable", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "format_specified"], "perspectives": {"functional": ["general"], "technical": ["numerical_methods"], "design_pattern": ["general"], "workflow": ["general"], "asset_class": ["rates_ir", "credit"]}, "finance_subcategories": ["regulatory_compliance", "derivatives_products", "quant_modeling"]}, {"content": "explain what is meant by this line intuitive and if need be explain it with examples: \n\nAggregation of Similar Greeks specifications:\nRMBS:\nCR01 for securitized products (asset backed) do not need hazard curves, so any aggregation with credit derivatives with hazard curve is appropriate. explain this to me. i dont get what it is saying", "quality_level": "good", "quality_score": 3, "quality_factors": ["has_context", "specific_request", "examples_provided"], "perspectives": {"functional": ["general"], "technical": ["financial_mathematics"], "design_pattern": ["explainer_educator"], "workflow": ["data_acquisition"], "asset_class": ["rates_ir", "credit"]}, "finance_subcategories": ["derivatives_products", "greeks_sensitivities", "asset_classes"]}, {"content": "explain to me very intuitively and numerically the point of convexity or cv01 and how it is calculated and also why it matters and how to view form a market risk standpoint? i want a concrete example of both a cash security like a bond and also a non-linear security example with the math and everything explained and be sure it is concise and intuitive", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "examples_provided"], "perspectives": {"functional": ["pricing_valuation", "market_research"], "technical": ["numerical_methods"], "design_pattern": ["explainer_educator", "calculator_engine"], "workflow": ["calculation_core"], "asset_class": ["credit"]}, "finance_subcategories": ["trading_markets", "derivatives_products", "greeks_sensitivities"]}, {"content": "i have this intraday risk report for the cib division that covers all trading desks and tracked risk measures. the columns are lob, desk, risk measure, eod-1 value, 10am value, 1pm value, 10am vs eod-1 diff, 1pm vs eod-1 diff, 10am utilization% (against intraday ewi), 1pm utilization% (against intraday ewi), intraday ewi, 1pm vs eod limit utilization%. this is for page 1. at the top of this page is also an aggregate table that has rows as ir01,cr01,ag01,eq exposure, eq vega, fx exp, fx vega, com", "quality_level": "good", "quality_score": 3, "quality_factors": ["has_context", "constraints_defined", "format_specified"], "perspectives": {"functional": ["risk_monitoring"], "technical": ["visualization_reporting"], "design_pattern": ["report_generator", "monitor_alerter"], "workflow": ["data_transformation", "output_delivery"], "asset_class": ["fx_currency"]}, "finance_subcategories": ["var_risk_metrics", "trading_markets", "greeks_sensitivities"]}, {"content": "i have this intraday risk report for the cib division that covers all trading desks and tracked risk measures. the columns are lob, desk, risk measure, eod-1 value, 10am value, 1pm value, 10am vs eod-1 diff, 1pm vs eod-1 diff, 10am utilization% (against intraday ewi), 1pm utilization% (against intraday ewi), intraday ewi, 1pm vs eod limit utilization%. this is for page 1. at the top of this page is also an aggregate table that has rows as ir01,cr01,ag01,eq exposure, eq vega, fx exp, fx vega, com", "quality_level": "good", "quality_score": 3, "quality_factors": ["has_context", "constraints_defined", "format_specified"], "perspectives": {"functional": ["risk_monitoring"], "technical": ["visualization_reporting"], "design_pattern": ["report_generator", "monitor_alerter"], "workflow": ["data_transformation", "output_delivery"], "asset_class": ["fx_currency", "equity"]}, "finance_subcategories": ["var_risk_metrics", "trading_markets", "greeks_sensitivities"]}, {"content": "Now let's say we were going to do this more on a retail level like using ibkr or whatever else is needed for a 100k account, make sure the strategies are still the absolute best and are excellent and take everything into account and minimize risk whilst maximizing profit and always learning from itslef", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "constraints_defined"], "perspectives": {"functional": ["hedging_optimization"], "technical": ["visualization_reporting"], "design_pattern": ["explainer_educator"], "workflow": ["general"], "asset_class": ["rates_ir"]}, "finance_subcategories": ["data_infrastructure"]}, {"content": "Give me a full breakdown of all the algos and strategies that are used on the Macro trading desks at the largest CIB trading desks in the US. so like i want to really understand the intuitive sense of the trading algorithm itself from all contexts such as the risk or the models or the stresses or pnl or whatever else. make sure to be incredibly detailed intuitive and include the math or logic or code and steps in it and make sure it is like what is in practice today and is excellent and pioneeri", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "examples_provided"], "perspectives": {"functional": ["scenario_analysis", "pricing_valuation", "market_research"], "technical": ["quantitative_modeling", "numerical_methods", "visualization_reporting"], "design_pattern": ["explainer_educator"], "workflow": ["calculation_core"], "asset_class": ["rates_ir"]}, "finance_subcategories": ["var_risk_metrics", "trading_markets", "market_intelligence"]}, {"content": "Create a comprehensive single-file HTML asset pricing tool that matches the sophistication and accuracy standards used by front office traders at top-tier investment banks, covering all major asset classes including fixed income securities across all major curves with proper day count conventions and holiday calendars, equity derivatives with complete Black-Scholes implementation plus exotic options like barriers and Asians with full Greeks calculations, FX derivatives using Garman-Kohlhagen mod", "quality_level": "good", "quality_score": 3, "quality_factors": ["has_context", "specific_request", "role_assigned"], "perspectives": {"functional": ["pricing_valuation", "regulatory_capital"], "technical": ["quantitative_modeling", "numerical_methods", "financial_mathematics", "api_integration"], "design_pattern": ["framework_architecture", "report_generator", "analyzer_insights"], "workflow": ["calculation_core", "validation_qa"], "asset_class": ["rates_ir", "credit"]}, "finance_subcategories": ["trading_markets", "derivatives_products", "asset_classes"]}, {"content": "give me all the latest research on BBAI the stock and what they do and projections and whatnot and also if i should invest in it long term or what and keep buying and also risks and whatnot. also give me comparable companies to it and competitors and whatnot. i want a full analysis for a saavy investor, but making sure we have excellent information that can be used for decision making whilst also being intuitive and direct and perfect and informative", "quality_level": "good", "quality_score": 3, "quality_factors": ["has_context", "specific_request", "format_specified"], "perspectives": {"functional": ["market_research"], "technical": ["visualization_reporting", "financial_mathematics"], "design_pattern": ["report_generator"], "workflow": ["validation_qa", "decision_support"], "asset_class": ["equity"]}, "finance_subcategories": ["asset_classes", "data_infrastructure"]}, {"content": "give me all the latest research on BBAI the stock and what they do and projections and whatnot and also if i should invest in it long term or what and keep buying and also risks and whatnot. also give me comparable companies to it and competitors and whatnot. i want a full analysis for a saavy investor, but making sure we have excellent information that can be used for decision making whilst also being intuitive and direct and perfect and informative", "quality_level": "good", "quality_score": 3, "quality_factors": ["has_context", "specific_request", "format_specified"], "perspectives": {"functional": ["market_research"], "technical": ["visualization_reporting", "financial_mathematics"], "design_pattern": ["report_generator"], "workflow": ["validation_qa", "decision_support"], "asset_class": ["equity"]}, "finance_subcategories": ["asset_classes", "data_infrastructure"]}, {"content": "You are a senior partner at a top-tier management consulting firm, specializing in AI strategy, risk management, and digital transformation for global systemically important banks (G-SIBs). Your task is to create a comprehensive and actionable AI Operating Framework for the Corporate & Investment Banking (CIB) and CIB Risk divisions of a large, diversified financial institution, analogous to Wells Fargo. i want absolutely everything that should be in there. also take into account that we are foc", "quality_level": "excellent", "quality_score": 4, "quality_factors": ["has_context", "specific_request", "format_specified", "role_assigned"], "perspectives": {"functional": ["pricing_valuation", "reporting_communication", "data_analytics"], "technical": ["visualization_reporting", "quantitative_modeling"], "design_pattern": ["framework_architecture", "report_generator", "etl_pipeline"], "workflow": ["data_transformation", "calculation_core", "decision_support"], "asset_class": ["credit"]}, "finance_subcategories": ["trading_markets", "derivatives_products", "quant_modeling"]}, {"content": "i want to be able to have copilot use context files or whatever that basically give it context or something that will do some tpoye of analysis for me during my work as a market risk specialist in cib market risk. i want to know what i need to do to basically get the results automated in certain things like stress scenario explains or var explain to the driver level or like get it to produce results for me so like it would take the context files and then the actual data files or whatever and the", "quality_level": "good", "quality_score": 3, "quality_factors": ["has_context", "format_specified", "role_assigned"], "perspectives": {"functional": ["scenario_analysis", "risk_measurement", "pricing_valuation", "data_analytics", "market_research"], "technical": ["general"], "design_pattern": ["report_generator", "explainer_educator"], "workflow": ["data_acquisition", "output_delivery"], "asset_class": ["general"]}, "finance_subcategories": ["var_risk_metrics", "stress_testing", "trading_markets"]}, {"content": "We look forward to discussing your experience and how it might align with the mission of Guardian Capital and Sterling. this is what the interviewer wrote to me alongside whatever else for the 4 hour offsite i will have tomorrow. the role i thought it was for was Technology Transformation lead, but rather the note they sent back for tomorrow's offsite is saying 'Portfolio Administrator position'. i want a list of the absolute best questions and whatnot. this is two versions of my resume. i want ", "quality_level": "good", "quality_score": 3, "quality_factors": ["has_context", "specific_request", "format_specified"], "perspectives": {"functional": ["data_analytics", "regulatory_capital", "market_research"], "technical": ["visualization_reporting", "api_integration"], "design_pattern": ["etl_pipeline", "report_generator", "monitor_alerter", "analyzer_insights"], "workflow": ["data_acquisition", "data_transformation"], "asset_class": ["rates_ir", "fx_currency", "credit", "cross_asset"]}, "finance_subcategories": ["trading_markets", "derivatives_products"]}, {"content": "Refer to the following sequential logic circuit for the next set of questions.\n\u00a0\nThis circuit is a latch. Its inputs are A and B, and its outputs are C and C'. C and C' must be opposing values: C'= NOT(C).\n\u00a0\nGenerate a truth table for the latch. Additionally, label the Actions of this latch. Hint: find a known state that doesn\u2019t depend on the previous output to begin your analysis. Give the completed truth table\n\u00a0\nThen:\n\u00a0\nGenerate a timing diagram for the latch. Additionally, label the Actions o", "quality_level": "good", "quality_score": 3, "quality_factors": ["has_context", "specific_request", "format_specified"], "perspectives": {"functional": ["pricing_valuation"], "technical": ["api_integration"], "design_pattern": ["report_generator", "analyzer_insights", "explainer_educator"], "workflow": ["data_acquisition", "output_delivery", "decision_support"], "asset_class": ["rates_ir", "credit"]}, "finance_subcategories": ["stress_testing", "derivatives_products", "asset_classes"]}, {"content": "Implement the full adder using a PLA.\nYou must do this in CircuitLab, export the .png image. \u00a0tell me exactly what i need to build and then show me cleanly what it should look like. be sure to be simple and make it easy for me to understand exactly what we need to do here to get what we want.\n\nthen, You can implement a full adder using fewer gates than the PLA.\nShow a simpler implementation than the PLA, and explain in detail how you arrived at your design. Answers with undetailed or unintuitive", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "specific_request"], "perspectives": {"functional": ["general"], "technical": ["general"], "design_pattern": ["explainer_educator", "framework_architecture"], "workflow": ["data_acquisition", "data_transformation"], "asset_class": ["credit"]}, "finance_subcategories": ["regulatory_compliance", "asset_classes"]}, {"content": "look at the papers produced by krishan nagpal and give me a full one page executive summary that takes all the matha nd intutition and every thing and tehn gives me the best output that makes sense and is useful to a market risk professionla and trader and also takes into account the end goal being stress scenario generation and in a more systematic and dynamic way and then give me a one pager on potential synergies of an ai enabled stress scenario generator if we were to build one out for the c", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "examples_provided"], "perspectives": {"functional": ["scenario_analysis", "pricing_valuation", "reporting_communication", "market_research"], "technical": ["general"], "design_pattern": ["report_generator", "framework_architecture"], "workflow": ["output_delivery"], "asset_class": ["general"]}, "finance_subcategories": ["stress_testing", "trading_markets", "derivatives_products"]}, {"content": "i still dont get the point of like callable bonds and these other types of instruments. like i want the actual business point and logic and trading sense, intuitively and with real numbers and intuition and examples so i always get it", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "examples_provided"], "perspectives": {"functional": ["general"], "technical": ["general"], "design_pattern": ["explainer_educator"], "workflow": ["data_acquisition"], "asset_class": ["general"]}, "finance_subcategories": ["trading_markets", "derivatives_products", "asset_classes"]}, {"content": "give me a fully intuitive, quant, trading, risk, model based understanding of fixed income instruments and how they behave so that i know them backwards and forwards and can really explain with real numbers, values, etc. be sure to be detailed, comprehensive, use examples, everything that is needed for full intuition that i can teach and also mentally be able to calculate, see the intuition, behavior, etc from the numbers, trading, risk reports, etc. i want it all", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "examples_provided"], "perspectives": {"functional": ["pricing_valuation", "risk_monitoring", "reporting_communication"], "technical": ["quantitative_modeling", "visualization_reporting"], "design_pattern": ["explainer_educator"], "workflow": ["calculation_core", "output_delivery"], "asset_class": ["fx_currency"]}, "finance_subcategories": ["regulatory_compliance", "trading_markets", "derivatives_products"]}, {"content": "**Objective**\nBuild a **comprehensive stress scenario generation framework** that produces **granular, implementable shocks** across risk factors (rates, FX, credit, commodities, equities, vol surfaces, etc.), with a **clear methodology for calibration, narrative, backtesting, and accuracy validation**.\n**Requirements**\n1. **Executive Summary & Narrative**\n   * Provide a high-level **executive summary** of the tool, including purpose, scope, and key deliverables.\n   * For each scenario, include ", "quality_level": "excellent", "quality_score": 4, "quality_factors": ["has_context", "specific_request", "examples_provided", "format_specified"], "perspectives": {"functional": ["scenario_analysis", "risk_monitoring", "reporting_communication"], "technical": ["statistical_analysis", "visualization_reporting"], "design_pattern": ["report_generator", "framework_architecture"], "workflow": ["validation_qa", "output_delivery"], "asset_class": ["credit", "equity", "commodities", "cross_asset"]}, "finance_subcategories": ["trading_markets", "asset_classes", "risk_factors"]}, {"content": "put togehter a promt bank for market irsk professionals that is incredible and can be used in their ai. be sure that it is a curated excellent list for thingsd for daily use and analytiocal and wahtever else incl;udiong productivity and whatever esle. i want to esnrue that we have a solid list that produces excellent asdn detailed intutigve and comprehensive and accurate outputs. these prompts should be categorized and not so generic but rather oriented towards the certain things they would need", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "format_specified"], "perspectives": {"functional": ["risk_monitoring", "pricing_valuation", "market_research"], "technical": ["visualization_reporting"], "design_pattern": ["report_generator"], "workflow": ["output_delivery"], "asset_class": ["rates_ir", "credit"]}, "finance_subcategories": ["trading_markets", "derivatives_products", "data_infrastructure"]}, {"content": "lets say one is using metatrader to trade algos and trade also discretionarily, say gold, some indices and also forex pairs. lets also say that we are making these algos in metaeditor then running them whatever and then doing genetic optimization and then backtesting and whatever else. what are we doing wrong and or right and also what should we be doing to ensure the algo actually works/will work like the backtests and whatever. i want to know exactly how professionals do this and ensure profit", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "specific_request"], "perspectives": {"functional": ["market_research"], "technical": ["numerical_methods", "statistical_analysis", "financial_mathematics"], "design_pattern": ["general"], "workflow": ["validation_qa", "data_acquisition", "calculation_core"], "asset_class": ["rates_ir", "fx_currency", "credit", "commodities"]}, "finance_subcategories": ["trading_markets", "asset_classes", "quant_modeling"]}, {"content": "Here\u2019s a copy-pasteable, single-paragraph prompt you can drop into a smart AI or research assistant:\n\u201cAct as my buy-side equity analyst. Build a **comprehensive, up-to-date** investment report identifying the **best high-growth companies in AI and quantum** (including edge AI and AI infrastructure such as semis/accelerators, HBM/packaging, optical networking, datacenter power/thermal, software platforms, MLOps, security, and quantum hardware/software). **Focus on small/mid caps (and select micro", "quality_level": "excellent", "quality_score": 6, "quality_factors": ["has_context", "specific_request", "constraints_defined", "examples_provided", "format_specified", "role_assigned"], "perspectives": {"functional": ["risk_monitoring", "pricing_valuation", "scenario_analysis", "reporting_communication", "regulatory_capital"], "technical": ["visualization_reporting", "quantitative_modeling", "financial_mathematics", "api_integration"], "design_pattern": ["framework_architecture", "report_generator", "monitor_alerter", "analyzer_insights"], "workflow": ["data_acquisition", "calculation_core", "validation_qa", "output_delivery"], "asset_class": ["equity", "credit", "cross_asset"]}, "finance_subcategories": ["trading_markets", "market_intelligence", "data_infrastructure"]}, {"content": "even after working 3 years in market risk, i dont get the concept of duration intuitively like whats the point and hows it really used adn interpreted and felt if that makes sense. i want to get it from a holistic point of view and also the trading sense directly and tangibly", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "format_specified"], "perspectives": {"functional": ["pricing_valuation", "market_research"], "technical": ["general"], "design_pattern": ["explainer_educator"], "workflow": ["data_acquisition"], "asset_class": ["rates_ir"]}, "finance_subcategories": ["trading_markets", "greeks_sensitivities"]}, {"content": "**System**: *You are a senior quant developer.*\n**Goal**: Deliver an institutional\u2011grade research & trading stack that mirrors leading multi\u2011factor hedge funds.\n**Scope**\n1. **Data Layer** \u00a0\u00a0\u00a0* Ingest real\u2011time market, fundamentals, macro (FRED) and five alt\u2011data sets (see ExtractAlpha 2025 list). \u00a0\u00a0\u00a0* Implement schema\u2011versioned ETL with point\u2011in\u2011time guarantees.\n2. **Feature Store** \u00a0\u00a0\u00a0* Compute and store at least 30 style & sentiment factors. \u00a0\u00a0\u00a0* Provide SQL/Python APIs and metadata (source, ", "quality_level": "excellent", "quality_score": 6, "quality_factors": ["has_context", "specific_request", "constraints_defined", "examples_provided", "format_specified", "role_assigned"], "perspectives": {"functional": ["data_analytics", "risk_monitoring", "market_research", "risk_measurement", "scenario_analysis", "pricing_valuation"], "technical": ["data_engineering", "api_integration"], "design_pattern": ["etl_pipeline", "monitor_alerter", "framework_architecture"], "workflow": ["data_acquisition", "calculation_core", "validation_qa"], "asset_class": ["credit", "rates_ir", "cross_asset"]}, "finance_subcategories": ["trading_markets", "data_infrastructure"]}, {"content": "**Provide a comprehensive market update for today (October 6, 2025) covering:**\n**1. Major Market Moves**\n* Key index performance (S&P 500, Nasdaq, Dow, Russell 2000)\n* Notable sector rotations and leading/lagging sectors\n* Significant individual stock movers and why\n**2. Market Drivers**\n* Main catalysts moving markets today (economic data, Fed commentary, earnings, geopolitical events)\n* Any breaking news or developing stories impacting sentiment\n**3. Economic Data & Events**\n* Key economic re", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "format_specified"], "perspectives": {"functional": ["scenario_analysis", "pricing_valuation", "data_analytics", "market_research"], "technical": ["general"], "design_pattern": ["monitor_alerter", "explainer_educator"], "workflow": ["decision_support", "data_acquisition"], "asset_class": ["commodities", "rates_ir", "equity", "credit"]}, "finance_subcategories": ["asset_classes", "market_intelligence"]}, {"content": "explain in depth how cib trading desks actually make money and like intuitively so it is super clear and why the customers even go to them and whatever else i need to know. be sure to use actual numbers and examples and make it fully intuitive top down, so that if one were to want to recreate the same business model maybe smaller and more optimal scale they are able to", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "examples_provided"], "perspectives": {"functional": ["pricing_valuation"], "technical": ["quantitative_modeling"], "design_pattern": ["explainer_educator", "report_generator"], "workflow": ["calculation_core"], "asset_class": ["credit"]}, "finance_subcategories": ["regulatory_compliance", "trading_markets", "quant_modeling"]}, {"content": "if i have say the last 3 months of data for 19 trading desks in cib and i am using one representaitve risk measure fopr each, and i have 4 points of data per day (prioreod, 10a,1p,eod) and i want to come up with a scatter plot for intraday volatility to compare desks what do i do. i have thje data as Desk, Date, PriorEod,10a,1p,eod,then, some hjelper columns on the right: eod-1p,eod-10a,eod-prioreod,10a-prioreod,1p-prioreod (abs of these) and the max of those is then in a column i call max intra", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "constraints_defined"], "perspectives": {"functional": ["risk_measurement", "risk_monitoring", "pricing_valuation", "data_analytics"], "technical": ["visualization_reporting"], "design_pattern": ["report_generator"], "workflow": ["data_acquisition", "data_transformation", "output_delivery"], "asset_class": ["credit"]}, "finance_subcategories": ["var_risk_metrics", "trading_markets", "derivatives_products"]}, {"content": "You are briefing the Chief Market Risk Officer of a major financial institution who manages business-as-usual stress testing. This person has 20+ years experience, reads through BS instantly, and needs actionable intelligence only.\nProvide a market risk intelligence brief for [TODAY'S DATE] covering:\nFramework Updates Required This Week - What assumptions/parameters in our stress models are now stale or broken? Be specific with numbers.\nCritical Data Points - Current levels for: VIX, gold, key s", "quality_level": "excellent", "quality_score": 5, "quality_factors": ["has_context", "specific_request", "constraints_defined", "format_specified", "role_assigned"], "perspectives": {"functional": ["pricing_valuation", "scenario_analysis", "market_research", "hedging_optimization"], "technical": ["quantitative_modeling", "statistical_analysis", "visualization_reporting"], "design_pattern": ["report_generator", "framework_architecture", "etl_pipeline", "analyzer_insights"], "workflow": ["calculation_core", "validation_qa", "decision_support"], "asset_class": ["credit", "commodities"]}, "finance_subcategories": ["trading_markets", "asset_classes", "risk_factors"]}, {"content": "INVESTMENT PORTFOLIO STRATEGY REQUEST\nPersonal Profile:\n* Age: 28 years old\n* Occupation: Systems Engineer at Wells Fargo\n* Current Income: $110,000 annually (with growth trajectory toward higher-skilled roles)\n* Investment Accounts: 401(k), Roth IRA, newly opened Schwab brokerage account\n* Current Contributions: 6% to 401(k) (maxing company match), ~1% to Roth IRA\nInvestment Objective: Create a comprehensive, long-term growth portfolio optimized for a 30-40+ year time horizon, maximizing compou", "quality_level": "excellent", "quality_score": 4, "quality_factors": ["has_context", "specific_request", "constraints_defined", "format_specified"], "perspectives": {"functional": ["market_research", "hedging_optimization", "reporting_communication"], "technical": ["visualization_reporting", "numerical_methods", "api_integration"], "design_pattern": ["framework_architecture", "report_generator", "explainer_educator", "calculator_engine", "monitor_alerter"], "workflow": ["decision_support", "data_acquisition"], "asset_class": ["equity", "credit", "cross_asset"]}, "finance_subcategories": ["regulatory_compliance", "trading_markets", "risk_factors"]}, {"content": "make me a prompt i can ask an ai to put together the absolute best picks for stocks and etfs and whatever else to buy like think long term growth for someone who is 28 years old right now and makes say about 110k annually right now as a systems engineer at wells fargo and is working towards making more in even better roles and higher skilled xyz. so she has 401k and roth ira and i think is maxing out her match with the company of 6% for the 401k and i think maybe like say 1% or something for rot", "quality_level": "excellent", "quality_score": 5, "quality_factors": ["has_context", "specific_request", "constraints_defined", "format_specified", "role_assigned"], "perspectives": {"functional": ["market_research", "pricing_valuation", "reporting_communication"], "technical": ["general"], "design_pattern": ["framework_architecture", "calculator_engine"], "workflow": ["data_acquisition", "decision_support"], "asset_class": ["equity", "credit", "cross_asset"]}, "finance_subcategories": ["trading_markets"]}, {"content": "You are an expert algorithmic trading analyst. Analyze current market conditions and identify high-probability trading opportunities using the following framework: **MARKET SCANNING PARAMETERS:** - Asset Classes: [Forex/Crypto/Stocks - specify your preference] - Timeframe: Swing trading (2-5 day hold) - Risk Tolerance: Conservative (1.5% risk per trade maximum) - Target Risk-Reward: Minimum 1:2, ideal 1:3 **ANALYSIS REQUIREMENTS:** 1. **Trend Identification:** - Scan for assets showing clear tre", "quality_level": "excellent", "quality_score": 6, "quality_factors": ["has_context", "specific_request", "constraints_defined", "examples_provided", "format_specified", "role_assigned"], "perspectives": {"functional": ["pricing_valuation", "market_research", "risk_monitoring", "data_analytics"], "technical": ["statistical_analysis", "visualization_reporting", "numerical_methods", "api_integration"], "design_pattern": ["analyzer_insights", "report_generator"], "workflow": ["data_acquisition", "calculation_core", "validation_qa", "decision_support", "output_delivery"], "asset_class": ["rates_ir", "fx_currency", "equity", "credit", "cross_asset"]}, "finance_subcategories": ["trading_markets"]}, {"content": "give me a method or something or whatever for what we could use for stress scenario generation for cib risk at wells fargo, given that we want to design something that is schedule f type inspired and granular. like if for example MROs from each asset class provided us shocks for said scenario/narrative, how do we go about translating that into Schedule F or something to product stress risk shocks and link the driver level to the sensitivity level shocks and stuff and all that. i want a fully bro", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "examples_provided"], "perspectives": {"functional": ["scenario_analysis"], "technical": ["visualization_reporting"], "design_pattern": ["framework_architecture"], "workflow": ["general"], "asset_class": ["credit"]}, "finance_subcategories": ["stress_testing", "derivatives_products", "greeks_sensitivities"]}, {"content": "i want it for the head of cib risk for a bank like wells fargo for example. i want it to be incredibly perfect and actionable and excellent and ensure all is up to date and is relevant for them", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "examples_provided"], "perspectives": {"functional": ["general"], "technical": ["visualization_reporting"], "design_pattern": ["general"], "workflow": ["decision_support"], "asset_class": ["general"]}, "finance_subcategories": ["data_infrastructure"]}, {"content": "Prompt for Senior Muni MRO/Trader Expert\nI need you to explain municipal bond MRO and trader roles to me with complete clarity and intuition.\nCritical requirements for your explanations:\nFor EVERY risk metric, trading strategy, limit, workflow, or practice you explain:\n1. Explain WHY it matters - What problem does this solve? What's the underlying economic logic?\n2. Show me the disaster - Give me real examples (Detroit, Puerto Rico, 2008, COVID, etc.) of what happens when this is ignored. Make i", "quality_level": "excellent", "quality_score": 5, "quality_factors": ["has_context", "specific_request", "constraints_defined", "examples_provided", "format_specified"], "perspectives": {"functional": ["risk_monitoring", "scenario_analysis", "regulatory_capital"], "technical": ["financial_mathematics", "visualization_reporting"], "design_pattern": ["explainer_educator", "report_generator", "monitor_alerter"], "workflow": ["general"], "asset_class": ["credit", "rates_ir"]}, "finance_subcategories": ["trading_markets"]}, {"content": "make a prompt that i can ask an ai or whoever else to put trogether an extensive collection of the best prompts that would be for daily use for someon working in cib risk at a large corporation, such as wells fargo, say using their enterprise copilot or gemini or whatever ai tools have internally. so give me a prompt that puts together this prompt library that covers absolutely evertything eneded and organize in such a way that maybe some are dailies, some need some modification and can be reuse", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "examples_provided"], "perspectives": {"functional": ["risk_monitoring"], "technical": ["visualization_reporting"], "design_pattern": ["general"], "workflow": ["data_acquisition"], "asset_class": ["rates_ir", "credit"]}, "finance_subcategories": ["trading_markets", "derivatives_products", "data_infrastructure"]}, {"content": "make me a prompt i can ask ai or a trading desk professional or head of markets at a large cib like say wells fargo cib to determine what are the all the different trading strategies used and across desks and like everything. what are the most used and common strategies, most profitable, most etc, least risk, most risk, whagtevcer else, how they handle, where deos the money really come from, etc. profit loss, actuall attributable, risk, etc. i wnat a full detailed trading strastegy breakdown of ", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "format_specified"], "perspectives": {"functional": ["pricing_valuation", "market_research"], "technical": ["quantitative_modeling"], "design_pattern": ["general"], "workflow": ["calculation_core"], "asset_class": ["rates_ir"]}, "finance_subcategories": ["trading_markets"]}, {"content": "give me everything there is to know about the stock FIX and be sure to be accurate and perfect and trading ideas and profitable and risk and eveyrhhgting", "quality_level": "good", "quality_score": 3, "quality_factors": ["examples_provided", "format_specified", "role_assigned"], "perspectives": {"functional": ["general"], "technical": ["general"], "design_pattern": ["general"], "workflow": ["general"], "asset_class": ["rates_ir", "equity"]}, "finance_subcategories": ["trading_markets", "asset_classes"]}, {"content": "give me a prompt i can give ai that will design an ai stress scenario for me that has the follwoing narrative and is excellent and has the drivers and shocks by asset class and incredibly granular yet reserach backed and cohesive and makes perfect sense: moderate scenario si designed to capture risks of ai correction given ai vals and sp trailing at pe 28 and cape at 38.6 and nasdaq at hights and stevere realises adverse impacts ot he economy and erarnings and credit cycle thouigh sdmaller than ", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "role_assigned"], "perspectives": {"functional": ["scenario_analysis"], "technical": ["visualization_reporting"], "design_pattern": ["framework_architecture"], "workflow": ["general"], "asset_class": ["credit", "equity"]}, "finance_subcategories": ["stress_testing", "trading_markets", "asset_classes"]}, {"content": "what are the recent reports that have come out on home prices coming down or being negative or lower or what? i want all the detials and eveything and be sure to layout what this is based on and coming from and how to strategically angle selves to start a big RE portoflio somehow and i want all the details comprhesievneily in the a way a saavy investorn with hundreds or thouisands of properties would manage and view the market and cleverly design a plan to maximize returns as well as minimize li", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "constraints_defined"], "perspectives": {"functional": ["pricing_valuation", "risk_monitoring", "hedging_optimization", "reporting_communication", "market_research"], "technical": ["visualization_reporting"], "design_pattern": ["framework_architecture", "report_generator"], "workflow": ["calculation_core", "output_delivery"], "asset_class": ["rates_ir", "credit"]}, "finance_subcategories": ["trading_markets", "derivatives_products", "market_intelligence"]}, {"content": "give me a prompt that i can ask the worlds best principal trader and algo trader waht is full systemic principal trading, in context of institutional traders like in cib at wells fargo for example on the etrading desk or in perspective of hedge funds or whatver and also retail if it applies. gfive me that full promp that will put togethrer a full guide and learning and examples and intititon and all that", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "examples_provided"], "perspectives": {"functional": ["hedging_optimization"], "technical": ["financial_mathematics"], "design_pattern": ["framework_architecture", "explainer_educator"], "workflow": ["data_acquisition"], "asset_class": ["general"]}, "finance_subcategories": ["trading_markets"]}, {"content": "put this into a markdown perfectly formatted and nice and ensure that it is accuyrate and relevant for a cib cro", "quality_level": "good", "quality_score": 2, "quality_factors": ["specific_request", "format_specified"], "perspectives": {"functional": ["pricing_valuation"], "technical": ["visualization_reporting"], "design_pattern": ["report_generator"], "workflow": ["general"], "asset_class": ["rates_ir"]}, "finance_subcategories": ["derivatives_products"]}, {"content": "Task: Build a forward-looking stress scenario that is the most logically consistent with current market conditions and that tests resilience across the specified portfolio and time horizon. Use recent market data and observable macro signals to justify each stress driver and assumption.  \nContext (fill in): Current date: [YYYY\u2011MM\u2011DD]; Primary region(s): [e.g., US, EU, EM]; Portfolio / exposures to test: [asset classes, sectors, instruments, notional amounts]; Time horizon: [e.g., 1 month, 3 mont", "quality_level": "excellent", "quality_score": 5, "quality_factors": ["has_context", "specific_request", "constraints_defined", "examples_provided", "format_specified"], "perspectives": {"functional": ["scenario_analysis", "risk_monitoring", "pricing_valuation"], "technical": ["visualization_reporting"], "design_pattern": ["framework_architecture", "report_generator", "monitor_alerter", "analyzer_insights"], "workflow": ["validation_qa", "data_acquisition", "calculation_core"], "asset_class": ["credit", "fx_currency", "cross_asset"]}, "finance_subcategories": ["trading_markets", "derivatives_products", "asset_classes"]}, {"content": "give me an accurate and perfect list of shocks and drivers for all asset classes for this ai severe scenario that we;ve been working on and also for moderate then, for price and vol. ensure sectors and rating granularity where appropriate and single names for the big ai guys and related. make sure all makes sense for the 60day time horizon for the severe scenario and 10d for the moderate and of course cohesive and statistically and historically grounded and feasible and the perfect ai bubble sev", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "format_specified"], "perspectives": {"functional": ["scenario_analysis"], "technical": ["general"], "design_pattern": ["general"], "workflow": ["calculation_core"], "asset_class": ["credit", "rates_ir"]}, "finance_subcategories": ["stress_testing", "trading_markets", "derivatives_products"]}, {"content": "Iran Geopolitical Crisis Stress Scenario Framework\nDevelop a comprehensive market risk stress scenario for the current Iran geopolitical crisis (January 2026), incorporating the following event drivers:\nScenario Drivers:\n* Nationwide protests across all 31 Iranian provinces; rial collapsed 100% YoY (700K \u2192 1.4M per USD)\n* June 2025 US/Israel strikes on nuclear/missile infrastructure; potential follow-up strikes signaled before March 2026\n* UN snapback sanctions reimposed (Sept 2025); shadow flee", "quality_level": "excellent", "quality_score": 4, "quality_factors": ["has_context", "specific_request", "constraints_defined", "format_specified"], "perspectives": {"functional": ["scenario_analysis", "market_research"], "technical": ["quantitative_modeling", "statistical_analysis"], "design_pattern": ["framework_architecture", "report_generator", "monitor_alerter", "analyzer_insights"], "workflow": ["output_delivery", "validation_qa"], "asset_class": ["credit", "commodities"]}, "finance_subcategories": ["trading_markets", "asset_classes"]}, {"content": "In this practice question set, we will answer some conceptual questions about Python and write a collection of basic algorithms and data structures. A skeleton file tester.py containing empty definitions for each question has been provided. Since portions of this practice question set will be graded automatically, none of the names or function signatures in this file should be modified. However, you are free to introduce additional variables or functions if needed. Unless explicitly stated other", "quality_level": "excellent", "quality_score": 6, "quality_factors": ["has_context", "specific_request", "constraints_defined", "examples_provided", "format_specified", "role_assigned"], "perspectives": {"functional": ["pricing_valuation", "data_analytics", "regulatory_capital"], "technical": ["numerical_methods", "api_integration", "data_engineering"], "design_pattern": ["report_generator", "etl_pipeline"], "workflow": ["data_acquisition", "data_transformation", "calculation_core", "validation_qa", "output_delivery"], "asset_class": ["credit", "rates_ir"]}, "finance_subcategories": ["trading_markets", "derivatives_products", "data_infrastructure"]}, {"content": "put together a timeline of the most major market events like a market watch timeline for 2025 - recap of market stresses and events highlighting key events from q1 2025 to current and be sure to include a header name or something along with a bullet style or very very brief note that would go on a timeline type thing for this and be sure to be accurate and excellent and up to date", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "format_specified"], "perspectives": {"functional": ["scenario_analysis", "pricing_valuation", "reporting_communication", "market_research"], "technical": ["visualization_reporting"], "design_pattern": ["monitor_alerter"], "workflow": ["data_acquisition"], "asset_class": ["rates_ir", "credit"]}, "finance_subcategories": ["trading_markets", "derivatives_products", "market_intelligence"]}, {"content": "give me a full detailed idea intuitively and mathematically and trading wise and quant wise all rolled together in a perfect actual example to understand like rates bear flatterner and bull steepener stress scenarios and versus that of ccar firm sa", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "examples_provided"], "perspectives": {"functional": ["scenario_analysis", "regulatory_capital"], "technical": ["general"], "design_pattern": ["explainer_educator"], "workflow": ["data_acquisition"], "asset_class": ["rates_ir"]}, "finance_subcategories": ["stress_testing", "regulatory_compliance", "trading_markets"]}, {"content": "Act as a Senior Real Estate Analyst and Buyer\u2019s Agent specializing in Central Nassau County, Long Island.\n**Objective:**\nConduct a real-time market search and financial analysis for single-family homes in the following towns: **Hicksville, Mineola, Carle Place, and Westbury (specifically the Salisbury/residential sections).**\n**Search Criteria:**\n* **Price Range:** $800,000 \u2013 $1,000,000.\n* **Property Type:** Single Family Home (min 3 beds, 2 baths preferred).\n* **Timeframe:** Current Active List", "quality_level": "excellent", "quality_score": 5, "quality_factors": ["has_context", "specific_request", "examples_provided", "format_specified", "role_assigned"], "perspectives": {"functional": ["pricing_valuation", "reporting_communication"], "technical": ["visualization_reporting", "api_integration"], "design_pattern": ["report_generator", "calculator_engine", "analyzer_insights"], "workflow": ["calculation_core", "output_delivery"], "asset_class": ["rates_ir", "credit"]}, "finance_subcategories": ["trading_markets", "derivatives_products", "asset_classes"]}, {"content": "im so confused. how in the world are stress scenarios really designed. like whats beta, whats correlation, what about drivers, risk factors. like make it all relate. like what makes most sense for our stress scenario designer tool we are putting together. like historical betas or correlations of drivers or asset class risk factors or more granular or not historically correlated because idiosyncratic. like im so confused at this stage of how it all relates. like is it multiple different ways or l", "quality_level": "good", "quality_score": 3, "quality_factors": ["has_context", "examples_provided", "role_assigned"], "perspectives": {"functional": ["scenario_analysis"], "technical": ["statistical_analysis"], "design_pattern": ["framework_architecture", "etl_pipeline", "analyzer_insights"], "workflow": ["data_acquisition", "validation_qa"], "asset_class": ["credit", "cross_asset"]}, "finance_subcategories": ["risk_factors"]}, {"content": "give me a perfect executive summary of the 2026 report by goldman sachs and jpm and whover else top institutions and everything and be sure to give all the best ideas and critical things to know that would be the best for a senior cib markets executive and also top traders and risk mgmt as well. be sure to be perfect and accurate and comprehensive yet intuitive and excellent", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "role_assigned"], "perspectives": {"functional": ["reporting_communication", "risk_monitoring", "pricing_valuation", "market_research"], "technical": ["visualization_reporting"], "design_pattern": ["report_generator"], "workflow": ["output_delivery"], "asset_class": ["rates_ir", "commodities"]}, "finance_subcategories": ["trading_markets", "market_intelligence", "data_infrastructure"]}, {"content": "Put together a prompt for the world best strategist or whoever necessary to put together a research doc and full details for: ok so imagine front office risk analytics and market risk analytics used to be split and now they are merging and there\u2019s model stuff as well in that, put together a prompt that could find the actual use or functions that are critical to a large CIB like Wells Fargo or something that would still need those market risk analytics folks and where those functions would serve.", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "role_assigned"], "perspectives": {"functional": ["pricing_valuation", "market_research", "reporting_communication"], "technical": ["quantitative_modeling"], "design_pattern": ["analyzer_insights"], "workflow": ["data_acquisition", "calculation_core"], "asset_class": ["rates_ir"]}, "finance_subcategories": ["regulatory_compliance", "trading_markets", "derivatives_products"]}, {"content": "**TO:** World-class organizational strategist with deep expertise in investment banking operating models, regulatory frameworks, quantitative risk management, and front-office/middle-office integration\n\n**OBJECTIVE:** Produce a comprehensive research document with executive summary that definitively maps, justifies, and strategically positions the critical functions performed by Market Risk Analytics and Front Office Risk Analytics quants within a large Corporate & Investment Banking (CIB) divis", "quality_level": "excellent", "quality_score": 5, "quality_factors": ["has_context", "specific_request", "constraints_defined", "examples_provided", "format_specified"], "perspectives": {"functional": ["risk_monitoring", "regulatory_capital", "pricing_valuation", "scenario_analysis", "reporting_communication", "data_analytics", "market_research"], "technical": ["api_integration", "quantitative_modeling", "visualization_reporting", "data_engineering", "financial_mathematics"], "design_pattern": ["framework_architecture", "report_generator", "analyzer_insights", "explainer_educator"], "workflow": ["decision_support", "calculation_core", "validation_qa", "output_delivery"], "asset_class": ["credit"]}, "finance_subcategories": ["regulatory_compliance", "trading_markets", "quant_modeling"]}, {"content": "how does risk sensitivity values become a stress pnl value for a scenario like do we sum them by asset class or across all positions but like the final pnl how is it determined. walk me through an actual example for what we would exepect our ai severe scneario to look like and also a side by side of how it should compare to bau severe rates rally scenario, we are expected ir and fx will stay same as rates rally and eq cp co will change as we';ve been discussing. give me that intotlaity and perfe", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "examples_provided"], "perspectives": {"functional": ["scenario_analysis"], "technical": ["general"], "design_pattern": ["general"], "workflow": ["general"], "asset_class": ["rates_ir", "fx_currency"]}, "finance_subcategories": ["var_risk_metrics", "trading_markets", "greeks_sensitivities"]}, {"content": "give me a standalone script that i can run to see the monte carlos being built out for the gold futures thing so that i can just and it will do the analysis and i can see the visuals and table and wahtever else and make sure accurate and perfect", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "format_specified"], "perspectives": {"functional": ["general"], "technical": ["quantitative_modeling", "data_engineering"], "design_pattern": ["general"], "workflow": ["calculation_core"], "asset_class": ["rates_ir", "commodities"]}, "finance_subcategories": ["derivatives_products", "quant_modeling", "data_infrastructure"]}, {"content": "give me the best possible ways to make money from trading gold futures right now as gold seems to be moving and waht is expected i want all the resrarch adn eveyring possible to hav a full analyusis and pnl plan to make as much as possible for a 1m futures portfolio i have cash ready right now so get me to a place where we can at least get to 10 m if not more and with risk mgmt in place and ensure that of course we are doing what the best in the wortld would do. give mne that comprehesivneily in", "quality_level": "good", "quality_score": 2, "quality_factors": ["has_context", "constraints_defined"], "perspectives": {"functional": ["general"], "technical": ["general"], "design_pattern": ["general"], "workflow": ["data_acquisition"], "asset_class": ["rates_ir", "credit", "commodities", "cross_asset"]}, "finance_subcategories": ["var_risk_metrics", "trading_markets", "derivatives_products"]}], "templates": [{"id": "stress-framework", "name": "Stress Testing Framework", "perspectives": {"functional": "scenario_analysis", "technical": "quantitative_modeling", "design_pattern": "framework_architecture", "workflow": "calculation_core"}, "description": "Design a comprehensive stress testing/scenario analysis framework", "template": "You are a {ROLE} at a {INSTITUTION_TYPE}. Design a {FRAMEWORK_TYPE} for {PURPOSE}.\n\nScope:\n- Asset classes: {ASSET_CLASSES}\n- Risk factors: {RISK_FACTOR_COUNT} drivers across {DESK_COUNT} desks\n- Scenario types: {SCENARIO_TYPES}\n\nRequirements:\n1. {REQUIREMENT_1}\n2. {REQUIREMENT_2}\n3. {REQUIREMENT_3}\n4. Output format: {OUTPUT_FORMAT}\n\nDeliverables:\n- {DELIVERABLE_1}\n- {DELIVERABLE_2}\n- {DELIVERABLE_3}\n\nInclude: {INCLUDE_ITEMS}", "slots": [{"id": "ROLE", "label": "Role", "default": "senior stress testing quant", "options": ["senior stress testing quant", "market risk SME", "risk methodology lead", "quantitative analyst"]}, {"id": "INSTITUTION_TYPE", "label": "Institution", "default": "G-SIB", "options": ["G-SIB", "regional bank", "hedge fund", "asset manager"]}, {"id": "FRAMEWORK_TYPE", "label": "Framework Type", "default": "hierarchical shock propagation framework", "options": ["hierarchical shock propagation framework", "scenario generation engine", "reverse stress testing methodology", "sensitivity analysis framework"]}, {"id": "PURPOSE", "label": "Purpose", "default": "macro stress scenarios", "options": ["macro stress scenarios", "CCAR compliance", "internal risk management", "regulatory stress testing"]}, {"id": "ASSET_CLASSES", "label": "Asset Classes", "default": "rates, FX, equity, credit", "type": "text"}, {"id": "RISK_FACTOR_COUNT", "label": "Risk Factor Count", "default": "300,000", "type": "text"}, {"id": "DESK_COUNT", "label": "Desk Count", "default": "19", "type": "text"}, {"id": "SCENARIO_TYPES", "label": "Scenario Types", "default": "historical replay, hypothetical, reverse stress", "type": "text"}, {"id": "REQUIREMENT_1", "label": "Requirement 1", "default": "Support 4-level hierarchy: macro \u2192 asset class \u2192 curve \u2192 granular", "type": "text"}, {"id": "REQUIREMENT_2", "label": "Requirement 2", "default": "Maintain correlation consistency across related factors", "type": "text"}, {"id": "REQUIREMENT_3", "label": "Requirement 3", "default": "Configurable severity levels (mild/moderate/severe/extreme)", "type": "text"}, {"id": "OUTPUT_FORMAT", "label": "Output Format", "default": "JSON with factor paths and instantaneous shocks", "options": ["JSON with factor paths", "CSV with shock magnitudes", "Excel workbook", "Database-ready format"]}, {"id": "DELIVERABLE_1", "label": "Deliverable 1", "default": "Architecture diagram", "type": "text"}, {"id": "DELIVERABLE_2", "label": "Deliverable 2", "default": "Python implementation", "type": "text"}, {"id": "DELIVERABLE_3", "label": "Deliverable 3", "default": "Methodology documentation (max 5 pages)", "type": "text"}, {"id": "INCLUDE_ITEMS", "label": "Include", "default": "example scenario propagating a 100bp Fed hike", "type": "text"}]}, {"id": "var-explainer", "name": "Risk Metric Explainer", "perspectives": {"functional": "risk_measurement", "technical": "statistical_analysis", "design_pattern": "explainer_educator", "workflow": "decision_support"}, "description": "Get intuitive explanations of risk metrics and concepts", "template": "You are a {ROLE}. Explain {CONCEPT} for {AUDIENCE} who understands {BASELINE_KNOWLEDGE}.\n\nCover:\n1. {ASPECT_1}\n2. {ASPECT_2}\n3. {ASPECT_3}\n4. {ASPECT_4}\n\nUse a concrete numerical example with:\n- {EXAMPLE_CONTEXT}\n\nContext: {CONFIDENCE_LEVEL} confidence, {TIME_HORIZON} horizon\nLength: {LENGTH_CONSTRAINT}", "slots": [{"id": "ROLE", "label": "Expert Role", "default": "senior market risk quant at a G-SIB", "options": ["senior market risk quant at a G-SIB", "risk methodology lead", "chief risk officer", "quantitative researcher"]}, {"id": "CONCEPT", "label": "Concept to Explain", "default": "VaR vs Expected Shortfall", "options": ["VaR vs Expected Shortfall", "parametric vs historical VaR", "coherent risk measures", "backtesting methodology", "liquidity-adjusted VaR"]}, {"id": "AUDIENCE", "label": "Target Audience", "default": "a risk analyst", "options": ["a risk analyst", "senior management", "regulators", "trading desk heads", "new graduate hire"]}, {"id": "BASELINE_KNOWLEDGE", "label": "Baseline Knowledge", "default": "probability distributions but not tail risk measures", "type": "text"}, {"id": "ASPECT_1", "label": "Aspect 1", "default": "Mathematical intuition (conceptual, not proofs)", "type": "text"}, {"id": "ASPECT_2", "label": "Aspect 2", "default": "Why this matters for trading desk operations", "type": "text"}, {"id": "ASPECT_3", "label": "Aspect 3", "default": "Common misinterpretations and pitfalls", "type": "text"}, {"id": "ASPECT_4", "label": "Aspect 4", "default": "Connection to regulatory capital requirements", "type": "text"}, {"id": "EXAMPLE_CONTEXT", "label": "Example Context", "default": "a rates trading desk managing swap inventory", "type": "text"}, {"id": "CONFIDENCE_LEVEL", "label": "Confidence Level", "default": "99%", "options": ["95%", "97.5%", "99%", "99.5%"]}, {"id": "TIME_HORIZON", "label": "Time Horizon", "default": "10-day", "options": ["1-day", "10-day", "1-month", "1-year"]}, {"id": "LENGTH_CONSTRAINT", "label": "Length", "default": "Under 500 words with clear section headers", "options": ["Under 300 words", "Under 500 words with clear section headers", "1-2 pages detailed", "Comprehensive deep-dive"]}]}, {"id": "data-pipeline", "name": "Data Pipeline / Automation", "perspectives": {"functional": "data_analytics", "technical": "data_engineering", "design_pattern": "etl_pipeline", "workflow": "data_acquisition"}, "description": "Build automated data pipelines, reports, and analytics tools", "template": "Create a {TOOL_TYPE} that {PURPOSE}.\n\nData Flow:\n- Sources: {DATA_SOURCES}\n- Transformations: {TRANSFORMATIONS}\n- Destination: {DESTINATION}\n- Frequency: {FREQUENCY}\n\nTechnical Specs:\n- Language: {LANGUAGE}\n- Environment: {ENVIRONMENT}\n- Dependencies: {DEPENDENCIES}\n\nRequirements:\n1. {REQUIREMENT_1}\n2. {REQUIREMENT_2}\n3. {REQUIREMENT_3}\n\nError Handling:\n- {ERROR_HANDLING}\n\nOutput: {OUTPUT_FORMAT}\nInclude: {INCLUDE_ITEMS}", "slots": [{"id": "TOOL_TYPE", "label": "Tool Type", "default": "Python automation script", "options": ["Python automation script", "SQL stored procedure", "Excel VBA macro", "ETL pipeline", "real-time data feed"]}, {"id": "PURPOSE", "label": "Purpose", "default": "pulls market data and generates a daily risk report", "type": "text"}, {"id": "DATA_SOURCES", "label": "Data Sources", "default": "Bloomberg API, internal risk database, Reuters", "type": "text"}, {"id": "TRANSFORMATIONS", "label": "Transformations", "default": "aggregate by desk, calculate daily changes, flag breaches", "type": "text"}, {"id": "DESTINATION", "label": "Destination", "default": "Excel workbook + email distribution", "options": ["Excel workbook", "Database table", "Dashboard", "Email distribution", "SharePoint"]}, {"id": "FREQUENCY", "label": "Frequency", "default": "Daily at 7am", "options": ["Real-time", "Intraday (hourly)", "Daily at 7am", "Weekly", "On-demand"]}, {"id": "LANGUAGE", "label": "Language", "default": "Python 3.9+", "options": ["Python 3.9+", "SQL Server", "VBA", "R", "Scala"]}, {"id": "ENVIRONMENT", "label": "Environment", "default": "Windows server with scheduled task", "type": "text"}, {"id": "DEPENDENCIES", "label": "Dependencies", "default": "pandas, numpy, openpyxl, pyodbc", "type": "text"}, {"id": "REQUIREMENT_1", "label": "Requirement 1", "default": "Handle missing data and holidays gracefully", "type": "text"}, {"id": "REQUIREMENT_2", "label": "Requirement 2", "default": "Log all operations with timestamps", "type": "text"}, {"id": "REQUIREMENT_3", "label": "Requirement 3", "default": "Alert on failures via email", "type": "text"}, {"id": "ERROR_HANDLING", "label": "Error Handling", "default": "Retry 3 times, then alert and continue with available data", "type": "text"}, {"id": "OUTPUT_FORMAT", "label": "Output Format", "default": "Formatted Excel with conditional formatting", "type": "text"}, {"id": "INCLUDE_ITEMS", "label": "Include", "default": "Full code with comments, deployment instructions, sample output", "type": "text"}]}, {"id": "market-brief", "name": "Market Intelligence Brief", "perspectives": {"functional": "market_research", "technical": "visualization_reporting", "design_pattern": "report_generator", "workflow": "output_delivery"}, "description": "Generate market commentary, briefings, and outlook reports", "template": "Create a {BRIEF_TYPE} for {DATE_PERIOD}:\n\nCoverage:\n- Macro: {MACRO_TOPICS}\n- Asset Classes: {ASSET_CLASS_FOCUS}\n- Geographic: {GEOGRAPHIC_FOCUS}\n\nStructure:\n1. {SECTION_1}\n2. {SECTION_2}\n3. {SECTION_3}\n4. {SECTION_4}\n5. {SECTION_5}\n\nAudience: {AUDIENCE}\nTone: {TONE}\nLength: {LENGTH}\n\nSpecial Focus: {SPECIAL_FOCUS}", "slots": [{"id": "BRIEF_TYPE", "label": "Brief Type", "default": "daily market intelligence brief", "options": ["daily market intelligence brief", "weekly market recap", "monthly outlook", "event-driven analysis", "risk calendar"]}, {"id": "DATE_PERIOD", "label": "Date/Period", "default": "today", "type": "text"}, {"id": "MACRO_TOPICS", "label": "Macro Topics", "default": "Central bank communications, economic data releases, geopolitical developments", "type": "text"}, {"id": "ASSET_CLASS_FOCUS", "label": "Asset Classes", "default": "Rates, FX, Equities, Credit", "type": "text"}, {"id": "GEOGRAPHIC_FOCUS", "label": "Geographic Focus", "default": "US, Europe, Asia", "options": ["US focus", "Global", "US, Europe, Asia", "EM focus", "G10 only"]}, {"id": "SECTION_1", "label": "Section 1", "default": "Executive Summary (5 bullets, <100 words)", "type": "text"}, {"id": "SECTION_2", "label": "Section 2", "default": "Key Moves Table (asset, move, context)", "type": "text"}, {"id": "SECTION_3", "label": "Section 3", "default": "Detailed Commentary by Asset Class", "type": "text"}, {"id": "SECTION_4", "label": "Section 4", "default": "Risk Calendar: Next 5 trading days", "type": "text"}, {"id": "SECTION_5", "label": "Section 5", "default": "Positioning Implications for our desks", "type": "text"}, {"id": "AUDIENCE", "label": "Audience", "default": "Trading desk heads and senior risk management", "options": ["Trading desk heads", "Senior management", "Risk committee", "Full trading floor", "External clients"]}, {"id": "TONE", "label": "Tone", "default": "Actionable, specific levels and moves, not academic", "options": ["Actionable, specific levels", "Executive summary style", "Technical and detailed", "Conversational"]}, {"id": "LENGTH", "label": "Length", "default": "500-700 words", "options": ["<300 words bullet summary", "500-700 words", "1-2 pages detailed", "Comprehensive report"]}, {"id": "SPECIAL_FOCUS", "label": "Special Focus", "default": "Fed meeting implications", "type": "text"}]}, {"id": "regulatory-doc", "name": "Regulatory Document", "perspectives": {"functional": "regulatory_capital", "technical": "visualization_reporting", "design_pattern": "report_generator", "workflow": "output_delivery"}, "description": "Draft regulatory submissions, methodology docs, and compliance materials", "template": "Draft the {DOCUMENT_SECTION} for {SUBMISSION_TYPE}:\n\nRequirement: {RULE_REFERENCE}\nReporting Period: {PERIOD}\nScope: {SCOPE}\n\nContent Requirements:\n1. {CONTENT_1}\n2. {CONTENT_2}\n3. {CONTENT_3}\n\nKey Changes from Prior Period:\n- {CHANGE_1}\n- {CHANGE_2}\n\nNarrative Themes:\n- {THEME_1}\n- {THEME_2}\n\nAudience: {AUDIENCE}\nTone: {TONE}\nFormat: {FORMAT}\n\nInclude: {INCLUDE}\nAvoid: {AVOID}", "slots": [{"id": "DOCUMENT_SECTION", "label": "Document Section", "default": "methodology narrative", "options": ["methodology narrative", "executive summary", "quantitative analysis section", "model risk discussion", "limitations and caveats"]}, {"id": "SUBMISSION_TYPE", "label": "Submission Type", "default": "CCAR", "options": ["CCAR", "Basel Pillar 3", "FRTB IMA application", "Model validation report", "Internal audit response"]}, {"id": "RULE_REFERENCE", "label": "Rule Reference", "default": "FR Y-14A Schedule H", "type": "text"}, {"id": "PERIOD", "label": "Reporting Period", "default": "Q4 2025", "type": "text"}, {"id": "SCOPE", "label": "Scope", "default": "All CIB trading desks across US legal entities", "type": "text"}, {"id": "CONTENT_1", "label": "Content 1", "default": "Methodology overview and key assumptions", "type": "text"}, {"id": "CONTENT_2", "label": "Content 2", "default": "Data sources and quality controls", "type": "text"}, {"id": "CONTENT_3", "label": "Content 3", "default": "Validation results and model limitations", "type": "text"}, {"id": "CHANGE_1", "label": "Change 1", "default": "Enhanced scenario severity calibration", "type": "text"}, {"id": "CHANGE_2", "label": "Change 2", "default": "Expanded risk factor coverage", "type": "text"}, {"id": "THEME_1", "label": "Theme 1", "default": "Conservative assumptions throughout", "type": "text"}, {"id": "THEME_2", "label": "Theme 2", "default": "Strong governance and controls", "type": "text"}, {"id": "AUDIENCE", "label": "Audience", "default": "Federal Reserve examiners", "options": ["Federal Reserve examiners", "OCC", "Internal audit", "Model risk management", "Board risk committee"]}, {"id": "TONE", "label": "Tone", "default": "Formal, precise, defensible", "type": "text"}, {"id": "FORMAT", "label": "Format", "default": "Regulatory template structure", "type": "text"}, {"id": "INCLUDE", "label": "Include", "default": "Appropriate caveats, cross-references to supporting exhibits", "type": "text"}, {"id": "AVOID", "label": "Avoid", "default": "Speculation, forward-looking statements without basis", "type": "text"}]}, {"id": "derivative-pricer", "name": "Derivative Pricer/Calculator", "perspectives": {"functional": "pricing_valuation", "technical": "financial_mathematics", "design_pattern": "calculator_engine", "workflow": "calculation_core"}, "description": "Build pricing models and calculators for derivatives", "template": "Build a pricer for {PRODUCT_TYPE}:\n\nProduct Specifications:\n- Underlying: {UNDERLYING}\n- Features: {PRODUCT_FEATURES}\n- Model: {PRICING_MODEL}\n\nInputs:\n- Market data: {MARKET_DATA_INPUTS}\n- Trade terms: {TRADE_TERMS}\n\nOutputs:\n- {OUTPUT_1}\n- {OUTPUT_2}\n- {OUTPUT_3}\n\nGreeks Calculation:\n- Method: {GREEKS_METHOD}\n- Greeks required: {GREEKS_LIST}\n\nRequirements:\n1. {REQUIREMENT_1}\n2. {REQUIREMENT_2}\n3. {REQUIREMENT_3}\n\nValidation: {VALIDATION}\nPerformance: {PERFORMANCE}\n\nInclude: {INCLUDE}", "slots": [{"id": "PRODUCT_TYPE", "label": "Product Type", "default": "European vanilla options", "options": ["European vanilla options", "American options", "barrier options", "interest rate swaps", "swaptions", "exotic structures"]}, {"id": "UNDERLYING", "label": "Underlying", "default": "equity index", "options": ["equity index", "single stock", "FX pair", "interest rate", "commodity", "credit"]}, {"id": "PRODUCT_FEATURES", "label": "Product Features", "default": "call/put, strike, expiry, notional", "type": "text"}, {"id": "PRICING_MODEL", "label": "Pricing Model", "default": "Black-Scholes", "options": ["Black-Scholes", "Local volatility", "Stochastic volatility (Heston)", "SABR", "Monte Carlo", "Tree-based"]}, {"id": "MARKET_DATA_INPUTS", "label": "Market Data", "default": "spot, vol surface, rates curve, dividends", "type": "text"}, {"id": "TRADE_TERMS", "label": "Trade Terms", "default": "strike, expiry, notional, direction", "type": "text"}, {"id": "OUTPUT_1", "label": "Output 1", "default": "Price (premium)", "type": "text"}, {"id": "OUTPUT_2", "label": "Output 2", "default": "Greeks (delta, gamma, vega, theta, rho)", "type": "text"}, {"id": "OUTPUT_3", "label": "Output 3", "default": "P&L scenarios", "type": "text"}, {"id": "GREEKS_METHOD", "label": "Greeks Method", "default": "Analytical where available, bump-and-reprice otherwise", "options": ["Analytical formulas", "Bump-and-reprice", "AAD (Adjoint)", "Mixed approach"]}, {"id": "GREEKS_LIST", "label": "Greeks List", "default": "delta, gamma, vega, theta, rho", "type": "text"}, {"id": "REQUIREMENT_1", "label": "Requirement 1", "default": "Handle edge cases (deep ITM/OTM, near expiry)", "type": "text"}, {"id": "REQUIREMENT_2", "label": "Requirement 2", "default": "Support batch pricing for portfolios", "type": "text"}, {"id": "REQUIREMENT_3", "label": "Requirement 3", "default": "Clear documentation of all assumptions", "type": "text"}, {"id": "VALIDATION", "label": "Validation", "default": "Compare to Bloomberg OVME", "type": "text"}, {"id": "PERFORMANCE", "label": "Performance", "default": "1000 prices per second", "type": "text"}, {"id": "INCLUDE", "label": "Include", "default": "Unit tests, example trades, documentation", "type": "text"}]}, {"id": "risk-analysis", "name": "Risk Analysis / Assessment", "perspectives": {"functional": "risk_monitoring", "technical": "statistical_analysis", "design_pattern": "analyzer_insights", "workflow": "validation_qa"}, "description": "Analyze risk data, identify patterns, and generate insights", "template": "Analyze {DATA_TYPE} for {SCOPE}:\n\nData Structure:\n{DATA_STRUCTURE}\n\nAnalysis Required:\n1. {ANALYSIS_1}\n2. {ANALYSIS_2}\n3. {ANALYSIS_3}\n4. {ANALYSIS_4}\n\nIdentify:\n- {IDENTIFY_1}\n- {IDENTIFY_2}\n- {IDENTIFY_3}\n\nComparison: {COMPARISON}\n\nOutput Format:\n- {OUTPUT_FORMAT}\n\nFlag: {FLAG_CONDITIONS}\nRecommend: {RECOMMENDATIONS}", "slots": [{"id": "DATA_TYPE", "label": "Data Type", "default": "VaR and P&L data", "options": ["VaR and P&L data", "stress test results", "position data", "limit utilization", "factor exposures", "Greeks report"]}, {"id": "SCOPE", "label": "Scope", "default": "all CIB trading desks", "type": "text"}, {"id": "DATA_STRUCTURE", "label": "Data Structure", "default": "Columns: desk, book, risk_measure, value, prior_value, limit, date", "type": "textarea"}, {"id": "ANALYSIS_1", "label": "Analysis 1", "default": "Top 10 contributors by absolute risk with drivers", "type": "text"}, {"id": "ANALYSIS_2", "label": "Analysis 2", "default": "Day-over-day changes and trend analysis", "type": "text"}, {"id": "ANALYSIS_3", "label": "Analysis 3", "default": "Limit utilization and headroom", "type": "text"}, {"id": "ANALYSIS_4", "label": "Analysis 4", "default": "Data quality and anomaly detection", "type": "text"}, {"id": "IDENTIFY_1", "label": "Identify 1", "default": "Concentration risks (single factors > 20% of total)", "type": "text"}, {"id": "IDENTIFY_2", "label": "Identify 2", "default": "Unusual moves vs historical patterns", "type": "text"}, {"id": "IDENTIFY_3", "label": "Identify 3", "default": "Potential data issues or stale prices", "type": "text"}, {"id": "COMPARISON", "label": "Comparison", "default": "vs prior day, prior week, prior month", "type": "text"}, {"id": "OUTPUT_FORMAT", "label": "Output Format", "default": "Executive summary (5 bullets) + detailed findings table", "options": ["Executive summary + table", "Dashboard format", "Detailed report", "Email-ready bullets"]}, {"id": "FLAG_CONDITIONS", "label": "Flag Conditions", "default": "Any risk > 80% of limit or > 25% daily change", "type": "text"}, {"id": "RECOMMENDATIONS", "label": "Recommendations", "default": "Specific follow-up questions for desk heads", "type": "text"}]}, {"id": "greeks-sensitivity", "name": "Greeks & Sensitivity Analysis", "perspectives": {"functional": "hedging_optimization", "technical": "financial_mathematics", "design_pattern": "calculator_engine", "workflow": "calculation_core"}, "description": "Calculate, explain, or analyze Greeks and sensitivities", "template": "{ACTION} {GREEK_SENSITIVITY} for {PORTFOLIO_TYPE}:\n\n{CONTEXT_BLOCK}\n\n{SPECIFIC_REQUEST}\n\nCover:\n1. {POINT_1}\n2. {POINT_2}\n3. {POINT_3}\n4. {POINT_4}\n\n{ADDITIONAL_REQUIREMENTS}\n\nOutput: {OUTPUT}\nInclude: {INCLUDE}", "slots": [{"id": "ACTION", "label": "Action", "default": "Explain", "options": ["Explain", "Calculate", "Analyze", "Build a calculator for"]}, {"id": "GREEK_SENSITIVITY", "label": "Greek/Sensitivity", "default": "gamma exposure and hedging implications", "options": ["delta hedging strategy", "gamma exposure and hedging", "vega risk across maturities", "DV01 and duration", "cross-gamma risks", "theta decay patterns"]}, {"id": "PORTFOLIO_TYPE", "label": "Portfolio Type", "default": "an equity derivatives book", "options": ["an equity derivatives book", "a rates swaps portfolio", "an FX options book", "a cross-asset portfolio", "a structured products desk"]}, {"id": "CONTEXT_BLOCK", "label": "Context", "default": "Assuming knowledge of: basic option pricing and Black-Scholes Greeks", "type": "textarea"}, {"id": "SPECIFIC_REQUEST", "label": "Specific Request", "default": "Focus on practical hedging decisions for a trading desk.", "type": "text"}, {"id": "POINT_1", "label": "Point 1", "default": "Definition and intuition (what it measures, why traders care)", "type": "text"}, {"id": "POINT_2", "label": "Point 2", "default": "Behavior across moneyness/time/vol levels", "type": "text"}, {"id": "POINT_3", "label": "Point 3", "default": "Hedging strategies and trade-offs", "type": "text"}, {"id": "POINT_4", "label": "Point 4", "default": "Aggregation and portfolio-level considerations", "type": "text"}, {"id": "ADDITIONAL_REQUIREMENTS", "label": "Additional", "default": "Use a concrete example with specific numbers.", "type": "text"}, {"id": "OUTPUT", "label": "Output", "default": "Clear explanation with worked example", "type": "text"}, {"id": "INCLUDE", "label": "Include", "default": "P&L impact scenarios for typical market moves", "type": "text"}]}]};
+        
+        // Tab switching
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // Perspective colors
+        const perspectiveColors = {
+            functional: '#22d3ee',
+            technical: '#a78bfa',
+            design_pattern: '#f472b6',
+            workflow: '#4ade80',
+            asset_class: '#fbbf24'
+        };
+        
+        const perspectiveIcons = {
+            functional: '⚙️',
+            technical: '🔬',
+            design_pattern: '🏗️',
+            workflow: '🔄',
+            asset_class: '📈'
+        };
+        
+        // Build perspective grid
+        const perspectiveGrid = document.getElementById('perspectiveGrid');
+        Object.entries(data.perspectives).forEach(([perspective, categories]) => {
+            const card = document.createElement('div');
+            card.className = 'perspective-card';
+            card.style.borderLeft = `4px solid ${perspectiveColors[perspective]}`;
+            
+            const maxCount = Math.max(...Object.values(categories));
+            const sortedCats = Object.entries(categories).sort((a,b) => b[1] - a[1]).slice(0, 8);
+            
+            card.innerHTML = `
+                <h3><span class="icon">${perspectiveIcons[perspective]}</span> ${perspective.replace(/_/g, ' ').toUpperCase()}</h3>
+                ${sortedCats.map(([cat, count]) => `
+                    <div class="category-bar">
+                        <span class="cat-name">${cat.replace(/_/g, ' ')}</span>
+                        <span class="cat-count">${count}</span>
+                        <div class="cat-bar-bg">
+                            <div class="cat-bar-fill" style="width: ${(count/maxCount)*100}%; background: ${perspectiveColors[perspective]};"></div>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+            perspectiveGrid.appendChild(card);
+        });
+        
+        // Build template list
+        const templateList = document.getElementById('templateList');
+        data.templates.forEach((template, idx) => {
+            const card = document.createElement('div');
+            card.className = 'template-selector';
+            card.onclick = () => selectTemplate(idx);
+            card.id = 'template-' + idx;
+            
+            card.innerHTML = `
+                <h4>${template.name}</h4>
+                <p>${template.description}</p>
+                <div class="template-tags">
+                    <span class="template-tag tag-functional">${template.perspectives.functional}</span>
+                    <span class="template-tag tag-technical">${template.perspectives.technical}</span>
+                    <span class="template-tag tag-pattern">${template.perspectives.design_pattern}</span>
+                </div>
+            `;
+            templateList.appendChild(card);
+        });
+        
+        let currentTemplate = null;
+        let slotValues = {};
+        
+        function selectTemplate(idx) {
+            document.querySelectorAll('.template-selector').forEach(el => el.classList.remove('selected'));
+            document.getElementById('template-' + idx).classList.add('selected');
+            
+            currentTemplate = data.templates[idx];
+            document.getElementById('templateEditor').classList.add('active');
+            document.getElementById('editorTitle').textContent = currentTemplate.name;
+            
+            // Build slots form
+            const slotsGrid = document.getElementById('slotsGrid');
+            slotsGrid.innerHTML = '';
+            slotValues = {};
+            
+            currentTemplate.slots.forEach(slot => {
+                slotValues[slot.id] = slot.default;
+                
+                const field = document.createElement('div');
+                field.className = 'slot-field';
+                
+                let input;
+                if (slot.options) {
+                    input = `<select id="slot-${slot.id}" onchange="updateSlot('${slot.id}', this.value)">
+                        ${slot.options.map(opt => `<option value="${opt}" ${opt === slot.default ? 'selected' : ''}>${opt}</option>`).join('')}
+                    </select>`;
+                } else if (slot.type === 'textarea') {
+                    input = `<textarea id="slot-${slot.id}" oninput="updateSlot('${slot.id}', this.value)">${slot.default}</textarea>`;
+                } else {
+                    input = `<input type="text" id="slot-${slot.id}" value="${slot.default}" oninput="updateSlot('${slot.id}', this.value)">`;
+                }
+                
+                field.innerHTML = `<label>${slot.label}</label>${input}`;
+                slotsGrid.appendChild(field);
+            });
+            
+            updatePreview();
+        }
+        
+        function updateSlot(id, value) {
+            slotValues[id] = value;
+            updatePreview();
+        }
+        
+        function updatePreview() {
+            if (!currentTemplate) return;
+            
+            let preview = currentTemplate.template;
+            Object.entries(slotValues).forEach(([id, value]) => {
+                preview = preview.replace(new RegExp(`\{${id}\}`, 'g'), `<span class="slot-value">${value}</span>`);
+            });
+            
+            document.getElementById('previewContent').innerHTML = preview;
+        }
+        
+        function copyPrompt() {
+            if (!currentTemplate) return;
+            
+            let text = currentTemplate.template;
+            Object.entries(slotValues).forEach(([id, value]) => {
+                text = text.replace(new RegExp(`\{${id}\}`, 'g'), value);
+            });
+            
+            navigator.clipboard.writeText(text);
+            const btn = document.getElementById('copyBtn');
+            btn.textContent = '✓ Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.textContent = 'Copy to Clipboard';
+                btn.classList.remove('copied');
+            }, 2000);
+        }
+        
+        // Populate filters
+        const perspectives = ['functional', 'technical', 'design_pattern', 'workflow'];
+        const filterIds = ['filterFunctional', 'filterTechnical', 'filterPattern', 'filterWorkflow'];
+        
+        perspectives.forEach((p, i) => {
+            const select = document.getElementById(filterIds[i]);
+            Object.keys(data.perspectives[p]).sort((a,b) => data.perspectives[p][b] - data.perspectives[p][a]).forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat.replace(/_/g, ' ');
+                select.appendChild(opt);
+            });
+        });
+        
+        // Prompt pagination
+        let currentPage = 1;
+        const pageSize = 10;
+        let filteredPrompts = [...data.prompts];
+        
+        function filterPrompts() {
+            const funcFilter = document.getElementById('filterFunctional').value;
+            const techFilter = document.getElementById('filterTechnical').value;
+            const patternFilter = document.getElementById('filterPattern').value;
+            const workflowFilter = document.getElementById('filterWorkflow').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            
+            filteredPrompts = data.prompts.filter(p => {
+                if (funcFilter && !p.perspectives.functional.includes(funcFilter)) return false;
+                if (techFilter && !p.perspectives.technical.includes(techFilter)) return false;
+                if (patternFilter && !p.perspectives.design_pattern.includes(patternFilter)) return false;
+                if (workflowFilter && !p.perspectives.workflow.includes(workflowFilter)) return false;
+                if (search && !p.content.toLowerCase().includes(search)) return false;
+                return true;
+            });
+            
+            currentPage = 1;
+            renderPrompts();
+        }
+        
+        function renderPrompts() {
+            const grid = document.getElementById('promptGrid');
+            const start = (currentPage - 1) * pageSize;
+            const pagePrompts = filteredPrompts.slice(start, start + pageSize);
+            
+            grid.innerHTML = pagePrompts.map(p => `
+                <div class="prompt-card">
+                    <div class="prompt-text">${escapeHtml(p.content)}</div>
+                    <div class="prompt-meta">
+                        <div class="meta-section">
+                            <span class="meta-label">Func:</span>
+                            ${p.perspectives.functional.slice(0,2).map(c => `<span class="meta-tag functional">${c.replace(/_/g, ' ')}</span>`).join('')}
+                        </div>
+                        <div class="meta-section">
+                            <span class="meta-label">Tech:</span>
+                            ${p.perspectives.technical.slice(0,1).map(c => `<span class="meta-tag technical">${c.replace(/_/g, ' ')}</span>`).join('')}
+                        </div>
+                        <div class="meta-section">
+                            <span class="meta-label">Pattern:</span>
+                            ${p.perspectives.design_pattern.slice(0,1).map(c => `<span class="meta-tag pattern">${c.replace(/_/g, ' ')}</span>`).join('')}
+                        </div>
+                        <div class="meta-section">
+                            <span class="meta-tag quality ${p.quality_level}">${p.quality_level} (${p.quality_score})</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            const totalPages = Math.ceil(filteredPrompts.length / pageSize);
+            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages} (${filteredPrompts.length} prompts)`;
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function prevPage() { if (currentPage > 1) { currentPage--; renderPrompts(); } }
+        function nextPage() { if (currentPage < Math.ceil(filteredPrompts.length / pageSize)) { currentPage++; renderPrompts(); } }
+        
+        // Initial render
+        renderPrompts();
+    </script>
+</body>
+</html>
