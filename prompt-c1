@@ -1,0 +1,525 @@
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION I: EXECUTIVE SUMMARY
+# ═══════════════════════════════════════════════════════════════════════════════
+## Overall Risk Posture
+Open with a single-paragraph executive assessment (4-5 sentences):
+- What is the overall risk environment RIGHT NOW?
+- How has it changed from last week?
+- What is the dominant theme across risk stripes?
+- What keeps us up at night?
+- What is the recommended posture (defensive/cautious/neutral/constructive)?
+## Top 5 Priority Risks (Across All Stripes)
+For each risk, write a brief narrative paragraph covering:
+- **What it is** and which risk stripe(s) it affects
+- **Why it matters now** — what changed or is changing
+- **Probability / Impact / Velocity** — quantified
+- **Recommended response**
+Rank by: Probability × Impact × Velocity
+## Top 3 Opportunities
+Brief narrative on opportunities across all areas — dislocations, mispricings, or favorable positioning windows.
+## Key Dates: Next 2 Weeks
+Narrative calendar of the most critical events with expected impact and our positioning.
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION II: MARKET RISK
+# ═══════════════════════════════════════════════════════════════════════════════
+## II.A Current Regime Classification
+Write a narrative assessment (2-3 paragraphs):
+- Where are we in the economic cycle?
+- What is the dominant macro narrative?
+- What are the key uncertainties?
+- Regime transition probabilities (expansion → slowdown, etc.)
+## II.B Central Bank & Policy Trajectories
+Narrative covering:
+- Fed: Current stance, recent communications, market pricing vs. dots, what data would change the trajectory
+- ECB, BOJ, PBOC: Key developments and policy divergence implications
+- Policy divergence impact on FX, rates, and carry trades
+## II.C Cross-Asset Dashboard
+For each asset class, write a flowing narrative (not a table) covering current state, what's driving it, key levels, positioning, and our view:
+**Rates**
+[Narrative: curve dynamics, real vs. nominal, vol regime, auction demand, positioning, risks, our view]
+**Credit**
+[Narrative: IG and HY spreads, primary market, sector dispersion, default outlook, single-name watchlist, risks, our view]
+**Equities**  
+[Narrative: index performance, sector rotation, vol surface, positioning/flows, breadth, key earnings, risks, our view]
+**FX**
+[Narrative: dollar direction, G10 themes, EM FX stress/opportunity, carry trade dynamics, intervention risk, positioning, our view]
+**Commodities**
+[Narrative: energy (oil supply/demand, geopolitical), precious metals (gold as risk signal), base metals (China demand), agricultural, our view]
+## II.D Liquidity & Market Structure
+Narrative covering:
+- Funding markets: Repo, CP, FX swap basis — any stress signals?
+- Treasury market functioning: Depth, auction demand, dealer capacity
+- Equity microstructure: 0DTE dynamics, ETF flows, market depth
+- Dealer balance sheet constraints and quarter-end pressures
+## II.E Correlation & Contagion
+Narrative covering:
+- Cross-asset correlations vs. historical norms
+- Crowded trade identification (what's stretched, what could unwind)
+- Contagion pathways to monitor
+## II.F Market Risk Metrics
+Narrative on firm-wide market risk:
+- VaR utilization and trend
+- Stressed VaR status
+- Sensitivities (DV01, CS01, equity delta) — any limit concerns
+- Backtesting status and any recent exceptions
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION III: CREDIT RISK
+# ═══════════════════════════════════════════════════════════════════════════════
+## III.A Credit Environment Overview
+Narrative assessment (2-3 paragraphs):
+- Where are we in the credit cycle?
+- What's the default outlook?
+- Which sectors are under stress?
+- Where is credit risk underpriced/overpriced?
+## III.B Portfolio Credit Quality
+Narrative covering:
+- Credit quality migration trends (upgrades vs. downgrades)
+- Watch list changes and additions
+- Criticized asset trends
+- Expected loss trajectory
+- Allowance adequacy
+## III.C Sector Deep Dives
+Write narrative assessments for sectors with elevated risk:
+**Commercial Real Estate**
+[Narrative: office vacancy, cap rates, refinancing wall, regional exposure, CMBS implications]
+**Leveraged Lending**
+[Narrative: loan performance, covenant stress, CLO dynamics, refinancing risk]
+**Financial Institutions**
+[Narrative: bank credit quality, regional bank exposure, insurance sector]
+**Energy**
+[Narrative: oil price sensitivity, hedging status, E&P stress, utility credit]
+**Technology**
+[Narrative: growth vs. profitability, venture credit exposure, software credit quality]
+**Consumer**
+[Narrative: delinquency trends, auto/card performance, income stress signals]
+## III.D Single-Name Watchlist
+Narrative on specific credits requiring attention:
+- Name, sector, exposure, concern, trigger for action
+## III.E Credit Risk Metrics
+Narrative covering:
+- Expected Credit Loss trends
+- Credit VaR
+- Concentration metrics
+- Limit utilizations of concern
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION IV: COUNTERPARTY CREDIT RISK
+# ═══════════════════════════════════════════════════════════════════════════════
+## IV.A Counterparty Environment
+Narrative assessment:
+- Overall counterparty credit environment
+- Systemic counterparty concerns
+- Market-wide stress indicators
+## IV.B Top Exposures
+Narrative on largest counterparty exposures:
+- Top 10 exposures by name, type, gross/net, trend, concerns
+- Any concentration concerns
+- Rating migration among key counterparties
+## IV.C Counterparty Watchlist
+Narrative on counterparties requiring enhanced monitoring:
+- Which counterparties and why
+- Trigger events to watch
+- Action thresholds
+## IV.D Wrong-Way Risk
+Narrative assessment:
+- Identified wrong-way risk exposures
+- Correlation between counterparty credit and market exposure
+- Mitigation in place
+## IV.E Collateral & Margin
+Narrative covering:
+- Margin call trends and any fails
+- Collateral quality trends
+- Initial margin adequacy
+- Potential for margin calls under stress
+## IV.F CCR Stress Scenarios
+Narrative on counterparty credit risk under stress:
+- Impact of 2-notch downgrade across key counterparties
+- Single large counterparty default impact
+- Correlation breakdown scenario
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION V: LIQUIDITY RISK
+# ═══════════════════════════════════════════════════════════════════════════════
+## V.A Funding Environment
+Narrative assessment:
+- Overall funding market conditions
+- Any stress signals in wholesale funding
+- Deposit trends (if applicable)
+- Funding cost trajectory
+## V.B Regulatory Liquidity Metrics
+Narrative covering:
+- LCR status and trend
+- NSFR status and trend
+- HQLA composition and quality
+- Intraday liquidity adequacy
+- Internal stress test results
+## V.C Funding Concentration
+Narrative on:
+- Counterparty funding concentration
+- Maturity concentration and gaps
+- Currency funding mismatches
+- Contingent liquidity demands
+## V.D Market Liquidity Risk
+Narrative on:
+- Asset liquidation assumptions under stress
+- Bid-ask widening scenarios
+- Fire sale risk assessment
+- Liquidity of trading book positions
+## V.E Contingent Liquidity Events
+Narrative on potential liquidity demands:
+- Committed facility drawdowns
+- Margin call scenarios
+- Rating downgrade triggers
+- Contractual obligations that could accelerate
+## V.F Liquidity Stress Scenarios
+Narrative on:
+- Idiosyncratic stress (firm-specific)
+- Market-wide stress
+- Combined scenario
+- Recovery time assumptions
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION VI: OPERATIONAL RISK
+# ═══════════════════════════════════════════════════════════════════════════════
+## VI.A Operational Risk Environment
+Narrative assessment:
+- Overall operational risk posture
+- Industry incidents and lessons learned
+- Emerging operational risks
+## VI.B Recent Incidents & Near-Misses
+Narrative on:
+- Significant incidents in reporting period
+- Root cause analysis status
+- Remediation progress
+- Near-misses that warrant attention
+## VI.C Key Risk Indicators
+Narrative on KRI trends:
+- Trade fails and breaks
+- System availability and performance
+- Processing volumes and capacity
+- Error rates and manual interventions
+- Vendor performance issues
+## VI.D Technology & Cyber Risk
+Narrative covering:
+- Threat landscape assessment
+- Recent attacks or probes (industry-wide)
+- Vulnerability status
+- Patch compliance
+- Third-party cyber risk
+- Business continuity readiness
+## VI.E Third-Party & Vendor Risk
+Narrative on:
+- Critical vendor performance
+- Concentration in key vendors
+- Fourth-party risks
+- Contract renewals or transitions underway
+## VI.F Operational Risk Events Calendar
+Narrative on upcoming operational risk events:
+- System changes or migrations
+- Regulatory deadlines
+- Business process changes
+- Staff transitions in key roles
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION VII: MODEL RISK
+# ═══════════════════════════════════════════════════════════════════════════════
+## VII.A Model Risk Environment
+Narrative assessment:
+- Overall model risk posture
+- Regime change impact on model performance
+- Industry model risk developments
+## VII.B Model Performance Monitoring
+Narrative on:
+- Backtesting results for key models (VaR, credit, pricing)
+- Exception trends
+- Model stability assessments
+- Data quality issues affecting models
+## VII.C Validation Status
+Narrative on:
+- Models due for validation
+- Overdue validations
+- Findings from recent validations
+- Remediation status for open findings
+## VII.D Model Limitations & Compensating Controls
+Narrative on:
+- Key model limitations in current environment
+- Compensating controls in place
+- Management overlays and adjustments
+- Model uncertainty quantification
+## VII.E Emerging Model Risks
+Narrative on:
+- New models in development or recently deployed
+- AI/ML model governance
+- Model risk from third-party models
+- Regulatory expectations evolution
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION VIII: REGULATORY & COMPLIANCE RISK
+# ═══════════════════════════════════════════════════════════════════════════════
+## VIII.A Regulatory Environment
+Narrative assessment:
+- Key regulatory developments this period
+- Regulatory tone and priorities
+- Industry enforcement trends
+## VIII.B Upcoming Regulatory Changes
+Narrative on rules in implementation or pending:
+- Basel III Endgame status and capital impact
+- FRTB implementation progress
+- SEC/CFTC rule changes affecting trading
+- Resolution planning requirements
+- Climate/ESG disclosure rules
+- For each: timeline, impact assessment, readiness
+## VIII.C Examination Status
+Narrative on:
+- Active examinations
+- Recent examination findings
+- MRA/MRIA status and remediation
+- Upcoming examinations
+## VIII.D Compliance Monitoring
+Narrative on:
+- Key compliance metrics and trends
+- Issues identified through monitoring
+- Training compliance
+- Policy attestation status
+## VIII.E Legal & Litigation Risk
+Narrative on:
+- Significant pending litigation
+- Recent settlements or judgments
+- Emerging legal risks
+- Reserves adequacy
+## VIII.F Capital & Stress Testing
+Narrative on:
+- Capital ratio status and trajectory
+- CCAR/DFAST preparation status
+- Current environment vs. stress scenario assumptions
+- Capital buffer adequacy
+- Dividend/buyback capacity implications
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION IX: CONCENTRATION RISK
+# ═══════════════════════════════════════════════════════════════════════════════
+## IX.A Single-Name Concentrations
+Narrative on:
+- Largest single-name exposures across all portfolios
+- Trend in concentration levels
+- Limit utilizations
+- Names approaching or exceeding thresholds
+## IX.B Sector Concentrations
+Narrative on:
+- Sector exposure distribution
+- Sectors with elevated concentration
+- Sector limit utilizations
+- Sector stress correlation
+## IX.C Geographic Concentrations
+Narrative on:
+- Country/region exposures
+- Emerging market concentration
+- Political/sovereign risk by geography
+- Country limit status
+## IX.D Factor & Strategy Concentrations
+Narrative on:
+- Factor exposures (duration, credit beta, equity beta)
+- Crowded trade exposures
+- Strategy correlation under stress
+- Hidden concentrations (correlated but not obvious)
+## IX.E Interconnectedness & Contagion
+Narrative on:
+- Exposure to interconnected entities
+- Contagion pathways
+- Systemic risk contribution
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION X: GEOPOLITICAL & STRATEGIC RISK
+# ═══════════════════════════════════════════════════════════════════════════════
+## X.A Geopolitical Environment
+Narrative assessment:
+- Global geopolitical temperature
+- Key flashpoints and their current status
+- How geopolitical risk is/isn't priced in markets
+## X.B Priority Geopolitical Risks
+For each major risk, write a narrative covering:
+**[Risk #1: e.g., China-Taiwan]**
+- Current situation assessment
+- Escalation probability (30/60/90 day)
+- Transmission to financial markets
+- Our exposure (direct and indirect)
+- Hedging considerations
+- Early warning indicators
+**[Risk #2: e.g., Middle East/Iran]**
+[Same structure]
+**[Risk #3: e.g., Russia-Ukraine]**
+[Same structure]
+**[Risk #4: e.g., US Political Risk]**
+[Same structure]
+## X.C Trade & Sanctions Risk
+Narrative on:
+- Tariff developments and exposure
+- Sanctions risk (new designations, secondary sanctions)
+- Supply chain disruption scenarios
+- Export control compliance
+## X.D Strategic Risk
+Narrative on:
+- Competitive landscape changes
+- Disruptive technology threats (AI impact on business model)
+- Business model risks
+- Franchise/reputational considerations
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION XI: CLIMATE & ESG RISK
+# ═══════════════════════════════════════════════════════════════════════════════
+## XI.A Climate Risk Environment
+Narrative assessment:
+- Regulatory developments on climate
+- Physical risk events this period
+- Transition risk developments
+- Market pricing of climate risk
+## XI.B Physical Risk Exposure
+Narrative on:
+- Geographic exposure to climate events
+- Recent/upcoming weather impacts
+- Insurance/hedging status
+- Portfolio sensitivity to physical risk scenarios
+## XI.C Transition Risk Exposure
+Narrative on:
+- Exposure to carbon-intensive sectors
+- Client transition progress
+- Stranded asset risk
+- Carbon pricing sensitivity
+## XI.D ESG Compliance & Disclosure
+Narrative on:
+- ESG disclosure requirements and readiness
+- Sustainable finance commitments progress
+- Greenwashing risk
+- ESG data quality
+## XI.E Reputational & Social Risk
+Narrative on:
+- ESG-related controversies
+- Client/counterparty ESG incidents
+- Social media/stakeholder sentiment
+- Emerging social risks
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION XII: INTEGRATED SCENARIO ANALYSIS
+# ═══════════════════════════════════════════════════════════════════════════════
+## XII.A Base Case Scenario (Probability: __%)
+Write a narrative covering:
+- Scenario description and key assumptions
+- Impact across all risk stripes (market, credit, liquidity, operational)
+- Expected P&L / capital impact by business line
+- Recommended positioning
+- Key indicators that would validate/invalidate this scenario
+## XII.B Adverse Scenario: Risk-Off Shock (Probability: __%)
+Write a narrative covering:
+- Trigger conditions (what would cause this)
+- Scenario evolution (how it unfolds)
+- Impact by risk stripe:
+  - Market Risk: [specific impacts and estimates]
+  - Credit Risk: [specific impacts and estimates]
+  - Liquidity Risk: [specific impacts and estimates]
+  - Operational Risk: [specific impacts and estimates]
+- Total estimated impact
+- Defensive playbook / recommended actions
+- Recovery assumptions
+## XII.C Adverse Scenario: [Second Most Relevant Risk] (Probability: __%)
+[Same narrative structure]
+## XII.D Tail Risk / Black Swan (Probability: __%)
+Write a narrative covering:
+- Potential catalysts
+- How it would unfold
+- Estimated impact (severe)
+- Circuit breakers and escalation protocols
+- Recovery considerations
+## XII.E Reverse Stress Test
+Narrative on:
+- What combination of events would cause capital breach
+- How far current conditions are from those triggers
+- Early warning indicators
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION XIII: RECOMMENDED ACTIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+## XIII.A Immediate Actions (This Week)
+For each action, write a brief narrative:
+- **Action:** What specifically to do
+- **Risk Stripe:** Which risk category this addresses
+- **Rationale:** Why now
+- **Owner:** Who is responsible
+- **Deadline:** By when
+- **Consequence if Delayed:** What happens if we don't act
+## XIII.B Near-Term Actions (Next 2-4 Weeks)
+[Same structure for medium-priority items]
+## XIII.C Strategic Actions (1-3 Month Horizon)
+[Same structure for longer-term items]
+## XIII.D Items Requiring CRO Decision
+Narrative on matters requiring explicit CRO input:
+- Decision required
+- Options available
+- Recommendation
+- Urgency
+- Deadline for decision
+## XIII.E Risk Appetite Recommendations
+Narrative on any recommended changes to:
+- Risk limits
+- Risk appetite statements
+- Tolerance thresholds
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION XIV: KEY CALENDAR — NEXT 30 DAYS
+# ═══════════════════════════════════════════════════════════════════════════════
+Write a narrative calendar organized by week, covering:
+**Week 1: [Dates]**
+- Key events, data releases, central bank meetings
+- Market-moving earnings
+- Regulatory deadlines
+- Internal milestones
+- Risk level assessment for each
+**Week 2: [Dates]**
+[Same structure]
+**Week 3: [Dates]**
+[Same structure]
+**Week 4: [Dates]**
+[Same structure]
+## Wildcards
+Narrative on events that could emerge unexpectedly:
+- Known unknowns to monitor
+- Potential surprise catalysts
+- What we're watching for early warning
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# APPENDICES (Reference Only)
+# ═══════════════════════════════════════════════════════════════════════════════
+Brief reference tables (keep minimal — the narrative sections are primary):
+**A. Market Snapshot** — Current levels and performance for key instruments
+**B. Risk Limit Dashboard** — Key limits and utilizations  
+**C. Watchlist Summary** — Credits, counterparties, and other items under enhanced monitoring
+**D. Regulatory Calendar** — Key dates and deadlines
+**E. Abbreviations & Definitions**
+---
+# ═══════════════════════════════════════════════════════════════════════════════
+# QUALITY REQUIREMENTS
+# ═══════════════════════════════════════════════════════════════════════════════
+## Mandatory Standards:
+1. **SEARCH FOR CURRENT DATA** — Use web search for all market levels, news, and developments. Do not rely on training data. Verify everything.
+2. **NARRATIVE FORMAT** — Write in flowing prose paragraphs. Avoid bullet lists except where absolutely necessary. This should read like a professional intelligence brief, not a checklist.
+3. **QUANTIFICATION** — Include specific numbers: prices, spreads, probabilities, dollar impacts, percentages. "Elevated risk" means nothing without "35% probability of 150bps widening."
+4. **FORWARD-LOOKING** — 70% forward-looking, 30% backward context. History only matters for what it tells us about the future.
+5. **ACTIONABLE** — Every risk requires a "therefore..." Every section should inform a decision.
+6. **INTEGRATED** — Connect risks across stripes. A geopolitical event affects market risk, credit risk, and operational risk — show those connections.
+7. **EXECUTIVE APPROPRIATE** — Written for a CRO who has 45 minutes to read the whole document. Section I Executive Summary readable in 5 minutes. Clear, confident, direct.
+8. **CONTRARIAN CHECK** — Include at least one "consensus may be wrong because..." for each major risk area.
+9. **INTELLECTUAL HONESTY** — Acknowledge uncertainty. Distinguish between high-confidence and speculative assessments. Present alternative views where relevant.
+10. **PROFESSIONAL FORMATTING** — Use the document header provided. Number sections consistently. Use clear section breaks. This should look like a document from a Tier 1 bank's risk function.
+---
+# BEGIN THE COMPREHENSIVE RISK INTELLIGENCE BRIEF NOW
+**First:** Determine today's date and conduct thorough searches for:
+- Current market levels across all asset classes
+- Breaking news affecting any risk category
+- Recent central bank communications
+- Geopolitical developments
+- Regulatory news
+- Upcoming calendar events
+**Then:** Produce the complete CRO Risk Intelligence Brief covering ALL sections above.
+**Write this as a polished, professional document worthy of a Tier 1 bank CRO's desk.**
