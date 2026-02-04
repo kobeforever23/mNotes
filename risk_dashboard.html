@@ -1,0 +1,2790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRO Risk Intelligence Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --accent-cyan: #06b6d4;
+            --border-color: #334155;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .logo span {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: block;
+            margin-top: 4px;
+        }
+
+        .nav-section {
+            padding: 16px 12px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 2px 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .nav-item .icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-item .badge {
+            margin-left: auto;
+            background: var(--accent-red);
+            color: white;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-left h2 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header-left .breadcrumb {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-date {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .content {
+            padding: 32px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .metric-card.blue::before { background: var(--accent-blue); }
+        .metric-card.green::before { background: var(--accent-green); }
+        .metric-card.red::before { background: var(--accent-red); }
+        .metric-card.yellow::before { background: var(--accent-yellow); }
+        .metric-card.purple::before { background: var(--accent-purple); }
+
+        .metric-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .metric-change {
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .metric-change.positive { color: var(--accent-green); }
+        .metric-change.negative { color: var(--accent-red); }
+        .metric-change.neutral { color: var(--text-secondary); }
+
+        /* Risk Level Indicator */
+        .risk-level {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .risk-level.critical { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+        .risk-level.high { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+        .risk-level.medium { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+        .risk-level.low { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--bg-tertiary);
+        }
+
+        .data-table tr:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .data-table td {
+            font-size: 14px;
+        }
+
+        /* Alerts Panel */
+        .alerts-panel {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 32px;
+        }
+
+        .alert-item {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .alert-item:last-child {
+            border-bottom: none;
+        }
+
+        .alert-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .alert-icon.critical { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+        .alert-icon.warning { background: rgba(245, 158, 11, 0.2); color: var(--accent-yellow); }
+        .alert-icon.info { background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); }
+
+        .alert-content h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .alert-content p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .alert-time {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        /* Calendar */
+        .calendar-events {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .calendar-event {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            gap: 16px;
+        }
+
+        .event-date {
+            background: var(--accent-blue);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .event-date .day {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .event-date .month {
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .event-details h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .event-details p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+
+        /* Page Sections */
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        /* Gauge Chart */
+        .gauge-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .gauge {
+            width: 200px;
+            height: 100px;
+            position: relative;
+        }
+
+        .gauge-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 12px;
+        }
+
+        /* Heatmap */
+        .heatmap {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .heatmap-cell {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Report Generator Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-item input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-blue);
+        }
+
+        /* Status dots */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-dot.green { background: var(--accent-green); }
+        .status-dot.yellow { background: var(--accent-yellow); }
+        .status-dot.red { background: var(--accent-red); }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Print styles */
+        @media print {
+            .sidebar, .header-right, .modal-overlay {
+                display: none !important;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            body {
+                background: white;
+                color: black;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h1>Risk Intelligence</h1>
+            <span>CRO Dashboard v2.0</span>
+        </div>
+
+        <nav class="nav-section">
+            <div class="nav-section-title">Overview</div>
+            <div class="nav-item active" data-page="executive">
+                <span class="icon">📊</span>
+                Executive Summary
+                <span class="badge">5</span>
+            </div>
+            <div class="nav-item" data-page="alerts">
+                <span class="icon">🚨</span>
+                Active Alerts
+                <span class="badge" style="background: var(--accent-yellow);">3</span>
+            </div>
+        </nav>
+
+        <nav class="nav-section">
+            <div class="nav-section-title">Risk Stripes</div>
+            <div class="nav-item" data-page="market">
+                <span class="icon">📈</span>
+                Market Risk
+            </div>
+            <div class="nav-item" data-page="credit">
+                <span class="icon">💳</span>
+                Credit Risk
+            </div>
+            <div class="nav-item" data-page="counterparty">
+                <span class="icon">🤝</span>
+                Counterparty Risk
+            </div>
+            <div class="nav-item" data-page="liquidity">
+                <span class="icon">💧</span>
+                Liquidity Risk
+            </div>
+            <div class="nav-item" data-page="operational">
+                <span class="icon">⚙️</span>
+                Operational Risk
+            </div>
+            <div class="nav-item" data-page="model">
+                <span class="icon">🧮</span>
+                Model Risk
+            </div>
+            <div class="nav-item" data-page="regulatory">
+                <span class="icon">📋</span>
+                Regulatory Risk
+            </div>
+            <div class="nav-item" data-page="geopolitical">
+                <span class="icon">🌍</span>
+                Geopolitical Risk
+            </div>
+            <div class="nav-item" data-page="climate">
+                <span class="icon">🌱</span>
+                Climate & ESG
+            </div>
+        </nav>
+
+        <nav class="nav-section">
+            <div class="nav-section-title">Tools</div>
+            <div class="nav-item" data-page="scenarios">
+                <span class="icon">🎯</span>
+                Scenario Analysis
+            </div>
+            <div class="nav-item" data-page="calendar">
+                <span class="icon">📅</span>
+                Risk Calendar
+            </div>
+            <div class="nav-item" onclick="openReportModal()">
+                <span class="icon">📄</span>
+                Generate Report
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="header">
+            <div class="header-left">
+                <h2 id="page-title">Executive Summary</h2>
+                <div class="breadcrumb">Risk Intelligence Dashboard / <span id="breadcrumb-current">Overview</span></div>
+            </div>
+            <div class="header-right">
+                <div class="header-date">
+                    <span id="current-date"></span>
+                    <span id="market-status" class="risk-level medium" style="margin-left: 12px;">Markets Open</span>
+                </div>
+                <button class="btn btn-secondary" onclick="refreshData()">
+                    <span>↻</span> Refresh
+                </button>
+                <button class="btn btn-primary" onclick="openReportModal()">
+                    <span>📄</span> Generate Report
+                </button>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- Executive Summary Page -->
+            <section id="page-executive" class="page-section active">
+                <!-- Overall Risk Posture -->
+                <div class="card" style="margin-bottom: 24px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                    <div class="card-body">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">OVERALL RISK POSTURE</h3>
+                                <div style="display: flex; align-items: center; gap: 16px;">
+                                    <span style="font-size: 36px; font-weight: 700; color: var(--accent-yellow);">CAUTIOUS</span>
+                                    <span class="risk-level high">Elevated Risk</span>
+                                </div>
+                                <p style="color: var(--text-secondary); margin-top: 12px; max-width: 600px; line-height: 1.6;">
+                                    Risk environment has shifted defensive due to policy uncertainty, elevated valuations, and geopolitical tensions.
+                                    Credit spreads at multi-decade tights while equity risk premium near zero leaves minimal margin of safety.
+                                </p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 12px; color: var(--text-muted);">vs. Last Week</div>
+                                <div style="font-size: 18px; color: var(--accent-yellow);">↑ Risk Increased</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="metrics-grid">
+                    <div class="metric-card blue">
+                        <div class="metric-label">S&P 500</div>
+                        <div class="metric-value">6,412</div>
+                        <div class="metric-change positive">↑ 0.8% <span style="color: var(--text-muted);">today</span></div>
+                    </div>
+                    <div class="metric-card red">
+                        <div class="metric-label">VIX</div>
+                        <div class="metric-value">16.2</div>
+                        <div class="metric-change negative">↑ 2.1% <span style="color: var(--text-muted);">today</span></div>
+                    </div>
+                    <div class="metric-card yellow">
+                        <div class="metric-label">10Y Treasury</div>
+                        <div class="metric-value">4.29%</div>
+                        <div class="metric-change neutral">→ Flat <span style="color: var(--text-muted);">today</span></div>
+                    </div>
+                    <div class="metric-card green">
+                        <div class="metric-label">HY Spread (OAS)</div>
+                        <div class="metric-value">290bp</div>
+                        <div class="metric-change positive">↓ 3bp <span style="color: var(--text-muted);">today</span></div>
+                    </div>
+                    <div class="metric-card purple">
+                        <div class="metric-label">DXY Index</div>
+                        <div class="metric-value">97.5</div>
+                        <div class="metric-change positive">↑ 0.3% <span style="color: var(--text-muted);">today</span></div>
+                    </div>
+                    <div class="metric-card blue">
+                        <div class="metric-label">Brent Crude</div>
+                        <div class="metric-value">$66.5</div>
+                        <div class="metric-change negative">↓ 4.2% <span style="color: var(--text-muted);">today</span></div>
+                    </div>
+                </div>
+
+                <!-- Priority Risks & Charts -->
+                <div class="charts-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Top 5 Priority Risks</span>
+                            <span class="risk-level high">Action Required</span>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Risk</th>
+                                        <th>Stripe</th>
+                                        <th>Prob</th>
+                                        <th>Impact</th>
+                                        <th>Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Equity Valuation Compression</strong></td>
+                                        <td>Market</td>
+                                        <td>45%</td>
+                                        <td>High</td>
+                                        <td><span class="risk-level critical">9.2</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>CRE Refinancing Wall</strong></td>
+                                        <td>Credit</td>
+                                        <td>70%</td>
+                                        <td>High</td>
+                                        <td><span class="risk-level critical">8.8</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Fed Leadership Transition</strong></td>
+                                        <td>Policy</td>
+                                        <td>35%</td>
+                                        <td>Med</td>
+                                        <td><span class="risk-level high">7.5</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Geopolitical Flashpoints</strong></td>
+                                        <td>Geopolitical</td>
+                                        <td>30%</td>
+                                        <td>High</td>
+                                        <td><span class="risk-level high">7.2</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Cyber Risk Escalation</strong></td>
+                                        <td>Operational</td>
+                                        <td>60%</td>
+                                        <td>Med</td>
+                                        <td><span class="risk-level medium">6.8</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Risk Stripe Heatmap</span>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="riskHeatmapChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Alerts -->
+                <div class="alerts-panel">
+                    <div class="card-header">
+                        <span class="card-title">Active Alerts</span>
+                        <span style="color: var(--text-secondary); font-size: 13px;">Last updated: <span id="alert-time">Just now</span></span>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-icon critical">⚠️</div>
+                        <div class="alert-content">
+                            <h4>Standing Repo Facility Usage Spike</h4>
+                            <p>SRF borrowing surged to $15B — highest since COVID. Monitor for broader funding stress signals.</p>
+                        </div>
+                        <span class="alert-time">2 hours ago</span>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-icon warning">📊</div>
+                        <div class="alert-content">
+                            <h4>JGB 40Y Yield Breaches 4%</h4>
+                            <p>Japanese government bond yields at highest since 2007. Potential spillover to global duration.</p>
+                        </div>
+                        <span class="alert-time">6 hours ago</span>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-icon info">🌍</div>
+                        <div class="alert-content">
+                            <h4>US-Iran Diplomatic Talks Announced</h4>
+                            <p>Oil prices corrected 5% on de-escalation news. Maintain monitoring for reversal risk.</p>
+                        </div>
+                        <span class="alert-time">Yesterday</span>
+                    </div>
+                </div>
+
+                <!-- Charts Row 2 -->
+                <div class="charts-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">VaR Trend (30 Days)</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="varChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Asset Class Performance (YTD)</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="assetPerformanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Market Risk Page -->
+            <section id="page-market" class="page-section">
+                <div class="metrics-grid">
+                    <div class="metric-card blue">
+                        <div class="metric-label">Equity Beta</div>
+                        <div class="metric-value">0.85</div>
+                        <div class="metric-change neutral">Within limits</div>
+                    </div>
+                    <div class="metric-card green">
+                        <div class="metric-label">Duration (DV01)</div>
+                        <div class="metric-value">$2.4M</div>
+                        <div class="metric-change positive">↓ 5% MTD</div>
+                    </div>
+                    <div class="metric-card yellow">
+                        <div class="metric-label">FX Exposure</div>
+                        <div class="metric-value">$180M</div>
+                        <div class="metric-change negative">↑ 12% MTD</div>
+                    </div>
+                    <div class="metric-card red">
+                        <div class="metric-label">VaR (99%)</div>
+                        <div class="metric-value">$45M</div>
+                        <div class="metric-change negative">↑ 8% vs avg</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">S&P 500 vs VIX (60 Days)</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="spxVixChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Yield Curve</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="yieldCurveChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="card-header">
+                        <span class="card-title">Market Risk Assessment</span>
+                    </div>
+                    <div class="card-body">
+                        <p style="line-height: 1.8; color: var(--text-secondary);">
+                            <strong style="color: var(--text-primary);">Regime Classification:</strong> Late-cycle expansion with elevated recession risk.
+                            US GDP grew 1.8% in 2025, decelerating as tariff impacts and higher-for-longer rates weighed on activity.
+                            The dominant macro narrative has shifted from "soft landing achieved" to "how long can resilience persist?"
+                        </p>
+                        <div style="margin-top: 20px; padding: 16px; background: var(--bg-tertiary); border-radius: 8px;">
+                            <strong>Key Uncertainties:</strong>
+                            <ul style="margin-top: 8px; margin-left: 20px; color: var(--text-secondary);">
+                                <li>Impact of 47.5% average tariff on Chinese goods</li>
+                                <li>Federal Reserve leadership transition (Warsh nomination)</li>
+                                <li>"Sell America" trade dynamics and dollar direction</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Sector Exposure Heat Map</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="sectorExposureChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Currency Exposures</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="fxExposureChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Credit Risk Page -->
+            <section id="page-credit" class="page-section">
+                <div class="metrics-grid">
+                    <div class="metric-card red">
+                        <div class="metric-label">HY Default Rate</div>
+                        <div class="metric-value">4.8%</div>
+                        <div class="metric-change negative">Above avg</div>
+                    </div>
+                    <div class="metric-card yellow">
+                        <div class="metric-label">IG Spread</div>
+                        <div class="metric-value">95bp</div>
+                        <div class="metric-change neutral">Historic tight</div>
+                    </div>
+                    <div class="metric-card blue">
+                        <div class="metric-label">Watch List</div>
+                        <div class="metric-value">24</div>
+                        <div class="metric-change negative">↑ 3 this week</div>
+                    </div>
+                    <div class="metric-card green">
+                        <div class="metric-label">Expected Loss</div>
+                        <div class="metric-value">$82M</div>
+                        <div class="metric-change positive">Within allowance</div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="card-header">
+                        <span class="card-title">Credit Environment Assessment</span>
+                        <span class="risk-level high">Deterioration Underway</span>
+                    </div>
+                    <div class="card-body">
+                        <p style="line-height: 1.8; color: var(--text-secondary);">
+                            Current credit cycle assessment: <strong style="color: var(--accent-yellow);">Late-cycle with deterioration in select segments</strong>.
+                            Headline tight spreads (HY OAS at 2.9%) mask significant dispersion. Default rates elevated but not accelerating:
+                            S&P spec-grade at 4.8%, Moody's leveraged loan at 5.9% — both above long-term averages.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Credit Spreads Trend</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="creditSpreadsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Sector Credit Quality</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="sectorCreditChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CRE Deep Dive -->
+                <div class="card" style="margin-top: 24px;">
+                    <div class="card-header">
+                        <span class="card-title">🏢 Commercial Real Estate Deep Dive</span>
+                        <span class="risk-level critical">Highest Risk Sector</span>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px;">
+                            <div style="text-align: center; padding: 16px; background: var(--bg-tertiary); border-radius: 8px;">
+                                <div style="font-size: 28px; font-weight: 700; color: var(--accent-red);">18.7%</div>
+                                <div style="font-size: 13px; color: var(--text-secondary);">Office Vacancy Rate</div>
+                            </div>
+                            <div style="text-align: center; padding: 16px; background: var(--bg-tertiary); border-radius: 8px;">
+                                <div style="font-size: 28px; font-weight: 700; color: var(--accent-yellow);">$936B</div>
+                                <div style="font-size: 13px; color: var(--text-secondary);">2026 Maturities</div>
+                            </div>
+                            <div style="text-align: center; padding: 16px; background: var(--bg-tertiary); border-radius: 8px;">
+                                <div style="font-size: 28px; font-weight: 700; color: var(--accent-red);">83.7%</div>
+                                <div style="font-size: 13px; color: var(--text-secondary);">CMBS Delinquency</div>
+                            </div>
+                            <div style="text-align: center; padding: 16px; background: var(--bg-tertiary); border-radius: 8px;">
+                                <div style="font-size: 28px; font-weight: 700; color: var(--accent-yellow);">$126.6B</div>
+                                <div style="font-size: 13px; color: var(--text-secondary);">Distressed Volume</div>
+                            </div>
+                        </div>
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="creMaturityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Counterparty Risk Page -->
+            <section id="page-counterparty" class="page-section">
+                <div class="metrics-grid">
+                    <div class="metric-card blue">
+                        <div class="metric-label">Total Exposure</div>
+                        <div class="metric-value">$4.2B</div>
+                        <div class="metric-change neutral">Stable</div>
+                    </div>
+                    <div class="metric-card green">
+                        <div class="metric-label">Top 10 Concentration</div>
+                        <div class="metric-value">62%</div>
+                        <div class="metric-change positive">Within limits</div>
+                    </div>
+                    <div class="metric-card yellow">
+                        <div class="metric-label">Watch List</div>
+                        <div class="metric-value">3</div>
+                        <div class="metric-change neutral">No change</div>
+                    </div>
+                    <div class="metric-card red">
+                        <div class="metric-label">Margin Calls (24h)</div>
+                        <div class="metric-value">$28M</div>
+                        <div class="metric-change negative">↑ Elevated</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Top 10 Counterparty Exposures</span>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Counterparty</th>
+                                    <th>Type</th>
+                                    <th>Gross Exp</th>
+                                    <th>Net Exp</th>
+                                    <th>Rating</th>
+                                    <th>CDS (bp)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>JP Morgan Chase</strong></td>
+                                    <td>G-SIB</td>
+                                    <td>$680M</td>
+                                    <td>$420M</td>
+                                    <td>A+</td>
+                                    <td>45</td>
+                                    <td><span class="status-dot green"></span>Normal</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Goldman Sachs</strong></td>
+                                    <td>G-SIB</td>
+                                    <td>$520M</td>
+                                    <td>$310M</td>
+                                    <td>A</td>
+                                    <td>52</td>
+                                    <td><span class="status-dot green"></span>Normal</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Bank of America</strong></td>
+                                    <td>G-SIB</td>
+                                    <td>$485M</td>
+                                    <td>$290M</td>
+                                    <td>A</td>
+                                    <td>48</td>
+                                    <td><span class="status-dot green"></span>Normal</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Citadel Securities</strong></td>
+                                    <td>Broker</td>
+                                    <td>$340M</td>
+                                    <td>$185M</td>
+                                    <td>A-</td>
+                                    <td>68</td>
+                                    <td><span class="status-dot green"></span>Normal</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Regional Bank A</strong></td>
+                                    <td>Regional</td>
+                                    <td>$180M</td>
+                                    <td>$145M</td>
+                                    <td>BBB+</td>
+                                    <td>125</td>
+                                    <td><span class="status-dot yellow"></span>Monitor</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="charts-grid" style="margin-top: 24px;">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Exposure by Counterparty Type</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="counterpartyTypeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Collateral Quality Distribution</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="collateralChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Liquidity Risk Page -->
+            <section id="page-liquidity" class="page-section">
+                <div class="metrics-grid">
+                    <div class="metric-card green">
+                        <div class="metric-label">LCR Ratio</div>
+                        <div class="metric-value">142%</div>
+                        <div class="metric-change positive">Above minimum</div>
+                    </div>
+                    <div class="metric-card blue">
+                        <div class="metric-label">NSFR Ratio</div>
+                        <div class="metric-value">118%</div>
+                        <div class="metric-change positive">Compliant</div>
+                    </div>
+                    <div class="metric-card yellow">
+                        <div class="metric-label">HQLA</div>
+                        <div class="metric-value">$8.2B</div>
+                        <div class="metric-change neutral">Stable</div>
+                    </div>
+                    <div class="metric-card red">
+                        <div class="metric-label">SRF Usage (Industry)</div>
+                        <div class="metric-value">$15B</div>
+                        <div class="metric-change negative">↑ COVID high</div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="card-header">
+                        <span class="card-title">Funding Environment Assessment</span>
+                        <span class="risk-level medium">Adequate with Strain</span>
+                    </div>
+                    <div class="card-body">
+                        <p style="line-height: 1.8; color: var(--text-secondary);">
+                            Overall funding environment is adequate but showing signs of strain at the margin.
+                            The surge in Standing Repo Facility borrowing to $15 billion—the highest since COVID—indicates
+                            some institutions are experiencing short-term liquidity pressures. Quarter-end (March 31) presents
+                            potential for repo market strain given regulatory constraints on dealer balance sheets.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Liquidity Buffer Trend</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="liquidityBufferChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Funding Source Mix</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="fundingMixChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Operational Risk Page -->
+            <section id="page-operational" class="page-section">
+                <div class="metrics-grid">
+                    <div class="metric-card red">
+                        <div class="metric-label">Cyber Threat Level</div>
+                        <div class="metric-value">HIGH</div>
+                        <div class="metric-change negative">AI-powered attacks emerging</div>
+                    </div>
+                    <div class="metric-card green">
+                        <div class="metric-label">System Uptime</div>
+                        <div class="metric-value">99.97%</div>
+                        <div class="metric-change positive">SLA met</div>
+                    </div>
+                    <div class="metric-card yellow">
+                        <div class="metric-label">Open Incidents</div>
+                        <div class="metric-value">7</div>
+                        <div class="metric-change neutral">2 critical</div>
+                    </div>
+                    <div class="metric-card blue">
+                        <div class="metric-label">Vendor Risk Score</div>
+                        <div class="metric-value">B+</div>
+                        <div class="metric-change neutral">Stable</div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="card-header">
+                        <span class="card-title">Operational Risk Environment</span>
+                        <span class="risk-level high">Elevated</span>
+                    </div>
+                    <div class="card-body">
+                        <p style="line-height: 1.8; color: var(--text-secondary);">
+                            The operational risk environment has intensified significantly, with cyber threats representing the dominant concern.
+                            52% of bankers expect cybersecurity attacks to become more frequent and harder-hitting in 2026.
+                            AI-powered attacks are emerging as a game-changer—autonomous fraud agents, sophisticated deepfakes for social engineering,
+                            and supply chain compromises represent new threat vectors.
+                        </p>
+                        <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                            <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 4px solid var(--accent-red);">
+                                <div style="font-size: 24px; font-weight: 700; color: var(--accent-red);">$6.08M</div>
+                                <div style="font-size: 13px; color: var(--text-secondary);">Avg breach cost (FS sector)</div>
+                            </div>
+                            <div style="padding: 16px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border-left: 4px solid var(--accent-yellow);">
+                                <div style="font-size: 24px; font-weight: 700; color: var(--accent-yellow);">64%</div>
+                                <div style="font-size: 13px; color: var(--text-secondary);">Institutions hit by ransomware</div>
+                            </div>
+                            <div style="padding: 16px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 4px solid var(--accent-blue);">
+                                <div style="font-size: 24px; font-weight: 700; color: var(--accent-blue);">52%</div>
+                                <div style="font-size: 13px; color: var(--text-secondary);">Expect worse attacks in 2026</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Incident Trend (12 Months)</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="incidentTrendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Risk Category Breakdown</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="opRiskCategoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Model Risk Page -->
+            <section id="page-model" class="page-section">
+                <div class="metrics-grid">
+                    <div class="metric-card blue">
+                        <div class="metric-label">Models in Production</div>
+                        <div class="metric-value">127</div>
+                        <div class="metric-change neutral">+3 this quarter</div>
+                    </div>
+                    <div class="metric-card yellow">
+                        <div class="metric-label">Validation Overdue</div>
+                        <div class="metric-value">8</div>
+                        <div class="metric-change negative">Action needed</div>
+                    </div>
+                    <div class="metric-card green">
+                        <div class="metric-label">Backtesting Pass Rate</div>
+                        <div class="metric-value">94%</div>
+                        <div class="metric-change positive">Acceptable</div>
+                    </div>
+                    <div class="metric-card red">
+                        <div class="metric-label">VaR Exceptions (YTD)</div>
+                        <div class="metric-value">4</div>
+                        <div class="metric-change negative">↑ Review needed</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Model Validation Status</span>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Model</th>
+                                    <th>Type</th>
+                                    <th>Last Validated</th>
+                                    <th>Next Due</th>
+                                    <th>Status</th>
+                                    <th>Findings</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Market VaR</strong></td>
+                                    <td>Risk</td>
+                                    <td>Sep 2025</td>
+                                    <td>Sep 2026</td>
+                                    <td><span class="status-dot green"></span>Current</td>
+                                    <td>2 medium</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Credit PD Model</strong></td>
+                                    <td>Credit</td>
+                                    <td>Jun 2025</td>
+                                    <td>Jun 2026</td>
+                                    <td><span class="status-dot green"></span>Current</td>
+                                    <td>1 low</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>LGD Model</strong></td>
+                                    <td>Credit</td>
+                                    <td>Jan 2025</td>
+                                    <td>Jan 2026</td>
+                                    <td><span class="status-dot red"></span>Overdue</td>
+                                    <td>3 high</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Stress Test</strong></td>
+                                    <td>Capital</td>
+                                    <td>Dec 2025</td>
+                                    <td>Dec 2026</td>
+                                    <td><span class="status-dot green"></span>Current</td>
+                                    <td>0</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Fraud Detection ML</strong></td>
+                                    <td>AI/ML</td>
+                                    <td>Nov 2025</td>
+                                    <td>May 2026</td>
+                                    <td><span class="status-dot yellow"></span>Review</td>
+                                    <td>5 medium</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Regulatory Risk Page -->
+            <section id="page-regulatory" class="page-section">
+                <div class="metrics-grid">
+                    <div class="metric-card green">
+                        <div class="metric-label">CET1 Ratio</div>
+                        <div class="metric-value">13.2%</div>
+                        <div class="metric-change positive">Above buffer</div>
+                    </div>
+                    <div class="metric-card blue">
+                        <div class="metric-label">Total Capital</div>
+                        <div class="metric-value">16.8%</div>
+                        <div class="metric-change positive">Well capitalized</div>
+                    </div>
+                    <div class="metric-card yellow">
+                        <div class="metric-label">Open MRAs</div>
+                        <div class="metric-value">12</div>
+                        <div class="metric-change negative">3 past due</div>
+                    </div>
+                    <div class="metric-card red">
+                        <div class="metric-label">Basel III Impact</div>
+                        <div class="metric-value">~Neutral</div>
+                        <div class="metric-change positive">Revised proposal</div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="card-header">
+                        <span class="card-title">Regulatory Environment</span>
+                    </div>
+                    <div class="card-body">
+                        <p style="line-height: 1.8; color: var(--text-secondary);">
+                            The regulatory environment is in transition. The Trump administration has signaled intent to reduce regulatory burden,
+                            and Fed Vice Chair Bowman indicated Basel III Endgame re-proposal will aim for "roughly capital neutral" impact—a significant
+                            softening from the original 2023 proposal that would have increased large bank capital by ~20%.
+                        </p>
+                        <div style="margin-top: 20px; padding: 16px; background: var(--bg-tertiary); border-radius: 8px;">
+                            <strong>Key Regulatory Milestones:</strong>
+                            <ul style="margin-top: 12px; margin-left: 20px; color: var(--text-secondary); line-height: 1.8;">
+                                <li><strong>Q1 2026:</strong> Basel III Endgame revised proposal expected</li>
+                                <li><strong>Q1 2026:</strong> Supreme Court IEEPA tariff ruling</li>
+                                <li><strong>2027:</strong> UK Basel 3.1 implementation</li>
+                                <li><strong>2029-30:</strong> US Basel III full compliance</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Capital Ratios Trend</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="capitalRatioChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">MRA Status by Category</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="mraStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Geopolitical Risk Page -->
+            <section id="page-geopolitical" class="page-section">
+                <div class="card" style="margin-bottom: 24px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                    <div class="card-body">
+                        <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">GLOBAL GEOPOLITICAL TEMPERATURE</h3>
+                        <div style="display: flex; align-items: center; gap: 24px;">
+                            <span style="font-size: 48px; font-weight: 700; color: var(--accent-yellow);">ELEVATED</span>
+                            <div>
+                                <p style="color: var(--text-secondary); max-width: 500px;">
+                                    Multiple flashpoints remain active despite recent diplomatic de-escalation. Markets have largely priced out immediate escalation risk,
+                                    but underlying tensions remain unresolved.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 24px;">
+                    <!-- Russia-Ukraine -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">🇺🇦 Russia-Ukraine</span>
+                            <span class="risk-level high">Active Conflict</span>
+                        </div>
+                        <div class="card-body">
+                            <div style="margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="color: var(--text-secondary);">Escalation Probability (90d)</span>
+                                    <span style="font-weight: 600;">25%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 25%; background: var(--accent-yellow);"></div>
+                                </div>
+                            </div>
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+                                Day 1,440+. Russia launched most powerful attack of 2026 on Ukrainian energy infrastructure (450 drones, 60+ missiles).
+                                Trilateral talks scheduled in Abu Dhabi. Russia controls ~20% of territory.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Iran-Israel -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">🇮🇷 Iran-Israel/Middle East</span>
+                            <span class="risk-level high">De-escalating</span>
+                        </div>
+                        <div class="card-body">
+                            <div style="margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="color: var(--text-secondary);">Escalation Probability (90d)</span>
+                                    <span style="font-weight: 600;">30%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 30%; background: var(--accent-yellow);"></div>
+                                </div>
+                            </div>
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+                                US-Iran diplomatic talks announced, de-escalating from Feb 2 brinkmanship that spiked oil to $71.
+                                Underlying Israel-Iran hostility remains intense post-June 2025 twelve-day war.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- China-Taiwan -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">🇨🇳 China-Taiwan</span>
+                            <span class="risk-level medium">Managed Tension</span>
+                        </div>
+                        <div class="card-body">
+                            <div style="margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="color: var(--text-secondary);">Escalation Probability (90d)</span>
+                                    <span style="font-weight: 600;">15%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 15%; background: var(--accent-blue);"></div>
+                                </div>
+                            </div>
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+                                Near-term risk moderated post Trump-Xi summit. Moderate flare-ups expected as territorial claims challenged.
+                                Key risk: US arms sales to Taiwan triggering aggressive PLA posture.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Trade/Tariffs -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">📦 Trade & Tariffs</span>
+                            <span class="risk-level high">Elevated</span>
+                        </div>
+                        <div class="card-body">
+                            <div style="margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="color: var(--text-secondary);">Policy Change Probability</span>
+                                    <span style="font-weight: 600;">40%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 40%; background: var(--accent-yellow);"></div>
+                                </div>
+                            </div>
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+                                47.5% avg tariff on Chinese goods (highest in century). One-year pause on further escalation.
+                                Supreme Court evaluating IEEPA legality—ruling could reshape trade policy.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Climate & ESG Page -->
+            <section id="page-climate" class="page-section">
+                <div class="metrics-grid">
+                    <div class="metric-card green">
+                        <div class="metric-label">Financed Emissions</div>
+                        <div class="metric-value">-12%</div>
+                        <div class="metric-change positive">vs. 2024 baseline</div>
+                    </div>
+                    <div class="metric-card blue">
+                        <div class="metric-label">High-Carbon Exposure</div>
+                        <div class="metric-value">$2.1B</div>
+                        <div class="metric-change neutral">8% of portfolio</div>
+                    </div>
+                    <div class="metric-card yellow">
+                        <div class="metric-label">Physical Risk Score</div>
+                        <div class="metric-value">Medium</div>
+                        <div class="metric-change neutral">Coastal/wildfire</div>
+                    </div>
+                    <div class="metric-card red">
+                        <div class="metric-label">Stranded Asset Risk</div>
+                        <div class="metric-value">$340M</div>
+                        <div class="metric-change negative">Oil & gas exposure</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Transition Risk by Sector</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="transitionRiskChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Physical Risk Exposure Map</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="physicalRiskChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scenarios Page -->
+            <section id="page-scenarios" class="page-section">
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="card-header">
+                        <span class="card-title">Scenario Probability Distribution</span>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+                            <div style="text-align: center; padding: 24px; background: rgba(16, 185, 129, 0.1); border-radius: 12px; border: 2px solid var(--accent-green);">
+                                <div style="font-size: 36px; font-weight: 700; color: var(--accent-green);">55%</div>
+                                <div style="font-size: 16px; font-weight: 600; margin-top: 8px;">Base Case</div>
+                                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">Continued expansion</div>
+                            </div>
+                            <div style="text-align: center; padding: 24px; background: rgba(245, 158, 11, 0.1); border-radius: 12px; border: 2px solid var(--accent-yellow);">
+                                <div style="font-size: 36px; font-weight: 700; color: var(--accent-yellow);">30%</div>
+                                <div style="font-size: 16px; font-weight: 600; margin-top: 8px;">Risk-Off Shock</div>
+                                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">15-20% equity decline</div>
+                            </div>
+                            <div style="text-align: center; padding: 24px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; border: 2px solid var(--accent-red);">
+                                <div style="font-size: 36px; font-weight: 700; color: var(--accent-red);">15%</div>
+                                <div style="font-size: 16px; font-weight: 600; margin-top: 8px;">Geopolitical Shock</div>
+                                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">20-30% equity decline</div>
+                            </div>
+                            <div style="text-align: center; padding: 24px; background: rgba(139, 92, 246, 0.1); border-radius: 12px; border: 2px solid var(--accent-purple);">
+                                <div style="font-size: 36px; font-weight: 700; color: var(--accent-purple);"><1%</div>
+                                <div style="font-size: 16px; font-weight: 600; margin-top: 8px;">Tail Risk</div>
+                                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">Capital breach scenario</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Scenario Impact by Risk Stripe</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="scenarioImpactChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">P&L Impact Distribution</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="pnlDistributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Calendar Page -->
+            <section id="page-calendar" class="page-section">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Risk Events Calendar — Next 30 Days</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="calendar-events">
+                            <div class="calendar-event">
+                                <div class="event-date" style="background: var(--accent-red);">
+                                    <div class="day">5-7</div>
+                                    <div class="month">FEB</div>
+                                </div>
+                                <div class="event-details">
+                                    <h4>US-Russia-Ukraine Talks (Abu Dhabi)</h4>
+                                    <p>Trilateral negotiations — potential breakthrough or breakdown. High market impact.</p>
+                                </div>
+                                <span class="risk-level critical">Critical</span>
+                            </div>
+                            <div class="calendar-event">
+                                <div class="event-date" style="background: var(--accent-yellow);">
+                                    <div class="day">8</div>
+                                    <div class="month">FEB</div>
+                                </div>
+                                <div class="event-details">
+                                    <h4>Japan Snap Election</h4>
+                                    <p>Outcome affects BOJ policy trajectory and yen. Polling uncertain.</p>
+                                </div>
+                                <span class="risk-level high">High</span>
+                            </div>
+                            <div class="calendar-event">
+                                <div class="event-date" style="background: var(--accent-yellow);">
+                                    <div class="day">12</div>
+                                    <div class="month">FEB</div>
+                                </div>
+                                <div class="event-details">
+                                    <h4>US CPI Release</h4>
+                                    <p>Critical test of "tariffs are transitory" thesis. Consensus core CPI 2.8% YoY.</p>
+                                </div>
+                                <span class="risk-level high">High</span>
+                            </div>
+                            <div class="calendar-event">
+                                <div class="event-date" style="background: var(--accent-blue);">
+                                    <div class="day">18</div>
+                                    <div class="month">FEB</div>
+                                </div>
+                                <div class="event-details">
+                                    <h4>Treasury Refunding Announcement</h4>
+                                    <p>Scrutiny of auction sizes amid elevated yields.</p>
+                                </div>
+                                <span class="risk-level medium">Medium</span>
+                            </div>
+                            <div class="calendar-event">
+                                <div class="event-date" style="background: var(--accent-blue);">
+                                    <div class="day">19</div>
+                                    <div class="month">FEB</div>
+                                </div>
+                                <div class="event-details">
+                                    <h4>FOMC Minutes Release</h4>
+                                    <p>January meeting minutes — hints on policy trajectory and Warsh views.</p>
+                                </div>
+                                <span class="risk-level medium">Medium</span>
+                            </div>
+                            <div class="calendar-event">
+                                <div class="event-date" style="background: var(--accent-yellow);">
+                                    <div class="day">28</div>
+                                    <div class="month">FEB</div>
+                                </div>
+                                <div class="event-details">
+                                    <h4>Core PCE Release</h4>
+                                    <p>Fed's preferred inflation measure. Critical for rate expectations.</p>
+                                </div>
+                                <span class="risk-level high">High</span>
+                            </div>
+                            <div class="calendar-event">
+                                <div class="event-date" style="background: var(--accent-red);">
+                                    <div class="day">1</div>
+                                    <div class="month">MAR</div>
+                                </div>
+                                <div class="event-details">
+                                    <h4>OPEC+ Decision</h4>
+                                    <p>Whether to resume monthly output increases. High oil price impact.</p>
+                                </div>
+                                <span class="risk-level critical">Critical</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Alerts Page -->
+            <section id="page-alerts" class="page-section">
+                <div class="tabs">
+                    <div class="tab active" data-tab="all">All Alerts</div>
+                    <div class="tab" data-tab="critical">Critical</div>
+                    <div class="tab" data-tab="warning">Warning</div>
+                    <div class="tab" data-tab="info">Info</div>
+                </div>
+
+                <div class="alerts-panel">
+                    <div class="alert-item">
+                        <div class="alert-icon critical">⚠️</div>
+                        <div class="alert-content">
+                            <h4>Standing Repo Facility Usage at COVID Highs</h4>
+                            <p>SRF borrowing surged to $15 billion in two days — highest since the pandemic. Indicates potential funding stress at some institutions. Monitor for broader contagion signals.</p>
+                        </div>
+                        <span class="alert-time">2 hours ago</span>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-icon critical">📉</div>
+                        <div class="alert-content">
+                            <h4>Equity Risk Premium Near Zero</h4>
+                            <p>S&P 500 ERP at 0.02% — investors receiving no compensation for equity risk vs. Treasuries. Historically rare condition signaling elevated correction risk.</p>
+                        </div>
+                        <span class="alert-time">4 hours ago</span>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-icon warning">📊</div>
+                        <div class="alert-content">
+                            <h4>JGB 40-Year Yield Breaches 4%</h4>
+                            <p>Japanese government bond yields at highest level since 2007. BOJ normalization creating global duration repricing risk.</p>
+                        </div>
+                        <span class="alert-time">6 hours ago</span>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-icon warning">🏢</div>
+                        <div class="alert-content">
+                            <h4>CMBS Office Delinquency Rate at 83.7%</h4>
+                            <p>Among office loans that matured before 2026, 83.7% show delinquencies. Accelerated CRE review recommended.</p>
+                        </div>
+                        <span class="alert-time">Yesterday</span>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-icon info">🌍</div>
+                        <div class="alert-content">
+                            <h4>US-Iran Diplomatic Talks Announced</h4>
+                            <p>Trump confirms Washington in talks with Iran. Oil corrected 5% on de-escalation. Maintain monitoring for reversal risk.</p>
+                        </div>
+                        <span class="alert-time">Yesterday</span>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-icon info">🏦</div>
+                        <div class="alert-content">
+                            <h4>Metropolitan Capital Bank Failure</h4>
+                            <p>First US bank failure of 2026. $19.7M estimated DIF loss. 1.62% net equity ratio far below thresholds. Monitor regional bank sector.</p>
+                        </div>
+                        <span class="alert-time">2 days ago</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Report Generator Modal -->
+    <div class="modal-overlay" id="reportModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Generate Risk Intelligence Report</h3>
+                <button class="modal-close" onclick="closeReportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Report Type</label>
+                    <select class="form-select">
+                        <option>Full CRO Risk Intelligence Brief</option>
+                        <option>Executive Summary Only</option>
+                        <option>Single Risk Stripe Deep Dive</option>
+                        <option>Scenario Analysis Report</option>
+                        <option>Regulatory Compliance Report</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Time Period</label>
+                    <select class="form-select">
+                        <option>Weekly (Current)</option>
+                        <option>Monthly</option>
+                        <option>Quarterly</option>
+                        <option>Custom Date Range</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Include Risk Stripes</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" checked> Market Risk</label>
+                        <label class="checkbox-item"><input type="checkbox" checked> Credit Risk</label>
+                        <label class="checkbox-item"><input type="checkbox" checked> Counterparty Risk</label>
+                        <label class="checkbox-item"><input type="checkbox" checked> Liquidity Risk</label>
+                        <label class="checkbox-item"><input type="checkbox" checked> Operational Risk</label>
+                        <label class="checkbox-item"><input type="checkbox" checked> Model Risk</label>
+                        <label class="checkbox-item"><input type="checkbox" checked> Regulatory Risk</label>
+                        <label class="checkbox-item"><input type="checkbox" checked> Geopolitical Risk</label>
+                        <label class="checkbox-item"><input type="checkbox" checked> Climate/ESG Risk</label>
+                        <label class="checkbox-item"><input type="checkbox" checked> Scenario Analysis</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Output Format</label>
+                    <select class="form-select">
+                        <option>Word Document (.docx)</option>
+                        <option>PDF</option>
+                        <option>PowerPoint (.pptx)</option>
+                        <option>HTML Report</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button class="btn btn-primary" style="flex: 1;" onclick="generateReport()">
+                        Generate Report
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeReportModal()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+            item.addEventListener('click', () => {
+                const page = item.dataset.page;
+
+                // Update nav
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+
+                // Update page
+                document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+                document.getElementById('page-' + page).classList.add('active');
+
+                // Update header
+                document.getElementById('page-title').textContent = item.textContent.trim().replace(/\d+$/, '').trim();
+                document.getElementById('breadcrumb-current').textContent = item.textContent.trim().replace(/\d+$/, '').trim();
+
+                // Initialize charts for the page
+                initPageCharts(page);
+            });
+        });
+
+        // Set current date
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // Modal functions
+        function openReportModal() {
+            document.getElementById('reportModal').classList.add('active');
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.remove('active');
+        }
+
+        function generateReport() {
+            alert('Report generation initiated. The CRO Risk Intelligence Brief will be generated and saved to your workspace folder.');
+            closeReportModal();
+        }
+
+        function refreshData() {
+            document.getElementById('alert-time').textContent = 'Just now';
+            // Simulate data refresh animation
+            document.querySelectorAll('.metric-value').forEach(el => {
+                el.style.opacity = '0.5';
+                setTimeout(() => el.style.opacity = '1', 500);
+            });
+        }
+
+        // Chart.js defaults
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = '#334155';
+        Chart.defaults.font.family = 'Inter';
+
+        // Initialize charts
+        function initPageCharts(page) {
+            switch(page) {
+                case 'executive':
+                    initExecutiveCharts();
+                    break;
+                case 'market':
+                    initMarketCharts();
+                    break;
+                case 'credit':
+                    initCreditCharts();
+                    break;
+                case 'counterparty':
+                    initCounterpartyCharts();
+                    break;
+                case 'liquidity':
+                    initLiquidityCharts();
+                    break;
+                case 'operational':
+                    initOperationalCharts();
+                    break;
+                case 'regulatory':
+                    initRegulatoryCharts();
+                    break;
+                case 'climate':
+                    initClimateCharts();
+                    break;
+                case 'scenarios':
+                    initScenarioCharts();
+                    break;
+            }
+        }
+
+        // Executive Charts
+        function initExecutiveCharts() {
+            // Risk Heatmap
+            const heatmapCtx = document.getElementById('riskHeatmapChart');
+            if (heatmapCtx && !heatmapCtx.chart) {
+                heatmapCtx.chart = new Chart(heatmapCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Market', 'Credit', 'Counterparty', 'Liquidity', 'Operational', 'Model', 'Regulatory', 'Geopolitical', 'Climate'],
+                        datasets: [{
+                            label: 'Risk Score',
+                            data: [7.5, 8.2, 5.5, 6.0, 7.0, 5.0, 4.5, 7.2, 5.5],
+                            backgroundColor: [
+                                'rgba(245, 158, 11, 0.8)',
+                                'rgba(239, 68, 68, 0.8)',
+                                'rgba(59, 130, 246, 0.8)',
+                                'rgba(59, 130, 246, 0.8)',
+                                'rgba(245, 158, 11, 0.8)',
+                                'rgba(59, 130, 246, 0.8)',
+                                'rgba(16, 185, 129, 0.8)',
+                                'rgba(245, 158, 11, 0.8)',
+                                'rgba(59, 130, 246, 0.8)'
+                            ],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { max: 10, grid: { color: '#334155' } },
+                            y: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            // VaR Trend
+            const varCtx = document.getElementById('varChart');
+            if (varCtx && !varCtx.chart) {
+                const days = Array.from({length: 30}, (_, i) => `Day ${i + 1}`);
+                varCtx.chart = new Chart(varCtx, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets: [{
+                            label: 'VaR (99%)',
+                            data: [42, 43, 41, 44, 45, 43, 42, 44, 46, 45, 44, 43, 45, 46, 47, 45, 44, 45, 46, 44, 43, 44, 45, 46, 45, 44, 45, 46, 45, 45],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }, {
+                            label: 'Limit',
+                            data: Array(30).fill(55),
+                            borderColor: '#ef4444',
+                            borderDash: [5, 5],
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top' } },
+                        scales: {
+                            y: { beginAtZero: false, grid: { color: '#334155' } },
+                            x: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // Asset Performance
+            const assetCtx = document.getElementById('assetPerformanceChart');
+            if (assetCtx && !assetCtx.chart) {
+                assetCtx.chart = new Chart(assetCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Gold', 'S&P 500', 'IG Credit', 'HY Credit', 'Treasuries', 'DXY', 'Oil'],
+                        datasets: [{
+                            label: 'YTD Return %',
+                            data: [8, 16, 4.2, 5.8, 1.2, -9.4, -15],
+                            backgroundColor: [
+                                '#10b981', '#10b981', '#10b981', '#10b981', '#10b981', '#ef4444', '#ef4444'
+                            ],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: '#334155' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Market Risk Charts
+        function initMarketCharts() {
+            // SPX vs VIX
+            const spxVixCtx = document.getElementById('spxVixChart');
+            if (spxVixCtx && !spxVixCtx.chart) {
+                const days = Array.from({length: 60}, (_, i) => `Day ${i + 1}`);
+                spxVixCtx.chart = new Chart(spxVixCtx, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets: [{
+                            label: 'S&P 500',
+                            data: Array.from({length: 60}, () => 6200 + Math.random() * 400),
+                            borderColor: '#3b82f6',
+                            yAxisID: 'y',
+                            tension: 0.4
+                        }, {
+                            label: 'VIX',
+                            data: Array.from({length: 60}, () => 14 + Math.random() * 8),
+                            borderColor: '#ef4444',
+                            yAxisID: 'y1',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { type: 'linear', position: 'left', grid: { color: '#334155' } },
+                            y1: { type: 'linear', position: 'right', grid: { display: false } },
+                            x: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // Yield Curve
+            const yieldCtx = document.getElementById('yieldCurveChart');
+            if (yieldCtx && !yieldCtx.chart) {
+                yieldCtx.chart = new Chart(yieldCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['3M', '6M', '1Y', '2Y', '3Y', '5Y', '7Y', '10Y', '20Y', '30Y'],
+                        datasets: [{
+                            label: 'Current',
+                            data: [4.1, 4.0, 3.9, 3.85, 3.9, 4.0, 4.1, 4.29, 4.5, 4.55],
+                            borderColor: '#3b82f6',
+                            tension: 0.4
+                        }, {
+                            label: '1 Month Ago',
+                            data: [4.2, 4.1, 4.0, 3.95, 4.0, 4.1, 4.2, 4.35, 4.6, 4.65],
+                            borderColor: '#94a3b8',
+                            borderDash: [5, 5],
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { grid: { color: '#334155' } },
+                            x: { grid: { color: '#334155' } }
+                        }
+                    }
+                });
+            }
+
+            // Sector Exposure
+            const sectorCtx = document.getElementById('sectorExposureChart');
+            if (sectorCtx && !sectorCtx.chart) {
+                sectorCtx.chart = new Chart(sectorCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Technology', 'Financials', 'Healthcare', 'Consumer', 'Industrials', 'Energy', 'Other'],
+                        datasets: [{
+                            data: [28, 18, 14, 12, 10, 8, 10],
+                            backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#06b6d4', '#ef4444', '#64748b']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'right' }
+                        }
+                    }
+                });
+            }
+
+            // FX Exposure
+            const fxCtx = document.getElementById('fxExposureChart');
+            if (fxCtx && !fxCtx.chart) {
+                fxCtx.chart = new Chart(fxCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['EUR', 'GBP', 'JPY', 'CNY', 'CHF', 'CAD', 'Other'],
+                        datasets: [{
+                            label: 'Net Exposure ($M)',
+                            data: [45, 32, -28, 15, 12, -8, 18],
+                            backgroundColor: (ctx) => ctx.raw >= 0 ? '#3b82f6' : '#ef4444',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: '#334155' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Credit Risk Charts
+        function initCreditCharts() {
+            // Credit Spreads
+            const spreadCtx = document.getElementById('creditSpreadsChart');
+            if (spreadCtx && !spreadCtx.chart) {
+                const months = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'];
+                spreadCtx.chart = new Chart(spreadCtx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'HY OAS (bp)',
+                            data: [320, 305, 295, 290, 292, 288, 290],
+                            borderColor: '#ef4444',
+                            yAxisID: 'y'
+                        }, {
+                            label: 'IG OAS (bp)',
+                            data: [98, 96, 94, 93, 94, 95, 95],
+                            borderColor: '#3b82f6',
+                            yAxisID: 'y1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { type: 'linear', position: 'left', grid: { color: '#334155' } },
+                            y1: { type: 'linear', position: 'right', grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            // Sector Credit Quality
+            const sectorCreditCtx = document.getElementById('sectorCreditChart');
+            if (sectorCreditCtx && !sectorCreditCtx.chart) {
+                sectorCreditCtx.chart = new Chart(sectorCreditCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['CRE', 'Healthcare', 'Consumer', 'Energy', 'Tech', 'Financials'],
+                        datasets: [{
+                            label: 'Stable',
+                            data: [20, 65, 70, 60, 85, 80],
+                            backgroundColor: '#10b981'
+                        }, {
+                            label: 'Watch',
+                            data: [35, 25, 20, 25, 10, 15],
+                            backgroundColor: '#f59e0b'
+                        }, {
+                            label: 'Distressed',
+                            data: [45, 10, 10, 15, 5, 5],
+                            backgroundColor: '#ef4444'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top' } },
+                        scales: {
+                            x: { stacked: true, grid: { display: false } },
+                            y: { stacked: true, max: 100, grid: { color: '#334155' } }
+                        }
+                    }
+                });
+            }
+
+            // CRE Maturity Wall
+            const creCtx = document.getElementById('creMaturityChart');
+            if (creCtx && !creCtx.chart) {
+                creCtx.chart = new Chart(creCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['2024', '2025', '2026', '2027', '2028', '2029+'],
+                        datasets: [{
+                            label: 'Maturity Volume ($B)',
+                            data: [650, 880, 936, 720, 580, 1200],
+                            backgroundColor: (ctx) => ctx.dataIndex === 2 ? '#ef4444' : '#3b82f6',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: '#334155' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Counterparty Charts
+        function initCounterpartyCharts() {
+            const typeCtx = document.getElementById('counterpartyTypeChart');
+            if (typeCtx && !typeCtx.chart) {
+                typeCtx.chart = new Chart(typeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['G-SIBs', 'Regional Banks', 'Broker-Dealers', 'Asset Managers', 'Insurance', 'Corporate'],
+                        datasets: [{
+                            data: [45, 15, 18, 12, 5, 5],
+                            backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#06b6d4', '#64748b']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right' } }
+                    }
+                });
+            }
+
+            const collateralCtx = document.getElementById('collateralChart');
+            if (collateralCtx && !collateralCtx.chart) {
+                collateralCtx.chart = new Chart(collateralCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Cash', 'UST', 'Agency MBS', 'IG Corp', 'Equities', 'Other'],
+                        datasets: [{
+                            label: 'Collateral ($B)',
+                            data: [1.8, 1.2, 0.8, 0.5, 0.3, 0.2],
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: '#334155' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Liquidity Charts
+        function initLiquidityCharts() {
+            const bufferCtx = document.getElementById('liquidityBufferChart');
+            if (bufferCtx && !bufferCtx.chart) {
+                const months = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'];
+                bufferCtx.chart = new Chart(bufferCtx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'LCR %',
+                            data: [145, 143, 144, 142, 141, 142],
+                            borderColor: '#3b82f6',
+                            fill: false
+                        }, {
+                            label: 'Minimum',
+                            data: [100, 100, 100, 100, 100, 100],
+                            borderColor: '#ef4444',
+                            borderDash: [5, 5],
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { min: 80, grid: { color: '#334155' } }
+                        }
+                    }
+                });
+            }
+
+            const fundingCtx = document.getElementById('fundingMixChart');
+            if (fundingCtx && !fundingCtx.chart) {
+                fundingCtx.chart = new Chart(fundingCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Retail Deposits', 'Wholesale Funding', 'Senior Debt', 'Repo', 'Other'],
+                        datasets: [{
+                            data: [40, 25, 18, 12, 5],
+                            backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#64748b']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right' } }
+                    }
+                });
+            }
+        }
+
+        // Operational Risk Charts
+        function initOperationalCharts() {
+            const incidentCtx = document.getElementById('incidentTrendChart');
+            if (incidentCtx && !incidentCtx.chart) {
+                const months = ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'];
+                incidentCtx.chart = new Chart(incidentCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'Critical',
+                            data: [1, 2, 1, 0, 1, 2, 1, 1, 2, 1, 2, 2],
+                            backgroundColor: '#ef4444'
+                        }, {
+                            label: 'High',
+                            data: [3, 4, 2, 3, 4, 3, 2, 4, 3, 4, 3, 3],
+                            backgroundColor: '#f59e0b'
+                        }, {
+                            label: 'Medium',
+                            data: [8, 6, 7, 5, 6, 7, 8, 6, 7, 5, 6, 5],
+                            backgroundColor: '#3b82f6'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top' } },
+                        scales: {
+                            x: { stacked: true, grid: { display: false } },
+                            y: { stacked: true, grid: { color: '#334155' } }
+                        }
+                    }
+                });
+            }
+
+            const categoryCtx = document.getElementById('opRiskCategoryChart');
+            if (categoryCtx && !categoryCtx.chart) {
+                categoryCtx.chart = new Chart(categoryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Cyber/IT', 'Process', 'People', 'Vendor', 'Regulatory', 'Other'],
+                        datasets: [{
+                            data: [35, 25, 15, 12, 8, 5],
+                            backgroundColor: ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#64748b']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right' } }
+                    }
+                });
+            }
+        }
+
+        // Regulatory Charts
+        function initRegulatoryCharts() {
+            const capitalCtx = document.getElementById('capitalRatioChart');
+            if (capitalCtx && !capitalCtx.chart) {
+                const quarters = ['Q1 25', 'Q2 25', 'Q3 25', 'Q4 25', 'Q1 26'];
+                capitalCtx.chart = new Chart(capitalCtx, {
+                    type: 'line',
+                    data: {
+                        labels: quarters,
+                        datasets: [{
+                            label: 'CET1',
+                            data: [12.8, 13.0, 13.1, 13.0, 13.2],
+                            borderColor: '#3b82f6'
+                        }, {
+                            label: 'Tier 1',
+                            data: [14.2, 14.4, 14.5, 14.4, 14.6],
+                            borderColor: '#10b981'
+                        }, {
+                            label: 'Total Capital',
+                            data: [16.5, 16.6, 16.7, 16.6, 16.8],
+                            borderColor: '#8b5cf6'
+                        }, {
+                            label: 'CET1 Min',
+                            data: [10.5, 10.5, 10.5, 10.5, 10.5],
+                            borderColor: '#ef4444',
+                            borderDash: [5, 5],
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { min: 8, grid: { color: '#334155' } }
+                        }
+                    }
+                });
+            }
+
+            const mraCtx = document.getElementById('mraStatusChart');
+            if (mraCtx && !mraCtx.chart) {
+                mraCtx.chart = new Chart(mraCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['BSA/AML', 'Consumer', 'Capital', 'Liquidity', 'IT/Cyber', 'Model'],
+                        datasets: [{
+                            label: 'Open',
+                            data: [3, 2, 1, 2, 3, 1],
+                            backgroundColor: '#f59e0b'
+                        }, {
+                            label: 'Past Due',
+                            data: [1, 0, 0, 1, 1, 0],
+                            backgroundColor: '#ef4444'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top' } },
+                        scales: {
+                            x: { stacked: true, grid: { display: false } },
+                            y: { stacked: true, grid: { color: '#334155' } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Climate Charts
+        function initClimateCharts() {
+            const transitionCtx = document.getElementById('transitionRiskChart');
+            if (transitionCtx && !transitionCtx.chart) {
+                transitionCtx.chart = new Chart(transitionCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Oil & Gas', 'Utilities', 'Mining', 'Transportation', 'Manufacturing', 'Real Estate'],
+                        datasets: [{
+                            label: 'Exposure ($M)',
+                            data: [340, 280, 180, 220, 150, 120],
+                            backgroundColor: (ctx) => {
+                                const colors = ['#ef4444', '#f59e0b', '#f59e0b', '#3b82f6', '#3b82f6', '#10b981'];
+                                return colors[ctx.dataIndex];
+                            },
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: '#334155' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            const physicalCtx = document.getElementById('physicalRiskChart');
+            if (physicalCtx && !physicalCtx.chart) {
+                physicalCtx.chart = new Chart(physicalCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Hurricane (Coastal)', 'Wildfire (West)', 'Flood (River)', 'Heat Stress', 'Sea Level', 'Other'],
+                        datasets: [{
+                            data: [35, 25, 18, 10, 7, 5],
+                            backgroundColor: ['#3b82f6', '#ef4444', '#06b6d4', '#f59e0b', '#8b5cf6', '#64748b']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right' } }
+                    }
+                });
+            }
+        }
+
+        // Scenario Charts
+        function initScenarioCharts() {
+            const impactCtx = document.getElementById('scenarioImpactChart');
+            if (impactCtx && !impactCtx.chart) {
+                impactCtx.chart = new Chart(impactCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Market', 'Credit', 'Liquidity', 'Operational'],
+                        datasets: [{
+                            label: 'Base Case',
+                            data: [-2, -1, 0, -0.5],
+                            backgroundColor: '#10b981'
+                        }, {
+                            label: 'Risk-Off',
+                            data: [-12, -8, -4, -2],
+                            backgroundColor: '#f59e0b'
+                        }, {
+                            label: 'Geopolitical',
+                            data: [-18, -12, -8, -4],
+                            backgroundColor: '#ef4444'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top' } },
+                        scales: {
+                            y: { grid: { color: '#334155' }, title: { display: true, text: 'P&L Impact %' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            const pnlCtx = document.getElementById('pnlDistributionChart');
+            if (pnlCtx && !pnlCtx.chart) {
+                pnlCtx.chart = new Chart(pnlCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['-25%', '-20%', '-15%', '-10%', '-5%', '0%', '+5%', '+10%'],
+                        datasets: [{
+                            label: 'Probability',
+                            data: [2, 5, 10, 18, 25, 22, 12, 6],
+                            backgroundColor: (ctx) => {
+                                const idx = ctx.dataIndex;
+                                if (idx < 3) return '#ef4444';
+                                if (idx < 5) return '#f59e0b';
+                                return '#10b981';
+                            },
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: '#334155' }, title: { display: true, text: 'Probability %' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize executive charts on load
+        initExecutiveCharts();
+
+        // Auto-refresh simulation
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }, 60000);
+    </script>
+</body>
+</html>
