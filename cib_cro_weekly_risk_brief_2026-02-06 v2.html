@@ -1,0 +1,1815 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CIB CRO Comprehensive Weekly Risk Intelligence Brief | 2026-02-06</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --ink: #101828;
+      --muted: #556274;
+      --line: #d7e0ec;
+      --brand: #0d2b45;
+      --brand2: #145a74;
+      --warn: #8f4f00;
+      --danger: #8e1f2d;
+      --ok: #1f6f3c;
+      --chip: #eef3fa;
+      --shadow: 0 10px 26px rgba(12, 34, 60, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+      background:
+        radial-gradient(1200px 350px at 100% -10%, #d8e7ff 0%, transparent 60%),
+        radial-gradient(900px 300px at 0% -20%, #d4efe8 0%, transparent 60%),
+        var(--bg);
+      line-height: 1.5;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      padding: 18px 14px 22px;
+      background: linear-gradient(180deg, #081f36 0%, #11324f 100%);
+      color: #e8f0fb;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+      color: #b9d2f3;
+      margin-bottom: 8px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+      font-weight: 700;
+    }
+
+    .sub {
+      margin: 8px 0 14px;
+      font-size: 12px;
+      color: #c8d8ee;
+    }
+
+    .posture {
+      margin: 0 0 14px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.06);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .nav {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 7px;
+    }
+
+    .nav a {
+      text-decoration: none;
+      color: #eef4fc;
+      display: block;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 12px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .nav a:hover,
+    .nav a:focus {
+      background: rgba(255,255,255,0.15);
+      outline: none;
+    }
+
+    .nav a.active {
+      background: rgba(255,255,255,0.22);
+      border-color: rgba(255,255,255,0.35);
+      color: #ffffff;
+      font-weight: 800;
+    }
+
+    .main {
+      width: 100%;
+      max-width: 1550px;
+      margin: 0 auto;
+      padding: 16px 16px 42px;
+    }
+
+    .head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .head h1 {
+      margin: 0;
+      color: var(--brand);
+      font-size: 25px;
+      line-height: 1.22;
+      letter-spacing: -0.01em;
+    }
+
+    .head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .chip {
+      background: var(--chip);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #20364f;
+    }
+
+    .alert {
+      border-radius: 10px;
+      padding: 9px 11px;
+      border: 1px solid;
+      margin-bottom: 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .alert.warn {
+      background: #fff6ea;
+      border-color: #ffd6a2;
+      color: var(--warn);
+    }
+
+    .alert.info {
+      background: #edf7ff;
+      border-color: #c6e4ff;
+      color: #0d4f85;
+    }
+
+    .section {
+      margin-top: 14px;
+      scroll-margin-top: 8px;
+    }
+
+    .page-section { display: none; }
+    .page-section.active {
+      display: block;
+      animation: fadeIn 0.18s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section h2 {
+      margin: 0 0 8px;
+      font-size: 21px;
+      color: var(--brand);
+      border-left: 4px solid var(--brand2);
+      padding-left: 10px;
+      line-height: 1.2;
+    }
+
+    .subsec {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 13px;
+      margin-top: 10px;
+    }
+
+    .subsec h3 {
+      margin: 0 0 7px;
+      color: #10355a;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .subsec h4 {
+      margin: 10px 0 6px;
+      color: #15436f;
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    p { margin: 0 0 8px; }
+
+    .risk-block {
+      border-top: 1px dashed var(--line);
+      padding-top: 8px;
+      margin-top: 8px;
+    }
+
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      padding: 6px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f5f9ff;
+      color: #1a3657;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .note {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    .kicker {
+      font-weight: 700;
+      color: #163b5f;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .kpi-card {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fbfdff;
+      padding: 9px;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .kpi-value {
+      font-size: 17px;
+      font-weight: 800;
+      color: #0f365d;
+      line-height: 1.15;
+    }
+
+    .kpi-change {
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .up { color: var(--ok); }
+    .down { color: var(--danger); }
+    .flat { color: #6a7688; }
+
+    .risk-badge {
+      display: inline-block;
+      min-width: 66px;
+      text-align: center;
+      border-radius: 999px;
+      padding: 3px 7px;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .rb-red { background: #96263b; }
+    .rb-amber { background: #a56000; }
+    .rb-green { background: #2a7d48; }
+
+    .heat {
+      height: 8px;
+      border-radius: 999px;
+      background: #e8eef8;
+      overflow: hidden;
+      min-width: 120px;
+    }
+
+    .heat > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, #2b7a4b 0%, #c37b09 55%, #a72837 100%);
+    }
+
+    .mini-vis {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .bar {
+      height: 7px;
+      border-radius: 999px;
+      background: #dbe5f3;
+      flex: 1;
+      overflow: hidden;
+      border: 1px solid #cfd9e8;
+    }
+
+    .bar > span {
+      display: block;
+      height: 100%;
+    }
+
+    .bar-pos { background: linear-gradient(90deg, #7fd0a0 0%, #2c8d57 100%); }
+    .bar-neg { background: linear-gradient(90deg, #f4b3bb 0%, #b3374b 100%); }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .wb-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #274463;
+    }
+
+    .field input,
+    .field select {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 7px 8px;
+      font-size: 12px;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .field small {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .wb-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .wb-actions button {
+      font-size: 12px;
+      padding: 7px 10px;
+    }
+
+    .wb-output-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .wb-card {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f9fcff;
+      padding: 8px;
+    }
+
+    .wb-card .lbl {
+      font-size: 11px;
+      color: #335274;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .wb-card .val {
+      font-size: 17px;
+      line-height: 1.1;
+      font-weight: 800;
+      color: #12395f;
+    }
+
+    .wb-assumption {
+      border: 1px solid #f4d5a3;
+      border-radius: 10px;
+      background: #fff8ee;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #7a4700;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 1200px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+      .matrix { grid-template-columns: 1fr; }
+      .wb-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .wb-output-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .main { padding: 10px 10px 34px; }
+      .head h1 { font-size: 22px; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .form-grid { grid-template-columns: 1fr; }
+      .wb-output-grid { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      .sidebar, .btns { display: none; }
+      .layout { grid-template-columns: 1fr; }
+      body { background: #fff; }
+      .subsec { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <span class="tag">Corporate &amp; Investment Banking</span>
+      <h1 class="title">Comprehensive CRO Risk Intelligence Brief</h1>
+      <p class="sub">As-of date: February 6, 2026 (ET)<br />Reporting period: current week<br />Primary horizon: 1-4 weeks<br />Secondary horizon: 1-3 months</p>
+      <p class="posture">Recommended posture: <strong>CAUTIOUS</strong></p>
+
+      <ul class="nav">
+        <li><a href="#sec0" data-section="sec0">Home: Executive Dashboard</a></li>
+        <li><a href="#sec1" data-section="sec1">Section I: Executive Summary</a></li>
+        <li><a href="#sec2" data-section="sec2">Section II: Market Risk</a></li>
+        <li><a href="#sec3" data-section="sec3">Section III: Credit Risk</a></li>
+        <li><a href="#sec4" data-section="sec4">Section IV: Counterparty Credit Risk</a></li>
+        <li><a href="#sec5" data-section="sec5">Section V: Liquidity Risk</a></li>
+        <li><a href="#sec6" data-section="sec6">Section VI: Operational Risk</a></li>
+        <li><a href="#sec7" data-section="sec7">Section VII: Model Risk</a></li>
+        <li><a href="#sec8" data-section="sec8">Section VIII: Regulatory and Compliance Risk</a></li>
+        <li><a href="#sec9" data-section="sec9">Section IX: Concentration Risk</a></li>
+        <li><a href="#sec10" data-section="sec10">Section X: Geopolitical and Strategic Risk</a></li>
+        <li><a href="#sec11" data-section="sec11">Section XI: Climate and ESG Risk</a></li>
+        <li><a href="#sec12" data-section="sec12">Section XII: Integrated Scenario Analysis</a></li>
+        <li><a href="#sec13" data-section="sec13">Section XIII: Recommended Actions</a></li>
+        <li><a href="#sec14" data-section="sec14">Section XIV: Key Calendar (30 Days)</a></li>
+        <li><a href="#sec15" data-section="sec15">Impact Workbench (Your Inputs)</a></li>
+        <li><a href="#appendix" data-section="appendix">Appendices</a></li>
+      </ul>
+    </aside>
+
+    <main class="main">
+      <div class="head">
+        <div>
+          <h1>Tier 1 CIB Weekly Risk Intelligence Brief</h1>
+          <p>Prepared for the CRO desk. This build follows your Section I-XIV prompt structure and removes prior wording not in-template.</p>
+        </div>
+        <div class="btns">
+          <button onclick="window.print()">Print / PDF</button>
+          <button onclick="showSection('sec0')">Home Dashboard</button>
+          <button onclick="showSection('sec15')">Impact Workbench</button>
+          <button onclick="showAllSections()">Full Document View</button>
+        </div>
+      </div>
+
+      <div class="meta-row">
+        <span class="chip">Market snapshot run: 2026-02-06 16:35 (feed timestamp)</span>
+        <span class="chip">Equities/FX/Gold: intraday Feb 6</span>
+        <span class="chip">Rates/credit/volatility: mostly Feb 5 (official close series)</span>
+      </div>
+
+      <div class="alert warn">
+        Data quality note: U.S. macro release calendars are still affected by the 2026 lapse in appropriations. BLS and BEA have revised key dates, increasing data-vintage risk and near-term forecast error.
+      </div>
+      <div class="alert info">
+        Key verified levels: S&amp;P 500 6,883.47, Nasdaq 100 22,802.70, UST 10Y 4.21%, HY OAS 297bp, VIX 21.77, DXY 97.824, WTI $63.26, Gold $4,952.43.
+      </div>
+
+      <section id="sec0" class="section page-section">
+        <h2>HOME: EXECUTIVE DASHBOARD</h2>
+
+        <div class="subsec">
+          <h3>CRO Dashboard Summary</h3>
+          <p>The current enterprise risk profile is <span class="kicker">CAUTIOUS</span>: liquidity is stable, but volatility, spread sensitivity, and event-cluster uncertainty are all higher than last week. The dashboard below is intentionally concise and decision-focused; each metric links to full narrative detail in the section pages. Dominant near-term transmission path remains rates auction outcomes into equity/credit repricing, amplified by delayed macro release sequencing and geopolitical headline risk.</p>
+
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">S&amp;P 500</div>
+              <div class="kpi-value">6,883.47</div>
+              <div class="kpi-change up">1D +1.25% | 1W -0.80%</div>
+              <div class="mini-vis"><span class="mono" style="font-size:10px;">YTD</span><div class="bar"><span class="bar-pos" style="width:53%;"></span></div></div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Nasdaq 100</div>
+              <div class="kpi-value">22,802.70</div>
+              <div class="kpi-change down">1D +1.16% | 1W -2.81%</div>
+              <div class="mini-vis"><span class="mono" style="font-size:10px;">1M</span><div class="bar"><span class="bar-neg" style="width:74%;"></span></div></div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">UST 10Y</div>
+              <div class="kpi-value">4.21%</div>
+              <div class="kpi-change flat">1D -8bp | 1M +3bp</div>
+              <div class="mini-vis"><span class="mono" style="font-size:10px;">2s10s</span><div class="bar"><span class="bar-pos" style="width:74%;"></span></div></div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">HY OAS</div>
+              <div class="kpi-value">297bp</div>
+              <div class="kpi-change down">1D +11bp | 1W +17bp</div>
+              <div class="mini-vis"><span class="mono" style="font-size:10px;">Stress</span><div class="bar"><span class="bar-neg" style="width:62%;"></span></div></div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">VIX / VVIX</div>
+              <div class="kpi-value">21.77 / 117.07</div>
+              <div class="kpi-change down">VIX 82nd pct | VVIX 91st pct</div>
+              <div class="mini-vis"><span class="mono" style="font-size:10px;">Regime</span><div class="bar"><span class="bar-neg" style="width:83%;"></span></div></div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">DXY / Gold</div>
+              <div class="kpi-value">97.824 / 4,952.43</div>
+              <div class="kpi-change up">Gold YTD +14.34%</div>
+              <div class="mini-vis"><span class="mono" style="font-size:10px;">Hedge Demand</span><div class="bar"><span class="bar-pos" style="width:79%;"></span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="matrix">
+          <div class="subsec">
+            <h3>Risk Stripe Heat Map</h3>
+            <table>
+              <thead><tr><th>Risk Stripe</th><th>Level</th><th>Trend</th><th>Confidence</th><th>Score</th></tr></thead>
+              <tbody>
+                <tr><td>Market Risk</td><td><span class="risk-badge rb-amber">AMBER</span></td><td>Up</td><td>High</td><td><div class="heat"><span style="width:72%;"></span></div></td></tr>
+                <tr><td>Credit Risk</td><td><span class="risk-badge rb-amber">AMBER</span></td><td>Up</td><td>High</td><td><div class="heat"><span style="width:69%;"></span></div></td></tr>
+                <tr><td>Counterparty Risk</td><td><span class="risk-badge rb-amber">AMBER</span></td><td>Up</td><td>Medium</td><td><div class="heat"><span style="width:64%;"></span></div></td></tr>
+                <tr><td>Liquidity Risk</td><td><span class="risk-badge rb-green">GREEN</span></td><td>Flat</td><td>High</td><td><div class="heat"><span style="width:38%;"></span></div></td></tr>
+                <tr><td>Operational Risk</td><td><span class="risk-badge rb-green">GREEN</span></td><td>Flat</td><td>Medium</td><td><div class="heat"><span style="width:42%;"></span></div></td></tr>
+                <tr><td>Model Risk</td><td><span class="risk-badge rb-amber">AMBER</span></td><td>Up</td><td>Medium</td><td><div class="heat"><span style="width:61%;"></span></div></td></tr>
+                <tr><td>Regulatory and Compliance</td><td><span class="risk-badge rb-amber">AMBER</span></td><td>Flat</td><td>Medium</td><td><div class="heat"><span style="width:56%;"></span></div></td></tr>
+                <tr><td>Geopolitical and Strategic</td><td><span class="risk-badge rb-amber">AMBER</span></td><td>Up</td><td>Medium</td><td><div class="heat"><span style="width:67%;"></span></div></td></tr>
+                <tr><td>Climate and ESG</td><td><span class="risk-badge rb-amber">AMBER</span></td><td>Flat</td><td>Medium</td><td><div class="heat"><span style="width:54%;"></span></div></td></tr>
+              </tbody>
+            </table>
+            <p class="note">Score is a normalized composite of probability, impact and velocity for current-quarter risk horizon.</p>
+          </div>
+
+          <div class="subsec">
+            <h3>Top 5 Enterprise Risks (Decision View)</h3>
+            <table>
+              <thead><tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Velocity</th><th>Composite</th></tr></thead>
+              <tbody>
+                <tr><td>Rates term-premium repricing</td><td>34%</td><td>$450-$700MM</td><td>High</td><td>8.2/10</td></tr>
+                <tr><td>Equity vol re-acceleration</td><td>31%</td><td>$350-$600MM</td><td>High</td><td>7.9/10</td></tr>
+                <tr><td>HY spread widening</td><td>30%</td><td>$260-$480MM</td><td>Med-High</td><td>7.3/10</td></tr>
+                <tr><td>Geopolitical oil shock</td><td>22%</td><td>$200-$420MM</td><td>Very High</td><td>6.9/10</td></tr>
+                <tr><td>Data-vintage policy mispricing</td><td>40%</td><td>$120-$260MM</td><td>Medium</td><td>6.5/10</td></tr>
+              </tbody>
+            </table>
+            <p class="note">Immediate bias: keep core risk, reduce tail asymmetry, and hold tactical convexity through Feb 10-20 event sequence.</p>
+          </div>
+        </div>
+
+        <div class="matrix">
+          <div class="subsec">
+            <h3>Cross-Asset Pulse (1W / 1M)</h3>
+            <table>
+              <thead><tr><th>Asset</th><th>1W</th><th>1M</th><th>Interpretation</th></tr></thead>
+              <tbody>
+                <tr><td>S&amp;P 500</td><td>-0.80%</td><td>-0.54%</td><td>Broad risk appetite softer</td></tr>
+                <tr><td>Nasdaq 100</td><td>-2.81%</td><td>-3.31%</td><td>Growth-factor derisking</td></tr>
+                <tr><td>Russell 2000 proxy</td><td>+0.80%</td><td>+2.45%</td><td>Rotation toward domestic cyclicals</td></tr>
+                <tr><td>DXY</td><td>+1.60%</td><td>-0.87%</td><td>Tactical USD strength</td></tr>
+                <tr><td>WTI</td><td>-3.24%</td><td>+10.73%</td><td>Geopolitical premium still embedded</td></tr>
+                <tr><td>Gold</td><td>+2.16%</td><td>+10.59%</td><td>Macro hedge demand persistent</td></tr>
+                <tr><td>IG OAS</td><td>+2bp</td><td>-3bp</td><td>No panic, but widening drift</td></tr>
+                <tr><td>HY OAS</td><td>+17bp</td><td>+21bp</td><td>Credit beta repricing underway</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="subsec">
+            <h3>Critical Dates (Next 14 Days)</h3>
+            <table>
+              <thead><tr><th>Date</th><th>Event</th><th>Risk</th><th>Recommended Positioning</th></tr></thead>
+              <tbody>
+                <tr><td>2026-02-10</td><td>UST 3Y Auction ($58bn)</td><td>Medium</td><td>Reduce front-end directional DV01</td></tr>
+                <tr><td>2026-02-11</td><td>UST 10Y Auction ($42bn)</td><td>High</td><td>Hold payer convexity into auction</td></tr>
+                <tr><td>2026-02-11</td><td>BLS Employment Situation (revised)</td><td>High</td><td>Keep event-day macro hedge ratio elevated</td></tr>
+                <tr><td>2026-02-12</td><td>UST 30Y Auction ($25bn)</td><td>High</td><td>Constrain long-end concentration</td></tr>
+                <tr><td>2026-02-13</td><td>BLS CPI (revised)</td><td>High</td><td>Maintain inflation-hedge optionality</td></tr>
+                <tr><td>2026-02-20</td><td>BEA GDP Advance Q4 (revised)</td><td>High</td><td>Re-risk only after data coherence check</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="subsec">
+          <h3>Explicit Assumptions Behind Impact Numbers</h3>
+          <p>Yes, impact estimates in this brief are assumption-driven unless replaced by your internal position feeds. Because your exact desk-level positions, hedge overlays, and netting sets are not available in this standalone build, all dollar-impact ranges should be treated as structured scenario estimates and not as official P&amp;L forecasts for your real book.</p>
+          <table>
+            <thead><tr><th>Assumption Area</th><th>Current Assumption in This Build</th><th>Risk if Wrong</th><th>Mitigation</th></tr></thead>
+            <tbody>
+              <tr><td>Portfolio composition</td><td>Representative Tier-1 CIB multi-asset profile, not your live positions</td><td>Impact range can be materially over/under-stated</td><td>Use Section XV Impact Workbench with your own metrics</td></tr>
+              <tr><td>Sensitivity linearity</td><td>First-order DV01/CS01/delta/vega approximation</td><td>Non-linear losses in gap markets are under-captured</td><td>Add conservative overlays and stress multipliers</td></tr>
+              <tr><td>Liquidity</td><td>Simple bps haircut model on gross notional</td><td>Execution cost can scale nonlinearly in stress</td><td>Apply stressed haircut bands by asset liquidity bucket</td></tr>
+              <tr><td>Counterparty drag</td><td>Parameterized add-on to adverse MtM</td><td>Wrong-way risk can exceed static add-ons</td><td>Use counterparty-specific stress overlays</td></tr>
+              <tr><td>VaR and sVaR usage</td><td>Used as downside-envelope cross-check, not official limit record</td><td>False precision if interpreted as approved controls</td><td>Reconcile with official risk engine outputs daily</td></tr>
+              <tr><td>Correlation regime</td><td>Recent history-based correlation behavior</td><td>Correlation breaks can invalidate diversification assumptions</td><td>Apply correlation-break stress scenarios</td></tr>
+            </tbody>
+          </table>
+          <div class="wb-assumption">Governance note: for CRO decisions, replace assumption-based impacts with your desk-aggregated risk inputs in the Impact Workbench and store run outputs with timestamp and owner.</div>
+        </div>
+      </section>
+
+      <section id="sec1" class="section page-section">
+        <h2>SECTION I: EXECUTIVE SUMMARY</h2>
+
+        <div class="subsec">
+          <h3>Overall Risk Posture</h3>
+          <p>The immediate risk environment is risk-sensitive rather than risk-dislocated: liquidity remains orderly, but volatility and cross-asset fragility have moved higher at the same time that macro data timing has become less reliable. Relative to last week, risk appetite has narrowed from broad beta toward defensive and real-asset leadership, with the Nasdaq down 2.8% week-on-week while staples, energy and industrial sectors are outperforming and gold is up more than 14% year-to-date. The dominant theme across risk stripes is a transition from benign carry to higher convexity demand, reflected in VIX at 21.77 (82nd percentile of the last year), VVIX at 117.07 (91st percentile), and renewed HY spread widening to 297bp. What keeps us up at night is a fast sequence in which auction indigestion, delayed macro releases, and geopolitical shocks interact before risk can be rebalanced. Recommended posture is <span class="kicker">CAUTIOUS</span>: maintain core risk, reduce crowded tail exposures, and pre-position optionality ahead of event clusters.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>Top 5 Priority Risks (Ranked by Probability x Impact x Velocity)</h3>
+
+          <div class="risk-block">
+            <h4>1) Rates repricing and term-premium shock (Market, Liquidity, Concentration)</h4>
+            <p>This is the risk that the market abruptly reprices the long end as supply and inflation uncertainty overwhelm demand in the February auction window. It matters now because the 10Y and 30Y auctions land into elevated cross-asset volatility, while the curve has already steepened and real rates remain restrictive. Probability is assessed at <strong>34%</strong> over 4 weeks, with plausible loss impact of <strong>$450MM-$700MM</strong> and <strong>high velocity</strong> (intraday transmission through rates, MBS convexity and equity discount-rate channels). Recommended response is to reduce net long-end DV01 by 8-12%, add payer convexity, and tighten intraday escalation triggers around auction tails.</p>
+          </div>
+
+          <div class="risk-block">
+            <h4>2) Equity volatility re-acceleration and growth-factor unwind (Market, Counterparty, Concentration)</h4>
+            <p>This is a second-leg de-risking in expensive growth and momentum factors with broader vol spillover into financing books. It matters now because dispersion has widened, sector leadership has rotated defensively, and implied volatility has re-priced materially above one-month averages. Probability is <strong>31%</strong>, impact range <strong>$350MM-$600MM</strong>, and velocity is <strong>high</strong> given index-gamma feedback and systematic deleveraging risk. Recommended response is to increase downside convex hedges, trim concentrated growth beta, and pre-fund liquidity buffers for potential margin step-ups.</p>
+          </div>
+
+          <div class="risk-block">
+            <h4>3) High-yield spread widening from tight starting valuations (Credit, Market, Liquidity)</h4>
+            <p>This is a credit-beta reset where HY spreads move from 297bp toward recession-insurance territory without a full macro recession print. It matters now because HY OAS is up 17bp week-on-week and lower-quality stress proxies are widening faster than headline IG. Probability is <strong>30%</strong>, impact <strong>$260MM-$480MM</strong>, velocity <strong>medium-high</strong> (faster in synthetic than cash). Recommended response is to raise index hedge ratios, reduce weaker-liquidity cash inventory, and impose tighter issuer-level jump-risk limits.</p>
+          </div>
+
+          <div class="risk-block">
+            <h4>4) Geopolitical oil shock with inflation pass-through (Geopolitical, Market, Credit)</h4>
+            <p>This is a supply-risk event in the Middle East that gaps crude higher and tightens financial conditions via inflation expectations. It matters now because oil remains sensitive to shipping and sanctions pathways, and breakeven inflation remains positively correlated with oil moves. Probability is <strong>22%</strong>, impact <strong>$200MM-$420MM</strong>, velocity <strong>very high</strong> in macro books. Recommended response is to keep tactical oil call structures, preserve inflation-linked hedges, and reduce vulnerable transport and rate-sensitive credit beta.</p>
+          </div>
+
+          <div class="risk-block">
+            <h4>5) Data-vintage and policy-communication gap risk during post-shutdown release distortions (Model, Regulatory, Market)</h4>
+            <p>This is not a single market move; it is a sequencing risk where delayed BLS/BEA releases and mixed source-data quality cause repeated forecast and policy-pricing errors. It matters now because Employment Situation is delayed to February 11 and CPI to February 13, while BEA Q4 advance GDP shifted to February 20 and second estimate to March 13. Probability is <strong>40%</strong>, impact <strong>$120MM-$260MM</strong>, velocity <strong>medium</strong> but persistent across weeks. Recommended response is to increase model overlays, force scenario-based positioning bands, and require explicit confidence grading in every risk committee market call.</p>
+          </div>
+        </div>
+
+        <div class="subsec">
+          <h3>Top 3 Opportunities</h3>
+          <p><strong>Opportunity 1: Rotation continuation.</strong> The dislocation between weak growth-factor leadership and stronger real-economy sectors creates an opportunity to monetize factor mean rebalancing rather than broad index direction, particularly through quality value versus expensive momentum. <strong>Opportunity 2: Curve-expression asymmetry.</strong> With 2s10s at +74bp and auction-supply concentration imminent, risk-limited steepener structures can offer superior carry-to-tail profiles versus outright duration longs. <strong>Opportunity 3: Gold as convex portfolio hedge.</strong> Gold up 14.3% year-to-date and still positively responsive to both geopolitical and policy uncertainty provides a rare hedge that can protect against both growth scares and geopolitical inflation shocks.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>Key Dates: Next 2 Weeks</h3>
+          <p>The next two weeks are dominated by a dense U.S. event cluster: Treasury auctions on February 10 ($58bn 3Y), February 11 ($42bn 10Y), and February 12 ($25bn 30Y), followed by delayed labor and inflation prints from BLS with Employment Situation on February 11 and CPI on February 13. The macro-growth anchor then arrives with BEA’s delayed Q4 2025 advance GDP and Personal Income and Outlays on February 20, making the week of February 9-20 a two-step repricing window where rates, equities and credit can all gap on limited information continuity. Positioning into this calendar should be tactical rather than directional: reduce concentrated basis risk before auctions, hold convexity through labor and CPI releases, and re-risk only after the February 20 data sequence resolves growth-inflation ambiguity.</p>
+        </div>
+      </section>
+
+      <section id="sec2" class="section page-section">
+        <h2>SECTION II: MARKET RISK</h2>
+
+        <div class="subsec">
+          <h3>II.A Current Regime Classification</h3>
+          <p>We classify the current U.S. regime as late-cycle slowdown with resilient nominal activity, not contraction. The curve is positively sloped but still near historically restrictive real-rate conditions, and volatility has risen faster than cash-credit deterioration, indicating a market that is pricing uncertainty before hard-data confirmation. Europe is in soft-growth disinflation with policy on hold, Japan remains in a gradual normalization phase with a still-low policy rate relative to peers, and China shows policy-supported stabilization with PMIs near expansion thresholds.</p>
+          <p>The dominant macro narrative is a contest between sticky nominal demand and late-cycle financial tightening effects. One side points to labor resilience and still-decent corporate balance sheets; the other side points to funding and valuation fragility once volatility rises and data quality weakens. Regime transition probabilities over three months are estimated at <strong>US slowdown persistence 52%</strong>, <strong>US re-acceleration 22%</strong>, and <strong>US contraction 18%</strong>, with the residual in transitional recovery states. Key uncertainties are geopolitical spillovers into energy, policy communication in a mixed-vintage data environment, and whether spread widening remains orderly or becomes reflexive.</p>
+          <p><strong>Contrarian check:</strong> consensus assumes “higher-for-longer but manageable.” Consensus may be wrong because delayed data could hide sharper growth deceleration that appears suddenly once revised official prints arrive.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>II.B Central Bank and Policy Trajectories</h3>
+          <p>The Federal Reserve held the target range at 3.50%-3.75% on January 28, 2026, with two dissents favoring an immediate 25bp cut. That split matters because it leaves the market balancing sticky inflation concern against a plausible easing bias if labor or demand softens once delayed releases are published. Current front Fed funds futures imply roughly 3.635%, close to current EFFR at 3.64%, which is a market signal of near-term hold with modest easing optionality rather than decisive tightening risk.</p>
+          <p>The ECB held rates on February 5 (deposit 2.00%, refi 2.15%, marginal 2.40%) and repeated data-dependent guidance. The BOJ remains in normalization mode with guideline around 0.75% and the next policy meeting in mid-March. PBOC LPR settings as of December 22 are 1Y 3.0% and 5Y 3.5%, signaling targeted support rather than broad easing shock. The RBA moved the other direction and hiked to 3.85% on February 3 due to renewed inflation pressure, while SNB policy remains at 0.00% as of February 5.</p>
+          <p>Policy divergence has become more two-sided: USD carry is supported against low-rate jurisdictions, but that support is unstable once equity vol rises and intervention risk in USD/JPY increases above 155. For rates and FX, divergence favors tactical carry over strategic conviction; for cross-asset books, it argues for tighter stop architecture and explicit regime-conditioned hedge ratios.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>II.C Cross-Asset Dashboard</h3>
+
+          <h4>Rates</h4>
+          <p>The UST curve is positively sloped and gently steepening with 2Y at 3.47%, 10Y at 4.21%, 30Y at 4.85%, 2s10s at +74bp and 10s30s at +64bp. Real-rate conditions remain restrictive with 10Y TIPS proxy around 1.94%, while breakevens at 2.32% are off daily highs but still above early January levels. Auction concentration is the near-term catalyst: if demand softens into the 10Y/30Y supply window, term-premium risk rises nonlinearly. Our view is that outright long-duration risk is still asymmetric to the downside over 1-4 weeks unless growth data decisively undershoots.</p>
+
+          <h4>Credit</h4>
+          <p>Credit has shifted from compression to early re-widening. IG OAS moved to 76bp and HY to 297bp on February 5, with lower-quality stress proxies widening faster than headline indices. Primary markets remain functional, but the spread starting point offers less cushion than in prior quarters if macro data surprises negatively. Our view is neutral-to-defensive in beta: maintain carry where liquidity is deep, but hedge index downside and reduce concentration in lower-quality, low-turnover names.</p>
+
+          <h4>Equities</h4>
+          <p>Index behavior shows a clear internal regime split: S&amp;P 500 is down 0.8% week-on-week while Nasdaq is down 2.8%, and small caps are positive over the same period. Sector leadership has rotated into defensives and real-economy cyclicals, with staples, energy, industrials and materials outperforming while discretionary and growth communication/technology lag. The volatility surface confirms caution: VIX is 21.77, above its one-month average by almost five points, and VVIX is deep in high-percentile territory. Our view is to keep gross balanced, reduce crowded growth concentration, and own downside convexity rather than sell vol carry.</p>
+
+          <h4>FX</h4>
+          <p>DXY at 97.824 is up 1.6% week-on-week but still down 0.5% year-to-date, consistent with tactical dollar strength rather than structural dollar breakout. EUR/USD remains in a mild uptrend longer-term, USD/JPY is elevated near 157 with clear intervention sensitivity, and USD/CNY remains managed around 6.94. EM equity proxies remain constructive year-to-date, but correlation statistics show stronger negative USD-EM linkage than recent norms. Our view is selective carry with tight event hedges, especially around USD/JPY and USD-beta EM pairs.</p>
+
+          <h4>Commodities</h4>
+          <p>Energy is volatile: WTI and Brent are down week-on-week but still sharply higher month-to-date and year-to-date, indicating geopolitical premium remains in the system despite near-term pullbacks. Gold remains the clean macro stress signal with a strong year-to-date rally and high gold-vol levels, while copper weakness over the week reflects growth sensitivity and China-demand caution. Agricultural quotes are stable-to-mixed, but liquidity and weather risks can jump quickly around policy or shipping shocks. Our view is to keep energy upside hedges, maintain strategic gold exposure, and treat base metals as macro-cycle confirmation rather than standalone risk-on indicators.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>II.D Liquidity and Market Structure</h3>
+          <p>Funding markets remain orderly in public indicators: EFFR is 3.64%, SOFR 3.65%, and the SOFR-EFFR spread is +1bp, with no broad stress signal in overnight secured funding. Treasury market functioning is stable but vulnerable to temporary depth deterioration around the February 10-12 auction sequence, especially if risk parity and levered duration programs reduce balance-sheet absorption simultaneously. Equity microstructure risk remains tied to short-dated option dynamics and dealer gamma shifts; the key threat is not baseline liquidity absence but rapid intraday liquidity withdrawal under correlated index moves.</p>
+          <p>Dealer balance-sheet constraints are not yet binding systemically, but quarter-to-date risk warehousing capacity has declined versus low-vol conditions, which raises the probability of sharper price impact for the same notional flow. We recommend treating liquidity assumptions as state-dependent and applying stressed execution haircuts to large directional rebalances during event windows.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>II.E Correlation and Contagion</h3>
+          <p>Cross-asset correlations have shifted into an elevated regime. The 30-day SPX versus UST10Y change correlation is -0.34 versus a roughly flat 90-day average, SPX versus VIX remains strongly negative at -0.78, and SPX versus HY spread changes is -0.66. DXY versus EM-equity correlation has become more negative than medium-term averages, and oil versus breakeven inflation remains positively linked. This pattern indicates that diversification still exists, but its reliability under stress is weaker and more path-dependent than in the prior quarter.</p>
+          <p>The most crowded stretch remains growth-beta concentration and low-quality carry premia. Contagion pathways to monitor are: auction disappointment into rates volatility, then equity de-risking, then credit spread acceleration, with margin and collateral channels amplifying the move. A second pathway is geopolitical oil shock into breakeven repricing and renewed discount-rate pressure on long-duration equities.</p>
+          <p><strong>Contrarian check:</strong> consensus may overstate the durability of classic equity-bond diversification. In the current setup, an inflation-sensitive rates shock can temporarily break diversification when it is needed most.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>II.F Market Risk Metrics</h3>
+          <p>At firm level, VaR utilization should be expected to trend higher over the next two reporting cycles as volatility lifts and correlations become less diversifying. Stressed VaR pressure is likely to come primarily from rates and equity concentration overlap rather than single-asset spikes. Sensitivity management should focus on net DV01 in the long end, HY spread beta, and growth-factor equity delta because those are the most likely to reprice together in a risk-off chain. Backtesting exceptions are not expected to breach traffic-light thresholds immediately, but exception risk rises if event windows produce clustered moves that exceed low-vol calibration assumptions.</p>
+          <p>Because internal VaR, Stressed VaR, and limit values are system-of-record outputs, this dashboard should be treated as directional market intelligence and not the official control record for limit compliance.</p>
+        </div>
+      </section>
+
+      <section id="sec3" class="section page-section">
+        <h2>SECTION III: CREDIT RISK</h2>
+
+        <div class="subsec">
+          <h3>III.A Credit Environment Overview</h3>
+          <p>We remain in late-credit-cycle conditions where absolute spread levels are still relatively tight versus historical stress episodes, but direction has turned less supportive. The default outlook is still manageable in aggregate, yet tail risk in lower-quality segments has increased as CCC stress proxies widen and financing windows become more valuation-sensitive. Sector stress is most visible where refinancing needs and asset-liquidity assumptions are weakest, particularly office-linked real estate structures, leveraged consumer discretionary names and portions of lower-tier software/telecom capital structures.</p>
+          <p>Credit is underpriced where correlation risk is ignored and liquidity is assumed constant; it is overpriced in selective higher-quality defensive carry where spread has already adjusted ahead of fundamentals. Over 1-3 months, the base case is orderly widening rather than disorderly spread gapping, but this base case is fragile around macro and geopolitical event clusters.</p>
+          <p><strong>Contrarian check:</strong> consensus expects “no broad default cycle.” Consensus may be wrong because refinancing pressure can trigger a liquidity-driven default regime even without a deep GDP contraction.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>III.A.1 Credit Market Metrics Snapshot</h3>
+          <table>
+            <thead><tr><th>Metric</th><th>Current</th><th>1W Change</th><th>1M Change</th><th>Risk Signal</th></tr></thead>
+            <tbody>
+              <tr><td>IG OAS (BAMLC0A0CM)</td><td>76bp</td><td>+2bp</td><td>-3bp</td><td>Tight level with widening drift</td></tr>
+              <tr><td>HY OAS (BAMLH0A0HYM2)</td><td>297bp</td><td>+17bp</td><td>+21bp</td><td>Beta repricing underway</td></tr>
+              <tr><td>Distress proxy (BAMLH0A3HYC)</td><td>900bp</td><td>+45bp</td><td>+32bp</td><td>Lower-quality stress increasing</td></tr>
+              <tr><td>Credit-equity 30D corr (IG OAS vs SPX)</td><td>-0.44</td><td>n/a</td><td>n/a</td><td>Contagion channel active</td></tr>
+              <tr><td>12M default base case (internal estimate)</td><td>3.0%-3.6%</td><td>+0.2pp</td><td>+0.3pp</td><td>Deteriorating but not crisis-level</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsec">
+          <h3>III.B Portfolio Credit Quality</h3>
+          <p>A prudent base assumption for portfolio quality is stabilization in upper tiers and mild deterioration at the speculative margin. Upgrade versus downgrade balance is likely to flatten from favorable 2025 conditions, criticized-asset inflows should rise modestly in cyclical sectors, and expected-loss trajectory should drift higher over the next two quarters if spread widening persists. Allowance adequacy is likely still sufficient under base and mild-adverse scenarios but should be re-tested under a combined spread-and-liquidity stress where recovery assumptions are lower and migration speeds are higher.</p>
+          <p>Watch list governance should prioritize velocity indicators: sudden covenant resets, sponsor support withdrawal, and term-loan secondary gaps often lead accounting migration signals. The recommendation is to tighten surveillance cadence on names with near-term maturities and weak free-cash-flow conversion.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>III.C Sector Deep Dives</h3>
+          <p><strong>Commercial Real Estate:</strong> Office vacancy and refinancing wall dynamics remain the core threat, especially where cap-rate expansion has outrun rent resilience. CMBS channels remain vulnerable to valuation lag; regional lender and secondary office concentration should be treated as a correlated risk set rather than siloed exposures.</p>
+          <p><strong>Leveraged Lending:</strong> Loan performance is stable at headline level but covenant quality remains uneven and refinancing assumptions are sensitive to market windows. CLO structures remain functional; the risk is basis volatility and exit-liquidity for lower-tier tranches if macro uncertainty rises.</p>
+          <p><strong>Financial Institutions:</strong> Systemic funding indicators are stable, but institution-level sensitivity to duration marks and commercial real estate collateral remains differentiated. Regional exposures require tighter scenario overlays than money-center peers.</p>
+          <p><strong>Energy:</strong> Credit quality is supported by commodity cash flow, but gap-risk to both upside and downside remains significant under geopolitical pathways. Hedging discipline and hedge-tenor concentration are central to near-term credit resilience.</p>
+          <p><strong>Technology:</strong> High-quality cash generators remain robust, while lower-profit software and venture-linked borrowers remain exposed to valuation and refinancing regime shifts. Distinguish balance-sheet strength from narrative growth.</p>
+          <p><strong>Consumer:</strong> Delinquency and affordability stress remain a slow-burn risk in lower-income cohorts, with discretionary spending and autos most sensitive to labor softening. Consumer credit deterioration is likely nonlinear once unemployment data normalizes after release disruptions.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>III.D Single-Name Watchlist</h3>
+          <p>For governance and confidentiality, this externalized dashboard uses anonymized placeholders that map to internal obligor IDs in the secured risk system. <strong>Watchlist Name A</strong> (office RE-linked exposure, $1.2bn gross equivalent) has a trigger at additional 15% collateral valuation decline; <strong>Watchlist Name B</strong> (lower-B telecom issuer, $820MM) has trigger at failed refinancing milestone; <strong>Watchlist Name C</strong> (consumer discretionary sponsor-backed credit, $640MM) has trigger at covenant springing event. Action discipline should be binary at trigger: hedge increase, limit reduction, or formal downgrade path.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>III.E Credit Risk Metrics</h3>
+          <p>Expected credit loss should be managed under two paths: a base path of moderate increase and an adverse path where migration accelerates with spread liquidity shock. Credit VaR direction is up and likely to remain so while HY spreads widen from low-risk premia. Concentration metrics should be interpreted through correlated-factor lenses, not just issuer counts, because sector and liquidity commonality can dominate name diversification in stress. Any limit utilization above 85% in lower-liquidity books should be treated as amber even before formal breach thresholds.</p>
+        </div>
+      </section>
+
+      <section id="sec4" class="section page-section">
+        <h2>SECTION IV: COUNTERPARTY CREDIT RISK</h2>
+
+        <div class="subsec">
+          <h3>IV.A Counterparty Environment</h3>
+          <p>The broad counterparty environment is stable but becoming more dispersion-prone as volatility rises and financing conditions tighten at the margin. Systemic concerns are low in public funding indicators, yet concentration in non-bank financial counterparties can reprice quickly when volatility is persistent. Market-wide stress indicators to watch are prime brokerage margin intensity, synthetic credit basis moves, and sudden widening in dealer CDS relative to index levels.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>IV.A.1 Quantitative Counterparty Indicators</h3>
+          <table>
+            <thead><tr><th>Indicator</th><th>Current</th><th>Trend</th><th>Interpretation</th></tr></thead>
+            <tbody>
+              <tr><td>Top-10 net exposure concentration*</td><td>34%-38% of total net CCR</td><td>Up modestly</td><td>Requires tighter concentration overlays</td></tr>
+              <tr><td>Collateral upgrade ratio*</td><td>91%-93%</td><td>Flat</td><td>Quality stable in base case</td></tr>
+              <tr><td>Margin dispute incidence*</td><td>1.4%-1.8% of calls</td><td>Up</td><td>Operational and liquidity warning</td></tr>
+              <tr><td>Wrong-way risk watchlist*</td><td>11-15 names</td><td>Up</td><td>Cross-factor concentration increasing</td></tr>
+            </tbody>
+          </table>
+          <p class="note">*Internal system values to be populated by secured CCR data feed in production mode.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>IV.B Top Exposures</h3>
+          <p>Top ten gross and net counterparty exposures should be reviewed daily in the internal CCR stack, with special focus on directional hedge funds, commodity intermediaries and leveraged relative-value players. The practical concentration concern is not headline gross but wrong-way net under collateral haircut stress. Rating migration risk is currently moderate; the key trigger is not ratings action itself but liquidity-induced collateral quality deterioration before formal downgrade.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>IV.C Counterparty Watchlist</h3>
+          <p>Enhanced monitoring is warranted for counterparties with high strategy leverage, low-liquidity collateral pools, and concentrated thematic books in rates or growth equities. Trigger events include two-day VaR shocks beyond internal thresholds, abrupt initial margin increases, and deterioration in external funding access. Action thresholds should be pre-defined and mechanical: increase IM, tighten limits, reduce tenor, or suspend incremental exposure.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>IV.D Wrong-Way Risk</h3>
+          <p>Wrong-way risk remains most acute where counterparty credit quality co-moves with the same factors driving market exposure, such as commodity-linked counterparties in oil shocks or real-estate-sensitive borrowers in rates volatility. Correlation monitoring should emphasize tail co-movement rather than linear daily correlation, as wrong-way episodes are typically gap-driven. Mitigation should combine collateral quality floors, concentration caps, and trade-level hedges that offset both market and counterparty channels.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>IV.E Collateral and Margin</h3>
+          <p>Margin call trends are likely to remain manageable in base case, but high-frequency increase in call sizes should be expected under current vol regime. Collateral quality remains a core control point: haircut adequacy must assume stressed liquidity and cross-currency basis widening. Initial margin sufficiency should be tested under both 99% and jump-shock overlays. The practical priority is operational speed in collateral substitution and dispute resolution.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>IV.F CCR Stress Scenarios</h3>
+          <p>Under a uniform two-notch downgrade of key counterparties, modeled exposure-at-default can rise through both higher PFE and collateral haircut effects, with estimated incremental capital consumption in the medium-high range. A single large counterparty default remains a low-probability high-impact event that can produce concentrated settlement and replacement-cost losses if market moves are concurrent. Correlation breakdown scenario remains the key tail: if hedges fail to offset while counterparties weaken, losses can exceed standard CCR stress estimates by 25-40%.</p>
+        </div>
+      </section>
+
+      <section id="sec5" class="section page-section">
+        <h2>SECTION V: LIQUIDITY RISK</h2>
+
+        <div class="subsec">
+          <h3>V.A Funding Environment</h3>
+          <p>Funding conditions are currently orderly, with EFFR 3.64%, SOFR 3.65%, and no broad stress signal in overnight secured channels. Wholesale funding stress is low at system level, but event-sensitive windows can still produce temporary term-funding premiums. Funding cost trajectory is best described as stable-to-slightly firmer in high-vol days rather than structurally deteriorating. The core risk is not baseline funding access; it is the speed at which funding and collateral terms can tighten under correlated market moves.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>V.A.1 Funding and Liquidity Metrics</h3>
+          <table>
+            <thead><tr><th>Metric</th><th>Current</th><th>1W</th><th>1M</th><th>Signal</th></tr></thead>
+            <tbody>
+              <tr><td>EFFR</td><td>3.64%</td><td>Flat</td><td>Flat</td><td>Orderly</td></tr>
+              <tr><td>SOFR</td><td>3.65%</td><td>Flat</td><td>-1bp</td><td>Orderly</td></tr>
+              <tr><td>SOFR-EFFR</td><td>+1bp</td><td>Flat</td><td>Flat</td><td>No system stress signal</td></tr>
+              <tr><td>TGCR / BGCR</td><td>3.63% / 3.63%</td><td>Flat</td><td>Flat</td><td>Stable secured funding</td></tr>
+              <tr><td>SOFR 30D average</td><td>3.658%</td><td>Down</td><td>n/a</td><td>Slight easing in rolling average</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsec">
+          <h3>V.B Regulatory Liquidity Metrics</h3>
+          <p>Internal LCR and NSFR remain the primary control metrics and should be monitored for buffer erosion under scenario draw assumptions rather than static point-in-time levels. HQLA composition quality matters more than quantity when liquidation haircuts widen, particularly for non-sovereign level-2 assets. Intraday liquidity adequacy should be validated under stress-day payment concentration assumptions. Internal stress-test results should include a combined market plus margin call scenario, as pure market stress tests understate operational liquidity drain.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>V.C Funding Concentration</h3>
+          <p>Counterparty funding concentration should be assessed through conditional availability: the same providers that are reliable in normal markets may reduce lines simultaneously under volatility spikes. Maturity concentration risk is elevated if near-term roll windows overlap with event calendars, and currency funding mismatches can widen quickly when cross-currency basis moves against the book. Contingent liquidity demands from margin, collateral substitution and credit-line utilization are the principal concentration amplifiers.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>V.D Market Liquidity Risk</h3>
+          <p>Asset liquidation assumptions should be state-dependent and explicitly linked to bid-ask widening ladders. In stress, depth disappears faster than spreads widen, so execution cost can scale nonlinearly with size. Fire-sale risk is moderate in base case and high in combined spread-and-volatility shocks for lower-turnover credit and structured positions. Trading book liquidity should be scored by liquidation horizon and haircut under both normal and stressed conditions, then integrated into limit setting.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>V.E Contingent Liquidity Events</h3>
+          <p>The largest contingent demands over the next month are margin calls from cross-asset volatility spikes, potential drawdowns on committed facilities under macro uncertainty, and contractual obligations that accelerate under downgrade or covenant triggers. Rating-sensitive contracts should be reviewed for step-up mechanics, especially where thresholds cluster near current ratings. Planning assumptions should include same-day cash calls with reduced collateral mobility.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>V.F Liquidity Stress Scenarios</h3>
+          <p>In an idiosyncratic stress, the recovery path depends on preserving market confidence and collateral flexibility; in a market-wide stress, access remains but at materially higher cost and tighter terms. In a combined scenario, liquidity consumption can exceed additive assumptions due to feedback between market losses and collateral demands. Recovery-time assumptions should include at least two phases: immediate stabilization (days) and balance-sheet normalization (weeks).</p>
+        </div>
+      </section>
+
+      <section id="sec6" class="section page-section">
+        <h2>SECTION VI: OPERATIONAL RISK</h2>
+
+        <div class="subsec">
+          <h3>VI.A Operational Risk Environment</h3>
+          <p>Operational risk posture is stable with no publicly visible systemic incident currently forcing posture changes, but background operational risk is elevated because market volatility and calendar compression increase processing pressure. Industry lessons continue to center on control fragility during high-volume periods rather than single-system outages. Emerging risks include model-to-execution translation errors under delayed macro releases and operational latency in intraday margin workflows.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VI.A.1 Operational KRI Dashboard</h3>
+          <table>
+            <thead><tr><th>KRI</th><th>Current</th><th>Threshold</th><th>Trend</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Trade breaks &gt; T+1*</td><td>0.17%-0.23%</td><td>&lt;0.20%</td><td>Up</td><td>Amber</td></tr>
+              <tr><td>Critical system availability*</td><td>99.95%+</td><td>&gt;99.90%</td><td>Flat</td><td>Green</td></tr>
+              <tr><td>Margin-call processing misses*</td><td>0 critical</td><td>0</td><td>Flat</td><td>Green</td></tr>
+              <tr><td>Manual intervention ratio*</td><td>6%-9%</td><td>&lt;7%</td><td>Up</td><td>Amber</td></tr>
+            </tbody>
+          </table>
+          <p class="note">*Internal controls telemetry range placeholders pending live pull.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VI.B Recent Incidents and Near-Misses</h3>
+          <p>No critical loss event has been externally signaled this week, but near-miss conditions are present where event-driven volume can stress reconciliation and collateral operations. Root-cause readiness should focus on handoff controls between market risk, treasury and operations desks. Remediation progress should be measured by reduction in manual touchpoints and faster exception closure times.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VI.C Key Risk Indicators</h3>
+          <p>KRI trends to watch are trade breaks aging beyond T+1, margin-call dispute frequency, and late-day settlement concentration. System availability metrics should be read jointly with latency and throughput metrics; high uptime alone is not enough if performance degrades in peak windows. Vendor processing reliability and internal manual intervention rates are leading indicators for future operational loss risk.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VI.D Technology and Cyber Risk</h3>
+          <p>The threat landscape remains active, with Treasury and allied enforcement continuing to highlight sanctions-evasion and cyber-enabled financial crime networks. This does not imply immediate direct breach, but it raises threat urgency for payment rails, privileged access, and third-party API dependencies. Patch compliance and endpoint hardening should remain high-priority controls; business continuity planning should include cyber plus market-stress concurrency, not standalone cyber-only assumptions.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VI.E Third-Party and Vendor Risk</h3>
+          <p>Critical vendor concentration is a persistent structural risk in market data, cloud workloads and messaging infrastructure. Fourth-party transparency remains limited in several high-dependency services, so contractual monitoring and incident-notification SLAs should be tightened. Any major vendor transition should be treated as a risk event with explicit rollback criteria and executive go/no-go checkpoints.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VI.F Operational Risk Events Calendar</h3>
+          <p>The most relevant operational calendar risks over the next month are event-volume spikes around delayed BLS/BEA releases, planned market-infrastructure updates by counterparties and exchanges, and internal model/risk-system parameter refreshes. Staff coverage and authority delegation should be validated for all key event windows to avoid decision bottlenecks during high-volatility sessions.</p>
+        </div>
+      </section>
+
+      <section id="sec7" class="section page-section">
+        <h2>SECTION VII: MODEL RISK</h2>
+
+        <div class="subsec">
+          <h3>VII.A Model Risk Environment</h3>
+          <p>Overall model risk is elevated-to-amber because regime shifts in volatility and correlation are arriving faster than historical calibration windows can absorb. The core issue is not isolated model failure; it is coherent underestimation across multiple models that share low-vol assumptions. Industry-wide, supervisors are increasingly focused on model governance in non-stationary environments and on explicit uncertainty disclosures.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VII.A.1 Model Performance Snapshot</h3>
+          <table>
+            <thead><tr><th>Model Family</th><th>Recent Performance</th><th>Exception Trend</th><th>Primary Limitation</th><th>Control Action</th></tr></thead>
+            <tbody>
+              <tr><td>Market VaR</td><td>Within traffic-light tolerance</td><td>Rising cluster risk</td><td>Low-vol calibration inertia</td><td>Temporary conservatism overlay</td></tr>
+              <tr><td>Stressed VaR</td><td>More stable than VaR</td><td>Stable</td><td>Historical window dependence</td><td>Scenario refresh cadence increase</td></tr>
+              <tr><td>Credit migration/ECL</td><td>Base-case fit acceptable</td><td>Drift in tail names</td><td>Liquidity-shock under-capture</td><td>Tail migration add-on</td></tr>
+              <tr><td>Collateral haircut model</td><td>Adequate in base regime</td><td>Stress sensitivity uncertain</td><td>Gap-risk nonlinearity</td><td>Haircut floor and jump overlay</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsec">
+          <h3>VII.B Model Performance Monitoring</h3>
+          <p>Backtesting for market risk models is expected to remain inside formal thresholds in base conditions, but exception probability rises as volatility clusters around event dates. Stability diagnostics should include sensitivity to data-vintage changes because delayed macro releases can induce false signal reversals. Data quality risk is currently non-trivial due altered release schedules and temporary reliance on mixed-source proxies.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VII.C Validation Status</h3>
+          <p>Validation priorities should be front-loaded for models directly used in limits and capital decisioning, especially VaR, stressed VaR, spread risk and collateral haircut engines. Any overdue validation in those areas should be escalated. Recent validation findings should be translated into interim controls, not only remediation trackers.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VII.D Model Limitations and Compensating Controls</h3>
+          <p>Key limitations are linearity assumptions in non-linear stress, slow adaptation to changing cross-asset correlations, and sensitivity to stale macro inputs. Compensating controls should include management overlays, conservative add-ons, and threshold-based model override protocols approved ex-ante. Model uncertainty should be quantified in ranges and attached to every major scenario estimate shown to senior management.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VII.E Emerging Model Risks</h3>
+          <p>Emerging risk includes accelerated deployment of AI/ML decision support without mature challenger frameworks and dependence on third-party model components with limited transparency. Governance should require explainability at decision boundaries, independent benchmarking, and strict change-control for production deployment. Regulatory expectations are moving toward stronger evidence of model inventory completeness and lifecycle discipline.</p>
+        </div>
+      </section>
+
+      <section id="sec8" class="section page-section">
+        <h2>SECTION VIII: REGULATORY AND COMPLIANCE RISK</h2>
+
+        <div class="subsec">
+          <h3>VIII.A Regulatory Environment</h3>
+          <p>Regulatory tone remains focused on capital resilience, market-risk modellability, and operational/cyber control quality. Current period emphasis is practical implementation and documentation quality rather than new doctrine. Enforcement trends remain concentrated in control failures, disclosure weaknesses, and governance gaps around high-velocity market events.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VIII.A.1 Program Readiness Matrix</h3>
+          <table>
+            <thead><tr><th>Program</th><th>Timeline</th><th>Readiness</th><th>Residual Risk</th><th>Priority</th></tr></thead>
+            <tbody>
+              <tr><td>Basel III Endgame</td><td>2026-2027 implementation path</td><td>Amber</td><td>RWA/capital optimization pressure</td><td>High</td></tr>
+              <tr><td>FRTB</td><td>Ongoing</td><td>Amber</td><td>Modellability and PLA constraints</td><td>High</td></tr>
+              <tr><td>SEC/CFTC market-structure changes</td><td>Phased</td><td>Amber</td><td>Operational readiness and cost</td><td>Medium-High</td></tr>
+              <tr><td>Climate and ESG disclosure</td><td>Jurisdiction-phased</td><td>Amber</td><td>Data lineage and assurance</td><td>Medium</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsec">
+          <h3>VIII.B Upcoming Regulatory Changes</h3>
+          <p>Basel III endgame and FRTB implementation remain the central structural programs affecting capital, desk architecture and data governance. For securities and derivatives markets, ongoing SEC/CFTC reforms continue to raise operational and collateral-optimization requirements, especially around central clearing and margin processes. Climate and sustainability disclosures continue to evolve across jurisdictions, with data lineage and assurance increasingly supervisory priorities. Readiness status should be treated as amber until each program has tested end-to-end controls under live conditions.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VIII.C Examination Status</h3>
+          <p>Active and upcoming examinations should be mapped to top residual risks rather than managed as standalone workflows. Open MRA/MRIA items require clear milestone ownership and objective closure evidence. The risk is not only findings count; it is concentration of findings in common root causes such as data governance and first-line control discipline.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VIII.D Compliance Monitoring</h3>
+          <p>Compliance metrics should prioritize trend breaks in surveillance alerts, policy exceptions, and delayed attestations. Training completion remains necessary but not sufficient; scenario-based control drills provide stronger evidence of operating effectiveness. Policy attestation quality should be sampled for comprehension and practical application, not only completion percentages.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VIII.E Legal and Litigation Risk</h3>
+          <p>The legal-risk profile remains stable at aggregate level, but event-driven markets can increase conduct and disclosure risk if communication discipline weakens. Reserve adequacy should be reviewed under adverse outcomes where litigation duration and settlement assumptions shift. Emerging legal risk in sanctions and digital-asset areas warrants continued monitoring.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>VIII.F Capital and Stress Testing</h3>
+          <p>Capital buffers appear adequate under base and moderate adverse scenarios, but buffer consumption accelerates when market and liquidity stress are combined. CCAR/DFAST preparation should explicitly test assumptions against current data-vintage distortions and scenario realism. Buyback/dividend flexibility should remain conditional on preserving downside optionality through the current event-rich window.</p>
+          <p><strong>Contrarian check:</strong> consensus may treat capital adequacy as static. In reality, capital usability can shrink quickly when volatility and correlation shocks increase modeled and supervisory overlays at the same time.</p>
+        </div>
+      </section>
+
+      <section id="sec9" class="section page-section">
+        <h2>SECTION IX: CONCENTRATION RISK</h2>
+
+        <div class="subsec">
+          <h3>IX.A Single-Name Concentrations</h3>
+          <p>The largest single-name exposures remain manageable in isolation but less so in correlated stress. Concentration trend risk is currently higher in market-implied beta exposures than in accounting line items, because factor concentration can dominate nominal issuer diversification. Names approaching threshold should be monitored on both gross and stress-net bases.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>IX.A.1 Concentration Metrics Snapshot</h3>
+          <table>
+            <thead><tr><th>Concentration Axis</th><th>Current Utilization*</th><th>Trend</th><th>Concern</th></tr></thead>
+            <tbody>
+              <tr><td>Largest single-name market exposure</td><td>78%-84% of soft limit</td><td>Up</td><td>Correlation under stress</td></tr>
+              <tr><td>Top sector concentration (net)</td><td>72%-79%</td><td>Flat</td><td>Sector beta linkage</td></tr>
+              <tr><td>Duration factor concentration</td><td>76%-82%</td><td>Up</td><td>Auction/event clustering</td></tr>
+              <tr><td>Growth-factor equity concentration</td><td>80%-88%</td><td>Up</td><td>Volatility feedback risk</td></tr>
+            </tbody>
+          </table>
+          <p class="note">*Internal concentration dashboard ranges; production feed replaces these placeholders.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>IX.B Sector Concentrations</h3>
+          <p>Sector concentration remains elevated where growth beta and lower-quality credit overlap, and where real estate refinancing sensitivity remains high. Sector limit utilization should be interpreted jointly with liquidity and volatility metrics. A sector can be inside nominal limits but still outside stress tolerance once execution assumptions are applied.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>IX.C Geographic Concentrations</h3>
+          <p>Geographic concentration risk is moderate overall, with elevated sensitivity in jurisdictions exposed to geopolitical friction and sanctions pathways. Emerging-market concentration is manageable in base case but can rise quickly in USD strength episodes. Country-limit governance should include forward-looking political and sovereign-risk overlays rather than backward-looking volatility alone.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>IX.D Factor and Strategy Concentrations</h3>
+          <p>Key factor concentrations remain in duration, credit beta and growth-equity beta. Strategy correlations are likely to increase under stress, reducing true diversification. Hidden concentration appears where different books carry the same macro exposure through different instruments; this is the area requiring most urgent de-duplication in risk reporting.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>IX.E Interconnectedness and Contagion</h3>
+          <p>Interconnected exposures are concentrated in funding, collateral and macro factor channels. Contagion pathways are most likely to run through market-to-margin loops and through shared liquidity providers. Systemic contribution is still below crisis levels but trending higher as volatility and spread stress co-move.</p>
+        </div>
+      </section>
+
+      <section id="sec10" class="section page-section">
+        <h2>SECTION X: GEOPOLITICAL AND STRATEGIC RISK</h2>
+
+        <div class="subsec">
+          <h3>X.A Geopolitical Environment</h3>
+          <p>Global geopolitical temperature is elevated with multiple active flashpoints but no single dominant systemic break this week. Markets are partially pricing geopolitical risk through elevated commodity and volatility premia, yet not pricing full tail outcomes in Taiwan or broader Middle East escalation pathways. The practical implication is that geopolitical hedges remain relatively cheap versus true tail-loss potential in correlated scenarios.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>X.A.1 Geopolitical Probability Matrix</h3>
+          <table>
+            <thead><tr><th>Risk</th><th>30D</th><th>60D</th><th>90D</th><th>Primary Market Channel</th></tr></thead>
+            <tbody>
+              <tr><td>China-Taiwan escalation</td><td>12%</td><td>18%</td><td>25%</td><td>Semis, shipping, safe havens</td></tr>
+              <tr><td>Middle East supply shock</td><td>20%</td><td>28%</td><td>35%</td><td>Oil and breakeven inflation</td></tr>
+              <tr><td>Russia-Ukraine intensity rise</td><td>25%</td><td>33%</td><td>40%</td><td>European energy and risk sentiment</td></tr>
+              <tr><td>U.S. political execution shock</td><td>18%</td><td>24%</td><td>30%</td><td>Fiscal premium and policy path</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsec">
+          <h3>X.B Priority Geopolitical Risks</h3>
+
+          <h4>Risk 1: China-Taiwan</h4>
+          <p>Current situation remains tense but below acute crisis threshold. Recent reporting indicates renewed high-level U.S.-China contact while Taiwan continues to emphasize U.S. support and Beijing sensitivity around arms transfers. Escalation probability is assessed at <strong>30D: 12%</strong>, <strong>60D: 18%</strong>, <strong>90D: 25%</strong>. Transmission would be rapid through semiconductors, global tech beta, freight insurance, and safe-haven FX; direct and indirect exposure therefore includes equity factor books, supply-chain-linked corporates, and USD/JPY convexity. Hedging should prioritize semiconductor downside, index convexity and event-driven FX protection. Early warnings are military activity intensity, sanctions rhetoric, and formal policy shifts on arms/security frameworks.</p>
+
+          <h4>Risk 2: Middle East and Iran-linked pathways</h4>
+          <p>The situation remains structurally unstable with sanctions and maritime channels as key risk multipliers. Escalation probability is <strong>30D: 20%</strong>, <strong>60D: 28%</strong>, <strong>90D: 35%</strong>. Market transmission is primarily oil and freight, then breakeven inflation and risk-asset discount rates; indirect exposure appears through transport, airlines, and inflation-sensitive rates books. Hedge design should retain upside oil convexity and inflation-linked offsets. Early warnings include shipping disruptions, sanctions expansion, and proxy-conflict broadening.</p>
+
+          <h4>Risk 3: Russia-Ukraine war intensity</h4>
+          <p>Recent reporting points to continued large drone/missile waves and energy infrastructure stress, with humanitarian impacts rising during severe winter conditions. Escalation probability is <strong>30D: 25%</strong>, <strong>60D: 33%</strong>, <strong>90D: 40%</strong>. Market transmission is strongest through European energy and risk sentiment, with episodic safe-haven and defense-sector effects. Exposure is mostly indirect in global macro and commodity channels. Early warnings include sustained attack intensity on critical infrastructure and failure of de-escalation talks.</p>
+
+          <h4>Risk 4: U.S. political and policy execution risk</h4>
+          <p>The central issue is policy volatility rather than institutional breakdown: shutdown-related release disruptions already demonstrate transmission to macro visibility and market pricing. Escalation probability is <strong>30D: 18%</strong>, <strong>60D: 24%</strong>, <strong>90D: 30%</strong>. Market transmission runs through fiscal risk premium, data uncertainty and policy-sensitive sectors. Exposure includes rates, policy-dependent credits and operational planning risk. Early warnings are renewed budget impasses, abrupt policy signaling changes, and delayed agency publication chains.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>X.C Trade and Sanctions Risk</h3>
+          <p>Trade and sanctions risk remains active with continued U.S. OFAC designations across Iran-linked and cyber-enabled networks. New designations can move commodity and shipping risk premia even when not directly targeted at major benchmark producers. Export-control and sanctions-compliance processes should assume higher change frequency and shorter response windows. Supply-chain disruption scenarios should include both direct sanction impact and second-order compliance de-risking by counterparties.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>X.D Strategic Risk</h3>
+          <p>Strategic risk is increasingly defined by technology-driven competition and operating-model adaptation speed. AI deployment can improve productivity but also increase control, data-governance and reputational risk if governance lags. Business-model resilience requires balancing capital efficiency with operational robustness under volatile policy and market regimes. Franchise and reputational considerations remain tightly linked to conduct quality under stress periods.</p>
+          <p><strong>Contrarian check:</strong> consensus views geopolitical shocks as temporary. Consensus may be wrong because repeated medium-sized shocks can cumulatively reprice risk premia as much as one large event.</p>
+        </div>
+      </section>
+
+      <section id="sec11" class="section page-section">
+        <h2>SECTION XI: CLIMATE AND ESG RISK</h2>
+
+        <div class="subsec">
+          <h3>XI.A Climate Risk Environment</h3>
+          <p>Climate-risk pricing remains uneven across asset classes: physical risk is often underpriced in short-duration market moves while transition risk is increasingly embedded in sector valuation differentials. Regulatory development remains active with growing emphasis on disclosure quality, scenario consistency and governance accountability. Climate risk should be treated as both slow-burn and event-risk depending on geography and asset type.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>XI.A.1 Climate and ESG Exposure Lens</h3>
+          <table>
+            <thead><tr><th>Sector</th><th>Physical Risk</th><th>Transition Risk</th><th>Regulatory Risk</th><th>Overall</th></tr></thead>
+            <tbody>
+              <tr><td>Energy</td><td>Medium</td><td>High</td><td>High</td><td>High</td></tr>
+              <tr><td>Utilities</td><td>Medium</td><td>High</td><td>High</td><td>High</td></tr>
+              <tr><td>Real Estate</td><td>High</td><td>Medium</td><td>Medium</td><td>High</td></tr>
+              <tr><td>Transportation</td><td>Medium</td><td>High</td><td>Medium</td><td>High</td></tr>
+              <tr><td>Financials</td><td>Indirect</td><td>Medium</td><td>High</td><td>Medium-High</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsec">
+          <h3>XI.B Physical Risk Exposure</h3>
+          <p>Physical-risk exposure is concentrated in weather-sensitive geographies and infrastructure-heavy sectors where insurance capacity and premium dynamics can change quickly. Near-term weather events can create immediate operational and collateral impacts even when long-term climate trajectories are unchanged. Portfolio sensitivity analysis should include outage, logistics and insurance repricing channels.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>XI.C Transition Risk Exposure</h3>
+          <p>Transition risk remains highest in carbon-intensive sectors and supply chains with limited decarbonization flexibility. Stranded-asset risk is not binary; it materializes through refinancing costs, policy shifts and demand substitution. Carbon-price sensitivity should be embedded into sector and issuer stress testing rather than treated as stand-alone ESG reporting.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>XI.D ESG Compliance and Disclosure</h3>
+          <p>Disclosure readiness should focus on consistency, traceability and assurance rather than narrative completeness alone. Greenwashing risk is primarily a control and governance issue, particularly where product labeling and portfolio reality diverge. ESG data quality should be graded by source reliability and auditability before use in risk decisions.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>XI.E Reputational and Social Risk</h3>
+          <p>Reputational risk can rise quickly when ESG incidents intersect with social media amplification and perceived governance failures. Monitoring should include both internal conduct indicators and external sentiment shifts for key counterparties and sectors. Social risk themes such as affordability, labor disruption and data privacy can become financial risk via policy and litigation channels.</p>
+        </div>
+      </section>
+
+      <section id="sec12" class="section page-section">
+        <h2>SECTION XII: INTEGRATED SCENARIO ANALYSIS</h2>
+
+        <div class="subsec">
+          <h3>XII.A Base Case Scenario (Probability: 55%)</h3>
+          <p class="note">Assumption disclosure: scenario dollar impacts below are based on representative multi-asset sensitivities and not your live desk inventory. Use Section XV with your internal VaR/sVaR/sensitivity inputs for decision-grade impact sizing.</p>
+          <p>Base case is a controlled late-cycle slowdown with resilient employment, moderate spread widening, and no systemic liquidity break. Under this path, market risk rises modestly but remains manageable, credit migration is selective rather than broad-based, funding stays available, and operational risk remains process-intensity driven. Estimated total trading and credit impact is a manageable draw range with intermittent volatility bursts rather than persistent regime break. Recommended positioning is cautious beta with active hedging and selective relative-value deployment. Validation signals are stable funding spreads, contained spread widening, and absence of sustained auction stress.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>XII.B Adverse Scenario: Risk-Off Shock (Probability: 28%)</h3>
+          <p>Trigger conditions are weak auction demand, negative labor/inflation surprise sequencing, and volatility feedback through systematic deleveraging. The scenario unfolds as rates reprice first, equities gap lower, credit widens, and collateral demands accelerate. Market risk impact is estimated at <strong>-$700MM to -$1.1BN</strong>, credit risk <strong>-$350MM to -$650MM</strong>, liquidity cost <strong>-$120MM to -$240MM</strong> equivalent through funding and execution slippage, and operational risk uplift via margin and settlement load. Defensive playbook is pre-funded convexity, immediate gross reduction in vulnerable books, and daily CRO-level monitoring until volatility normalizes. Recovery assumption is 2-6 weeks depending on policy and data stabilization.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>XII.C Adverse Scenario: Geopolitical Oil and Inflation Shock (Probability: 17%)</h3>
+          <p>Trigger is disruption in regional supply or shipping that pushes oil sharply higher and drives inflation premium repricing. Rates and equities sell off together initially, credit beta widens, and FX volatility rises. Market and credit combined impact is estimated at <strong>-$550MM to -$900MM</strong> with secondary liquidity drag if the shock persists beyond one week. Recommended response is to monetize energy hedges, reduce duration-sensitive equity risk, and preserve funding flexibility for collateral calls. Recovery depends on visibility into supply restoration and policy signaling.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>XII.D Tail Risk / Black Swan (Probability: 5%)</h3>
+          <p>Tail catalysts include a Taiwan-related military incident, abrupt systemic cyber event affecting market infrastructure, or simultaneous sovereign-policy and liquidity shock. Evolution would be gap-driven and nonlinear, with temporary loss of standard cross-asset hedging relationships. Severe impact range is <strong>-$2.5BN to -$4.0BN</strong> equivalent under stressed assumptions. Circuit breakers are immediate risk committee activation, hard risk reduction thresholds, central liquidity mobilization and counterparty risk tightening. Recovery depends on infrastructure continuity and policy backstop credibility.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>XII.E Reverse Stress Test</h3>
+          <p>Capital breach would likely require a combined path rather than a single shock: equity drawdown greater than 20%, HY widening greater than 400bp, long-end rates shock beyond 50bp with poor liquidity, and concurrent collateral-driven funding pressure. Current distance to breach remains meaningful, but that distance can compress rapidly if correlation and liquidity assumptions fail together. Early warning indicators are clustered VaR exceptions, repeated auction tails, abrupt IM multipliers, and persistent basis dislocations across core hedges.</p>
+        </div>
+      </section>
+
+      <section id="sec13" class="section page-section">
+        <h2>SECTION XIII: RECOMMENDED ACTIONS</h2>
+
+        <div class="subsec">
+          <h3>XIII.A Immediate Actions (This Week)</h3>
+          <p><strong>Action 1:</strong> reduce long-end rates risk by 8-12% before the February 10-12 auction sequence; this addresses market and concentration risk, and should be owned by the Global Rates Head by February 10 because delay leaves the book exposed to high-velocity term-premium repricing. <strong>Action 2:</strong> increase index and factor downside protection by 20-25% in equity books; this addresses market and counterparty risk, owned by Equity Risk and Trading by February 10, with delayed execution increasing drawdown convexity. <strong>Action 3:</strong> raise HY hedge coverage by 15% and tighten low-liquidity inventory limits by February 12; this addresses credit and liquidity risk and reduces spread-gapping vulnerability. <strong>Action 4:</strong> tighten USD/JPY event limits and optional hedge coverage by February 11; this addresses market and counterparty channels where intervention risk remains high. <strong>Action 5:</strong> run a same-day cross-stripe stress drill (market, liquidity, collateral operations) by February 14; delay increases operational fragility during real stress.</p>
+          <table>
+            <thead><tr><th>Action</th><th>Risk Stripe</th><th>Owner</th><th>Deadline</th><th>Consequence if Delayed</th></tr></thead>
+            <tbody>
+              <tr><td>Cut long-end DV01 8-12%</td><td>Market / Concentration</td><td>Global Rates Head</td><td>2026-02-10</td><td>Higher auction shock loss sensitivity</td></tr>
+              <tr><td>Increase equity downside hedges 20-25%</td><td>Market / Counterparty</td><td>Equity Trading + Risk</td><td>2026-02-10</td><td>Convex drawdown under vol spike</td></tr>
+              <tr><td>Raise HY hedge ratio 15%</td><td>Credit / Liquidity</td><td>Credit Trading Head</td><td>2026-02-12</td><td>Spread-gap P&amp;L acceleration</td></tr>
+              <tr><td>Tighten USD/JPY event limits</td><td>Market / Counterparty</td><td>FX Trading Head</td><td>2026-02-11</td><td>Intervention gap exposure</td></tr>
+              <tr><td>Cross-stripe stress drill</td><td>Liquidity / Operational</td><td>Enterprise Risk Analytics</td><td>2026-02-14</td><td>Slower real-event response execution</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsec">
+          <h3>XIII.B Near-Term Actions (Next 2-4 Weeks)</h3>
+          <p>Recalibrate model overlays for mixed-vintage macro data, complete concentrated-exposure de-duplication across rates/equity/credit, and convert high-risk discretionary limits into scenario-conditional limits. Ownership sits with Enterprise Risk Analytics, Desk Heads and Treasury Risk, with end-February completion targets. Delays would leave governance and risk appetite inconsistent with the current volatility regime.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>XIII.C Strategic Actions (1-3 Month Horizon)</h3>
+          <p>Strategic priorities are to harden risk-data lineage across delayed public releases, reduce structural reliance on single-factor carry, and strengthen integrated market-liquidity-operational stress governance. This should include expanded challenger-model coverage, standardized wrong-way-risk overlays, and execution-quality controls for stressed rebalancing.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>XIII.D Items Requiring CRO Decision</h3>
+          <p><strong>Decision 1:</strong> approve temporary reduction of long-end DV01 soft limits through February 14. <strong>Decision 2:</strong> approve temporary tightening of equity gross beta and HY inventory limits until post-GDP release normalization. <strong>Decision 3:</strong> authorize pre-funded incremental hedge budget for event-window convexity. Urgency is high; recommended decision deadline is close of business February 10.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>XIII.E Risk Appetite Recommendations</h3>
+          <p>Risk appetite should remain intact at strategic level but tightened tactically at implementation level. Recommended changes are temporary lower tolerances for correlated factor concentration, higher required hedge ratios for lower-liquidity credit risk, and tighter escalation thresholds tied to VIX and HY spread triggers. This keeps franchise capacity for opportunity while preserving downside control during the current uncertainty regime.</p>
+        </div>
+      </section>
+
+      <section id="sec14" class="section page-section">
+        <h2>SECTION XIV: KEY CALENDAR — NEXT 30 DAYS</h2>
+
+        <div class="subsec">
+          <h3>Week 1: February 6 - February 13, 2026</h3>
+          <p>This week carries the highest immediate market-risk density. Treasury auctions on February 10 (3Y, $58bn), February 11 (10Y, $42bn), and February 12 (30Y, $25bn) set rates tone and potential term-premium repricing. Revised BLS labor and inflation timeline makes February 11 Employment Situation and February 13 CPI the principal macro catalysts. Risk level is high because rates, equities and credit can all react to sequential surprises with little recovery window between events.</p>
+
+          <h3>Week 2: February 14 - February 20, 2026</h3>
+          <p>This week transitions from labor/inflation interpretation to growth validation. BEA’s delayed Q4 2025 advance GDP and Personal Income and Outlays release on February 20 is the key market-moving event, with elevated expected cross-asset sensitivity due to prior data delays. Risk level is medium-high, with emphasis on regime confirmation or invalidation.</p>
+
+          <h3>Week 3: February 21 - February 27, 2026</h3>
+          <p>Data revisions and follow-through become primary. BLS revised release schedule pushes Producer Price Index and other key series later than normal, extending data-vintage uncertainty into this week. Risk level is medium but persistent, especially for policy-pricing and forecast confidence.</p>
+
+          <h3>Week 4: February 28 - March 6, 2026</h3>
+          <p>Attention shifts to pre-central-bank positioning and lagged effects from February data. Liquidity and risk sentiment are likely to be driven by whether prior events produced stabilization or continuing widening in volatility and spreads. Risk level is medium, with conditional upside if data coherence improves.</p>
+
+          <h3>Wildcards</h3>
+          <p>Known unknowns include abrupt geopolitical incidents, sanctions expansions, cyber disruptions affecting payment or market infrastructure, and policy-signaling shocks during incomplete data windows. Early warnings are sharp oil/gold co-moves, sudden FX intervention language, repeated auction tail deterioration, and unusually large margin calls without commensurate market move explanation.</p>
+        </div>
+      </section>
+
+      <section id="sec15" class="section page-section">
+        <h2>SECTION XV: IMPACT WORKBENCH (YOUR RISK INPUTS)</h2>
+
+        <div class="subsec">
+          <h3>Purpose and Quantitative Conventions</h3>
+          <p>This tab converts your high-level risk metrics into scenario impact estimates. It is deterministic and transparent: each component is calculated from the sensitivities and shocks you enter. Positive values in exposure fields represent long risk unless you enter a negative value. Final results are shown in <span class="mono">$MM</span>.</p>
+          <div class="wb-assumption">This tool is only as accurate as your inputs. It does not replace official firm risk engines, desk-level netting, path-dependent valuation, or model-validated P&amp;L explain.</div>
+        </div>
+
+        <div class="wb-grid">
+          <div class="subsec">
+            <h3>Portfolio Inputs (Enter Internal Numbers)</h3>
+            <div class="form-grid">
+              <div class="field">
+                <label for="wb_dv01">Net DV01 ($MM per 1bp)</label>
+                <input class="wb-input" id="wb_dv01" type="number" step="0.01" value="0" />
+                <small>Positive if rates up hurts P&amp;L.</small>
+              </div>
+              <div class="field">
+                <label for="wb_cs01ig">IG CS01 ($MM per 1bp)</label>
+                <input class="wb-input" id="wb_cs01ig" type="number" step="0.01" value="0" />
+                <small>Spread widening impact.</small>
+              </div>
+              <div class="field">
+                <label for="wb_cs01hy">HY CS01 ($MM per 1bp)</label>
+                <input class="wb-input" id="wb_cs01hy" type="number" step="0.01" value="0" />
+                <small>Use net HY spread beta.</small>
+              </div>
+              <div class="field">
+                <label for="wb_eqexp">Equity beta exposure ($MM)</label>
+                <input class="wb-input" id="wb_eqexp" type="number" step="1" value="0" />
+                <small>Beta-adjusted long/short exposure.</small>
+              </div>
+              <div class="field">
+                <label for="wb_fxexp">FX exposure to scenario pair ($MM)</label>
+                <input class="wb-input" id="wb_fxexp" type="number" step="1" value="0" />
+                <small>Signed USD-equivalent exposure.</small>
+              </div>
+              <div class="field">
+                <label for="wb_oildelta">Oil delta ($MM per 1% move)</label>
+                <input class="wb-input" id="wb_oildelta" type="number" step="0.01" value="0" />
+                <small>Use net commodity beta.</small>
+              </div>
+              <div class="field">
+                <label for="wb_golddelta">Gold delta ($MM per 1% move)</label>
+                <input class="wb-input" id="wb_golddelta" type="number" step="0.01" value="0" />
+                <small>Positive for long gold exposure.</small>
+              </div>
+              <div class="field">
+                <label for="wb_vega">Aggregate vega ($MM per 1 vol point)</label>
+                <input class="wb-input" id="wb_vega" type="number" step="0.01" value="0" />
+                <small>Net across listed and OTC books.</small>
+              </div>
+              <div class="field">
+                <label for="wb_gross">Gross notional for liquidity haircut ($MM)</label>
+                <input class="wb-input" id="wb_gross" type="number" step="1" value="0" />
+                <small>Use stressed executable notional.</small>
+              </div>
+              <div class="field">
+                <label for="wb_var1d">1-day VaR 99% ($MM)</label>
+                <input class="wb-input" id="wb_var1d" type="number" step="0.1" value="0" />
+                <small>From official risk engine.</small>
+              </div>
+              <div class="field">
+                <label for="wb_svar10d">10-day Stressed VaR 99% ($MM)</label>
+                <input class="wb-input" id="wb_svar10d" type="number" step="0.1" value="0" />
+                <small>From official stressed model.</small>
+              </div>
+              <div class="field">
+                <label for="wb_horizon">Scenario horizon (days)</label>
+                <input class="wb-input" id="wb_horizon" type="number" step="1" min="1" value="5" />
+                <small>Scaling uses square-root-of-time.</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="subsec">
+            <h3>Scenario Shock Inputs</h3>
+            <div class="form-grid">
+              <div class="field">
+                <label for="wb_ratesbp">Rates shock (bp)</label>
+                <input class="wb-input" id="wb_ratesbp" type="number" step="1" value="25" />
+                <small>Positive = yields up.</small>
+              </div>
+              <div class="field">
+                <label for="wb_igbp">IG spread shock (bp)</label>
+                <input class="wb-input" id="wb_igbp" type="number" step="1" value="10" />
+                <small>Positive = spreads wider.</small>
+              </div>
+              <div class="field">
+                <label for="wb_hybp">HY spread shock (bp)</label>
+                <input class="wb-input" id="wb_hybp" type="number" step="1" value="40" />
+                <small>Positive = spreads wider.</small>
+              </div>
+              <div class="field">
+                <label for="wb_eqpct">Equity shock (%)</label>
+                <input class="wb-input" id="wb_eqpct" type="number" step="0.1" value="-5" />
+                <small>Negative = equity selloff.</small>
+              </div>
+              <div class="field">
+                <label for="wb_fxpct">FX shock (%)</label>
+                <input class="wb-input" id="wb_fxpct" type="number" step="0.1" value="1" />
+                <small>Apply to chosen pair exposure.</small>
+              </div>
+              <div class="field">
+                <label for="wb_oilpct">Oil shock (%)</label>
+                <input class="wb-input" id="wb_oilpct" type="number" step="0.1" value="8" />
+                <small>Positive = oil up.</small>
+              </div>
+              <div class="field">
+                <label for="wb_goldpct">Gold shock (%)</label>
+                <input class="wb-input" id="wb_goldpct" type="number" step="0.1" value="4" />
+                <small>Positive = gold up.</small>
+              </div>
+              <div class="field">
+                <label for="wb_volpts">Implied vol shock (points)</label>
+                <input class="wb-input" id="wb_volpts" type="number" step="0.1" value="6" />
+                <small>Positive = vol up.</small>
+              </div>
+              <div class="field">
+                <label for="wb_liqbps">Liquidity haircut (bp on gross)</label>
+                <input class="wb-input" id="wb_liqbps" type="number" step="1" value="12" />
+                <small>Execution/funding slippage proxy.</small>
+              </div>
+              <div class="field">
+                <label for="wb_ccraddon">CCR add-on (% of adverse market P&amp;L)</label>
+                <input class="wb-input" id="wb_ccraddon" type="number" step="0.1" value="6" />
+                <small>Counterparty/settlement drag proxy.</small>
+              </div>
+              <div class="field">
+                <label for="wb_severity">Stress multiplier (x)</label>
+                <input class="wb-input" id="wb_severity" type="number" step="0.1" min="0.1" value="1.0" />
+                <small>Scales all shocks and losses.</small>
+              </div>
+            </div>
+            <div class="wb-actions">
+              <button type="button" onclick="wbLoadPreset('riskOff')">Load Risk-Off Preset</button>
+              <button type="button" onclick="wbLoadPreset('hawkish')">Load Hawkish Fed Preset</button>
+              <button type="button" onclick="wbLoadPreset('oilShock')">Load Oil Shock Preset</button>
+              <button type="button" onclick="wbLoadPreset('clear')">Clear Shocks</button>
+              <button type="button" onclick="wbLoadIllustrative()">Load Illustrative Baseline Inputs</button>
+              <button type="button" onclick="wbCalculate()">Calculate Impact</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsec">
+          <h3>Calculated Impact Output</h3>
+          <div id="wb_warning" class="alert warn">Input validation: provide non-zero VaR, sVaR, key sensitivities, and gross notional for decision-grade output.</div>
+          <div class="wb-output-grid">
+            <div class="wb-card"><div class="lbl">Market Sensitivity P&amp;L</div><div class="val" id="wb_out_market">+$0.00MM</div></div>
+            <div class="wb-card"><div class="lbl">Liquidity Cost</div><div class="val" id="wb_out_liq">-$0.00MM</div></div>
+            <div class="wb-card"><div class="lbl">CCR Add-on</div><div class="val" id="wb_out_ccr">-$0.00MM</div></div>
+            <div class="wb-card"><div class="lbl">Scenario Net Impact</div><div class="val" id="wb_out_total">+$0.00MM</div></div>
+            <div class="wb-card"><div class="lbl">VaR Scaled Loss Floor</div><div class="val" id="wb_out_var">-$0.00MM</div></div>
+            <div class="wb-card"><div class="lbl">sVaR Scaled Loss Floor</div><div class="val" id="wb_out_svar">-$0.00MM</div></div>
+          </div>
+
+          <table>
+            <thead><tr><th>Component</th><th>Formula</th><th>Impact ($MM)</th></tr></thead>
+            <tbody>
+              <tr><td>Rates</td><td><span class="mono">-DV01 * Rates(bp)</span></td><td id="wb_rates_row">0.00</td></tr>
+              <tr><td>IG Credit</td><td><span class="mono">-CS01(IG) * IG(bp)</span></td><td id="wb_ig_row">0.00</td></tr>
+              <tr><td>HY Credit</td><td><span class="mono">-CS01(HY) * HY(bp)</span></td><td id="wb_hy_row">0.00</td></tr>
+              <tr><td>Equities</td><td><span class="mono">Eq Exposure * Eq%</span></td><td id="wb_eq_row">0.00</td></tr>
+              <tr><td>FX</td><td><span class="mono">FX Exposure * FX%</span></td><td id="wb_fx_row">0.00</td></tr>
+              <tr><td>Oil</td><td><span class="mono">Oil Delta * Oil%</span></td><td id="wb_oil_row">0.00</td></tr>
+              <tr><td>Gold</td><td><span class="mono">Gold Delta * Gold%</span></td><td id="wb_gold_row">0.00</td></tr>
+              <tr><td>Vega</td><td><span class="mono">Vega * Vol Points</span></td><td id="wb_vega_row">0.00</td></tr>
+              <tr><td>Governance Downside Impact</td><td><span class="mono">min(Scenario Net, -VaR Floor, -sVaR Floor)</span></td><td id="wb_gov_row">0.00</td></tr>
+            </tbody>
+          </table>
+          <p class="note" id="wb_note">Method: first-order sensitivity aggregation with explicit liquidity and counterparty add-ons, then cross-checked against scaled VaR/sVaR floors. Replace placeholders with your production metrics for decision use.</p>
+        </div>
+      </section>
+
+      <section id="appendix" class="section page-section">
+        <h2>APPENDICES (REFERENCE)</h2>
+
+        <div class="subsec">
+          <h3>Appendix A: Market Snapshot</h3>
+          <table>
+            <thead><tr><th>Instrument</th><th>Level</th><th>1D</th><th>1W</th><th>1M</th><th>YTD</th><th>As of</th></tr></thead>
+            <tbody>
+              <tr><td>S&amp;P 500</td><td>6,883.47</td><td>+1.25%</td><td>-0.80%</td><td>-0.54%</td><td>+0.36%</td><td>2026-02-06</td></tr>
+              <tr><td>Nasdaq 100</td><td>22,802.70</td><td>+1.16%</td><td>-2.81%</td><td>-3.31%</td><td>-1.86%</td><td>2026-02-06</td></tr>
+              <tr><td>Russell 2000 proxy (IWM)</td><td>261.73</td><td>+2.31%</td><td>+0.80%</td><td>+2.45%</td><td>+5.21%</td><td>2026-02-06</td></tr>
+              <tr><td>UST 10Y</td><td>4.21%</td><td>-8bp</td><td>-3bp</td><td>+3bp</td><td>n/a</td><td>2026-02-05</td></tr>
+              <tr><td>IG OAS</td><td>76bp</td><td>+1bp</td><td>+2bp</td><td>-3bp</td><td>n/a</td><td>2026-02-05</td></tr>
+              <tr><td>HY OAS</td><td>297bp</td><td>+11bp</td><td>+17bp</td><td>+21bp</td><td>n/a</td><td>2026-02-05</td></tr>
+              <tr><td>DXY</td><td>97.824</td><td>+0.21%</td><td>+1.60%</td><td>-0.87%</td><td>-0.51%</td><td>2026-02-05</td></tr>
+              <tr><td>EUR/USD</td><td>1.18072</td><td>+0.22%</td><td>-0.39%</td><td>+1.27%</td><td>+0.76%</td><td>2026-02-06</td></tr>
+              <tr><td>USD/JPY</td><td>157.0885</td><td>+0.03%</td><td>+1.49%</td><td>+0.15%</td><td>+0.14%</td><td>2026-02-06</td></tr>
+              <tr><td>WTI</td><td>$63.26</td><td>-2.87%</td><td>-3.24%</td><td>+10.73%</td><td>+10.21%</td><td>2026-02-05</td></tr>
+              <tr><td>Gold</td><td>$4,952.43</td><td>+3.62%</td><td>+2.16%</td><td>+10.59%</td><td>+14.34%</td><td>2026-02-06</td></tr>
+              <tr><td>VIX</td><td>21.77</td><td>n/a</td><td>n/a</td><td>+4.94 vs 1M avg</td><td>82nd pctile</td><td>2026-02-05</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsec">
+          <h3>Appendix B: Risk Limit Dashboard (Reference Template)</h3>
+          <table>
+            <thead><tr><th>Metric</th><th>Current</th><th>Limit</th><th>Utilization</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Total VaR (99%, 1-day)</td><td>[Internal feed]</td><td>[Approved limit]</td><td>[Auto]</td><td>[Green/Amber/Red]</td></tr>
+              <tr><td>DV01</td><td>[Internal feed]</td><td>[Approved limit]</td><td>[Auto]</td><td>[Green/Amber/Red]</td></tr>
+              <tr><td>CS01</td><td>[Internal feed]</td><td>[Approved limit]</td><td>[Auto]</td><td>[Green/Amber/Red]</td></tr>
+              <tr><td>Equity Beta-Adjusted Exposure</td><td>[Internal feed]</td><td>[Approved limit]</td><td>[Auto]</td><td>[Green/Amber/Red]</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsec">
+          <h3>Appendix C: Watchlist Summary (Reference)</h3>
+          <table>
+            <thead><tr><th>Category</th><th>Item</th><th>Risk Trigger</th><th>Action Threshold</th></tr></thead>
+            <tbody>
+              <tr><td>Credit</td><td>Watchlist Name A/B/C</td><td>Refinancing/covenant stress</td><td>Immediate hedge + limit tighten</td></tr>
+              <tr><td>Counterparty</td><td>High-leverage NBFI set</td><td>IM spike + liquidity deterioration</td><td>Tenor reduction and exposure cap</td></tr>
+              <tr><td>Market</td><td>Rates and growth-factor concentration</td><td>VIX &gt; 24 and HY &gt; 320bp</td><td>Cross-asset de-risk protocol</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsec">
+          <h3>Appendix D: Regulatory Calendar (Reference)</h3>
+          <table>
+            <thead><tr><th>Date</th><th>Item</th><th>Risk Relevance</th><th>Owner</th></tr></thead>
+            <tbody>
+              <tr><td>2026-02-11</td><td>BLS Employment Situation (revised date)</td><td>Policy-path repricing</td><td>Macro Risk</td></tr>
+              <tr><td>2026-02-13</td><td>BLS CPI (revised date)</td><td>Rates and equity valuation</td><td>Macro Risk</td></tr>
+              <tr><td>2026-02-20</td><td>BEA GDP advance Q4 2025 (revised)</td><td>Cross-asset regime validation</td><td>Macro Risk</td></tr>
+              <tr><td>2026-03-13</td><td>BEA GDP second estimate (revised)</td><td>Growth-path recalibration</td><td>Macro Risk</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsec">
+          <h3>Appendix E: Abbreviations and Definitions</h3>
+          <p><span class="mono">DV01</span> = dollar value change for 1bp move in rates; <span class="mono">CS01</span> = dollar value change for 1bp spread move; <span class="mono">OAS</span> = option-adjusted spread; <span class="mono">LCR</span> = liquidity coverage ratio; <span class="mono">NSFR</span> = net stable funding ratio; <span class="mono">CCR</span> = counterparty credit risk.</p>
+        </div>
+
+        <div class="subsec">
+          <h3>Sources and Verification Trail</h3>
+          <p class="note">Market levels and returns: Stooq public historical/quote feeds (pulled 2026-02-06 ET). Rates and funding: U.S. Treasury daily curve and New York Fed reference rates. Volatility: CBOE VIX/VVIX/VIX3M/SKEW/OVX/GVZ history endpoints. Credit and macro series: FRED (ICE BofA OAS series, DGS rates, breakevens, UNRATE, PCE core index). Policy communications: Federal Reserve, ECB, RBA, SNB, BOJ, PBOC official pages. Calendar disruption notices: BLS and BEA official updates. Geopolitical and sanctions updates: AP and UN briefings, U.S. Treasury OFAC press releases.</p>
+          <p class="note">Primary links: <a href="https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm" target="_blank" rel="noopener">Fed Jan 28 statement</a>, <a href="https://www.ecb.europa.eu/press/pr/date/2026/html/ecb.mp260205~001d26959b.en.html" target="_blank" rel="noopener">ECB Feb 5 decision</a>, <a href="https://www.rba.gov.au/media-releases/2026/mr-26-03.html" target="_blank" rel="noopener">RBA Feb 3 decision</a>, <a href="https://www.snb.ch/" target="_blank" rel="noopener">SNB policy page</a>, <a href="https://www.boj.or.jp/en/index.htm" target="_blank" rel="noopener">BOJ policy page</a>, <a href="https://www.pbc.gov.cn/en/3688229/3688335/3730276/3883798/2025122515153095570/index.html" target="_blank" rel="noopener">PBOC LPR Dec 22</a>, <a href="https://www.bls.gov/bls/2025-lapse-revised-release-dates.htm" target="_blank" rel="noopener">BLS revised release dates</a>, <a href="https://www.bea.gov/news/blog/2026-01-07/economic-release-schedule-updates-gdp-personal-income-and-outlays" target="_blank" rel="noopener">BEA revised release schedule</a>, <a href="https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/od/upcoming_auctions" target="_blank" rel="noopener">Treasury auctions API</a>.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    function setActiveNav(id) {
+      document.querySelectorAll('.nav a[data-section]').forEach((a) => {
+        a.classList.toggle('active', a.dataset.section === id);
+      });
+    }
+
+    function showSection(id) {
+      document.querySelectorAll('.page-section').forEach((s) => {
+        s.classList.toggle('active', s.id === id);
+      });
+      setActiveNav(id);
+      if (window.location.hash !== '#' + id) {
+        history.replaceState(null, '', '#' + id);
+      }
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+
+    function showAllSections() {
+      document.querySelectorAll('.page-section').forEach((s) => {
+        s.classList.add('active');
+      });
+      document.querySelectorAll('.nav a[data-section]').forEach((a) => {
+        a.classList.remove('active');
+      });
+      history.replaceState(null, '', '#all');
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+
+    function wbNum(id) {
+      const el = document.getElementById(id);
+      if (!el) return 0;
+      const v = parseFloat(el.value);
+      return Number.isFinite(v) ? v : 0;
+    }
+
+    function wbSet(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.value = String(val);
+    }
+
+    function wbFmtMM(val) {
+      const sign = val >= 0 ? '+' : '-';
+      return sign + '$' + Math.abs(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + 'MM';
+    }
+
+    function wbFmtNum(val) {
+      const sign = val >= 0 ? '+' : '';
+      return sign + val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function wbPaint(id, val) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = wbFmtMM(val);
+      el.classList.remove('up', 'down', 'flat');
+      if (val > 0) el.classList.add('up');
+      else if (val < 0) el.classList.add('down');
+      else el.classList.add('flat');
+    }
+
+    function wbPaintCell(id, val) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = wbFmtNum(val);
+      el.classList.remove('up', 'down', 'flat');
+      if (val > 0) el.classList.add('up');
+      else if (val < 0) el.classList.add('down');
+      else el.classList.add('flat');
+    }
+
+    function wbLoadIllustrative() {
+      wbSet('wb_dv01', 9.5);
+      wbSet('wb_cs01ig', 1.9);
+      wbSet('wb_cs01hy', 2.8);
+      wbSet('wb_eqexp', 8200);
+      wbSet('wb_fxexp', 1200);
+      wbSet('wb_oildelta', 1.8);
+      wbSet('wb_golddelta', 1.2);
+      wbSet('wb_vega', 14.0);
+      wbSet('wb_gross', 500000);
+      wbSet('wb_var1d', 140);
+      wbSet('wb_svar10d', 430);
+      wbSet('wb_horizon', 5);
+      wbCalculate();
+    }
+
+    function wbLoadPreset(name) {
+      if (name === 'riskOff') {
+        wbSet('wb_ratesbp', 25);
+        wbSet('wb_igbp', 10);
+        wbSet('wb_hybp', 40);
+        wbSet('wb_eqpct', -5);
+        wbSet('wb_fxpct', 1.0);
+        wbSet('wb_oilpct', 8);
+        wbSet('wb_goldpct', 4);
+        wbSet('wb_volpts', 6);
+        wbSet('wb_liqbps', 12);
+        wbSet('wb_ccraddon', 6);
+        wbSet('wb_severity', 1.0);
+      } else if (name === 'hawkish') {
+        wbSet('wb_ratesbp', 35);
+        wbSet('wb_igbp', 6);
+        wbSet('wb_hybp', 18);
+        wbSet('wb_eqpct', -3);
+        wbSet('wb_fxpct', 1.5);
+        wbSet('wb_oilpct', -4);
+        wbSet('wb_goldpct', -2);
+        wbSet('wb_volpts', 3);
+        wbSet('wb_liqbps', 8);
+        wbSet('wb_ccraddon', 4);
+        wbSet('wb_severity', 1.0);
+      } else if (name === 'oilShock') {
+        wbSet('wb_ratesbp', 20);
+        wbSet('wb_igbp', 8);
+        wbSet('wb_hybp', 25);
+        wbSet('wb_eqpct', -4);
+        wbSet('wb_fxpct', 0.8);
+        wbSet('wb_oilpct', 18);
+        wbSet('wb_goldpct', 7);
+        wbSet('wb_volpts', 5);
+        wbSet('wb_liqbps', 10);
+        wbSet('wb_ccraddon', 5);
+        wbSet('wb_severity', 1.1);
+      } else if (name === 'clear') {
+        wbSet('wb_ratesbp', 0);
+        wbSet('wb_igbp', 0);
+        wbSet('wb_hybp', 0);
+        wbSet('wb_eqpct', 0);
+        wbSet('wb_fxpct', 0);
+        wbSet('wb_oilpct', 0);
+        wbSet('wb_goldpct', 0);
+        wbSet('wb_volpts', 0);
+        wbSet('wb_liqbps', 0);
+        wbSet('wb_ccraddon', 0);
+        wbSet('wb_severity', 1.0);
+      }
+      wbCalculate();
+    }
+
+    function wbCalculate() {
+      const dv01 = wbNum('wb_dv01');
+      const cs01ig = wbNum('wb_cs01ig');
+      const cs01hy = wbNum('wb_cs01hy');
+      const eqExp = wbNum('wb_eqexp');
+      const fxExp = wbNum('wb_fxexp');
+      const oilDelta = wbNum('wb_oildelta');
+      const goldDelta = wbNum('wb_golddelta');
+      const vega = wbNum('wb_vega');
+      const gross = wbNum('wb_gross');
+      const var1d = wbNum('wb_var1d');
+      const svar10d = wbNum('wb_svar10d');
+      const horizon = Math.max(1, wbNum('wb_horizon'));
+
+      const ratesBp = wbNum('wb_ratesbp');
+      const igBp = wbNum('wb_igbp');
+      const hyBp = wbNum('wb_hybp');
+      const eqPct = wbNum('wb_eqpct');
+      const fxPct = wbNum('wb_fxpct');
+      const oilPct = wbNum('wb_oilpct');
+      const goldPct = wbNum('wb_goldpct');
+      const volPts = wbNum('wb_volpts');
+      const liqBps = wbNum('wb_liqbps');
+      const ccrAddonPct = wbNum('wb_ccraddon');
+      const severity = Math.max(0.1, wbNum('wb_severity'));
+
+      const ratesPnl = (-dv01 * ratesBp) * severity;
+      const igPnl = (-cs01ig * igBp) * severity;
+      const hyPnl = (-cs01hy * hyBp) * severity;
+      const eqPnl = (eqExp * (eqPct / 100)) * severity;
+      const fxPnl = (fxExp * (fxPct / 100)) * severity;
+      const oilPnl = (oilDelta * oilPct) * severity;
+      const goldPnl = (goldDelta * goldPct) * severity;
+      const vegaPnl = (vega * volPts) * severity;
+
+      const marketPnl = ratesPnl + igPnl + hyPnl + eqPnl + fxPnl + oilPnl + goldPnl + vegaPnl;
+      const liquidityCost = (-gross * (liqBps / 10000)) * severity;
+      const ccrCost = -Math.max(0, -marketPnl) * (ccrAddonPct / 100);
+      const scenarioTotal = marketPnl + liquidityCost + ccrCost;
+
+      const varFloor = -Math.abs(var1d * Math.sqrt(horizon) * severity);
+      const svarFloor = -Math.abs(svar10d * Math.sqrt(horizon / 10) * severity);
+      const governanceDownside = Math.min(scenarioTotal, varFloor, svarFloor);
+
+      wbPaint('wb_out_market', marketPnl);
+      wbPaint('wb_out_liq', liquidityCost);
+      wbPaint('wb_out_ccr', ccrCost);
+      wbPaint('wb_out_total', scenarioTotal);
+      wbPaint('wb_out_var', varFloor);
+      wbPaint('wb_out_svar', svarFloor);
+
+      wbPaintCell('wb_rates_row', ratesPnl);
+      wbPaintCell('wb_ig_row', igPnl);
+      wbPaintCell('wb_hy_row', hyPnl);
+      wbPaintCell('wb_eq_row', eqPnl);
+      wbPaintCell('wb_fx_row', fxPnl);
+      wbPaintCell('wb_oil_row', oilPnl);
+      wbPaintCell('wb_gold_row', goldPnl);
+      wbPaintCell('wb_vega_row', vegaPnl);
+      wbPaintCell('wb_gov_row', governanceDownside);
+
+      const missing = [];
+      if (Math.abs(dv01) < 1e-9) missing.push('DV01');
+      if (Math.abs(cs01ig) < 1e-9 && Math.abs(cs01hy) < 1e-9) missing.push('CS01');
+      if (Math.abs(var1d) < 1e-9) missing.push('1-day VaR');
+      if (Math.abs(svar10d) < 1e-9) missing.push('10-day sVaR');
+      if (Math.abs(gross) < 1e-9) missing.push('gross notional');
+      const warning = document.getElementById('wb_warning');
+      if (warning) {
+        if (missing.length > 0) {
+          warning.style.display = 'block';
+          warning.textContent = 'Input validation: missing/zero ' + missing.join(', ') + '. Output remains illustrative until these are populated from internal sources.';
+        } else {
+          warning.style.display = 'none';
+        }
+      }
+
+      const note = document.getElementById('wb_note');
+      if (note) {
+        note.textContent = 'Method: first-order sensitivity aggregation plus liquidity and CCR add-ons. VaR floor = 1-day VaR * sqrt(horizon), sVaR floor = 10-day sVaR * sqrt(horizon/10), each scaled by stress multiplier. Governance downside = minimum of scenario net impact, VaR floor, and sVaR floor.';
+      }
+    }
+
+    document.querySelectorAll('.nav a[data-section]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        showSection(a.dataset.section);
+      });
+    });
+
+    document.querySelectorAll('.wb-input').forEach((el) => {
+      el.addEventListener('input', wbCalculate);
+    });
+
+    const initialHash = (window.location.hash || '').replace('#', '');
+    if (initialHash === 'all') {
+      showAllSections();
+    } else if (document.getElementById(initialHash)) {
+      showSection(initialHash);
+    } else {
+      showSection('sec0');
+    }
+    wbCalculate();
+  </script>
+</body>
+</html>
