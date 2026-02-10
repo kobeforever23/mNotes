@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Intelligence Brief | Altruist Hazel AI Tax Tool Selloff</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0B0F19;
+    --surface: #111827;
+    --surface2: #1A2236;
+    --border: #1E293B;
+    --accent: #F43F5E;
+    --accent-glow: rgba(244, 63, 94, 0.15);
+    --green: #10B981;
+    --red: #EF4444;
+    --amber: #F59E0B;
+    --text: #E2E8F0;
+    --text-muted: #94A3B8;
+    --text-dim: #64748B;
+    --blue: #3B82F6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+
+  .noise {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeIn 0.5s ease forwards;
+  }
+  .header-bar .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    background: var(--accent-glow);
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(244,63,94,0.25);
+  }
+  .header-bar .date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .hero {
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 0.1s forwards;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 42px;
+    line-height: 1.15;
+    color: #fff;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero .subtitle {
+    font-size: 17px;
+    color: var(--text-muted);
+    max-width: 680px;
+    line-height: 1.6;
+  }
+
+  /* Ticker strip */
+  .ticker-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 0.2s forwards;
+  }
+  .tick {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .tick:hover { border-color: var(--accent); }
+  .tick .sym {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .tick .name {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .tick .change {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--red);
+  }
+  .tick .change.neutral { color: var(--amber); }
+
+  /* Sections */
+  .section {
+    margin-bottom: 36px;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 0.3s forwards;
+  }
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+  .section h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+  .section p {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    line-height: 1.7;
+  }
+  .section p strong { color: var(--text); font-weight: 600; }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card.highlight {
+    border-left: 3px solid var(--accent);
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(244,63,94,0.04) 100%);
+  }
+  .card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .card p { font-size: 14px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.65; }
+  .card p:last-child { margin-bottom: 0; }
+
+  /* Quote block */
+  .quote {
+    background: var(--surface2);
+    border-left: 3px solid var(--blue);
+    padding: 18px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 20px 0;
+  }
+  .quote p {
+    font-size: 15px;
+    font-style: italic;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .quote .attr {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-style: normal;
+  }
+
+  /* Timeline */
+  .timeline { margin: 24px 0; }
+  .tl-item {
+    display: flex;
+    gap: 16px;
+    padding-bottom: 20px;
+    position: relative;
+  }
+  .tl-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 22px;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+  .tl-dot {
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    margin-top: 4px;
+  }
+  .tl-content .tl-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .tl-content .tl-text {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .tl-content .tl-text strong { color: var(--text); }
+
+  /* Impact table */
+  .impact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .impact-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .impact-item .label {
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .impact-item .value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.6;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 0.5s forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 30px; }
+    .ticker-strip { grid-template-columns: repeat(3, 1fr); }
+    .impact-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="container">
+
+  <div class="header-bar">
+    <span class="tag">⚡ Breaking Market Intel</span>
+    <span class="date">February 10, 2026 · Close of Market</span>
+  </div>
+
+  <div class="hero">
+    <h1>Altruist's Hazel AI Tax Tool <span>Triggers Wealth Management Selloff</span></h1>
+    <p class="subtitle">A startup's AI-powered tax planning feature launched this morning and sparked the worst single-day decline in wealth management stocks since April, as investors rotate the AI disruption narrative into financial advisory.</p>
+  </div>
+
+  <!-- Ticker Strip -->
+  <div class="ticker-strip">
+    <div class="tick">
+      <div class="sym">LPLA</div>
+      <div class="name">LPL Financial</div>
+      <div class="change">−8.31%</div>
+    </div>
+    <div class="tick">
+      <div class="sym">RJF</div>
+      <div class="name">Raymond James</div>
+      <div class="change">−8.75%</div>
+    </div>
+    <div class="tick">
+      <div class="sym">SCHW</div>
+      <div class="name">Charles Schwab</div>
+      <div class="change">−7.42%</div>
+    </div>
+    <div class="tick">
+      <div class="sym">SF</div>
+      <div class="name">Stifel Financial</div>
+      <div class="change">−7.5%</div>
+    </div>
+    <div class="tick">
+      <div class="sym">MS</div>
+      <div class="name">Morgan Stanley</div>
+      <div class="change neutral">−2.4%</div>
+    </div>
+  </div>
+
+  <!-- What Happened -->
+  <div class="section">
+    <div class="section-label">The Catalyst</div>
+    <h2>What Happened</h2>
+    <p><strong>Altruist</strong>, a tech-forward wealth platform for independent advisors, launched a new AI-powered tax planning feature within its platform <strong>Hazel</strong> this morning. The tool reads and interprets clients' 1040s, paystubs, account statements, meeting notes, emails, and custodial/CRM data, then applies proprietary tax logic to generate fully personalized tax strategies — all <strong>within minutes</strong>.</p>
+    <p>The feature includes interactive scenario modeling for real-time "what-if" tax projections. It's available to <strong>any advisory firm regardless of custody arrangements</strong> at $60/seat/month standalone, making it an immediate competitive threat to incumbents across the wealth management industry.</p>
+
+    <div class="quote">
+      <p>"Hazel's tax planning feature flips that dynamic. It expands what a single advisor can handle, raises the bar on outcomes, and makes average advice a lot harder to justify."</p>
+      <div class="attr">— Jason Wenk, Founder & CEO of Altruist (ex-Morgan Stanley)</div>
+    </div>
+  </div>
+
+  <!-- Product Details -->
+  <div class="section">
+    <div class="section-label">Product Breakdown</div>
+    <h2>Hazel AI Tax Planning — Key Capabilities</h2>
+    <div class="impact-grid">
+      <div class="impact-item">
+        <div class="label">Document Ingestion</div>
+        <div class="value">Reads 1040s, paystubs, account statements, meeting notes, emails</div>
+      </div>
+      <div class="impact-item">
+        <div class="label">Data Sources</div>
+        <div class="value">Custodial data, CRM data, financial documents — all integrated</div>
+      </div>
+      <div class="impact-item">
+        <div class="label">Output</div>
+        <div class="value">Fully personalized, client-ready tax strategies with interactive dashboards</div>
+      </div>
+      <div class="impact-item">
+        <div class="label">Scenario Engine</div>
+        <div class="value">"What-if" modeling with projected tax outcomes in real time</div>
+      </div>
+      <div class="impact-item">
+        <div class="label">Availability</div>
+        <div class="value">Any advisory firm, custody-agnostic</div>
+      </div>
+      <div class="impact-item">
+        <div class="label">Pricing</div>
+        <div class="value">$60/seat/month (standalone)</div>
+      </div>
+    </div>
+    <p>Altruist's leadership includes founder/CEO Jason Wenk (ex-Morgan Stanley) and COO Mazi Bahadori (ex-PIMCO). The company is not locked into any single LLM, instead customizing AI architecture by use case — described by CTO Ramanathan as "very differentiated for wealth management."</p>
+  </div>
+
+  <!-- Market Reaction -->
+  <div class="section">
+    <div class="section-label">Market Impact</div>
+    <h2>The Selloff</h2>
+    <p>Wealth management stocks suffered their worst single-day declines since April. <strong>LPL Financial fell as much as 11% intraday</strong> before closing down 8.31%. The selloff caught Wall Street off guard — most analysts had maintained positive ratings on the affected names heading into the session.</p>
+
+    <div class="quote">
+      <p>"The sell-off appears tied to broader concerns about AI disrupting the financial advice and wealth-management model."</p>
+      <div class="attr">— Neil Sipes, Bloomberg Intelligence Analyst</div>
+    </div>
+
+    <p>Notably, LPL Financial's own head of equity research Thomas Shipp had written just last week that "fewer technical users are now empowered to replace existing workflows" with AI tools — and then his firm's stock got hammered on exactly that thesis today.</p>
+  </div>
+
+  <!-- Broader Pattern -->
+  <div class="section">
+    <div class="section-label">Pattern Recognition</div>
+    <h2>The Rolling AI Disruption Trade</h2>
+    <p>Today's wealth management selloff is the latest in a sector-by-sector rotation of the "AI disruption" narrative. Investors have been systematically repricing incumbents as new AI tools emerge targeting specific verticals:</p>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-date">Late January / Early February 2026</div>
+          <div class="tl-text"><strong>Software stocks hit first.</strong> Anthropic's Claude tools (including Cowork) triggered massive selloffs. Thomson Reuters plunged 15.83% (worst day on record). LegalZoom sank 19.68%. FactSet fell 10.51%. Software ETFs posted worst day since April.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-date">Week of Feb 3, 2026</div>
+          <div class="tl-text"><strong>Private credit firms hit.</strong> AI-driven investment analysis tools sparked fears about automated fund management and credit underwriting. Blue Owl (OWL) fell 9.76%.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-date">Monday, Feb 9, 2026</div>
+          <div class="tl-text"><strong>Insurance brokerages hit.</strong> AI disruption fears rotated into insurance distribution and brokerage names.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-date">Tuesday, Feb 10, 2026 — Today</div>
+          <div class="tl-text"><strong>Wealth management hit.</strong> Altruist's Hazel AI tax planning tool triggers 7-9% selloff across Schwab, Raymond James, LPL, Stifel. Worst day since April for all four.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card highlight">
+      <h3>Key Pattern: Sharp Selloff → Partial Bounce</h3>
+      <p>In prior rotations, affected stocks have typically rebounded 1-2% the following day as dip buyers step in. Thomson Reuters and LegalZoom both bounced ~1% the day after their respective drops. Watch for a similar dynamic in SCHW, LPLA, RJF, and SF on Wednesday.</p>
+    </div>
+  </div>
+
+  <!-- CIB Implications -->
+  <div class="section">
+    <div class="section-label">Risk Desk Implications</div>
+    <h2>CIB & Trading Desk Considerations</h2>
+
+    <div class="card">
+      <h3>Contagion Risk — Who's Next?</h3>
+      <p>The rotation pattern suggests <strong>asset management</strong> and <strong>retail banking</strong> could be next if new AI tools target those verticals. Any CIB desk with concentrated exposure to financial advisory names should be monitoring for additional AI product launches that could trigger the next leg of the rotation.</p>
+    </div>
+
+    <div class="card">
+      <h3>Volatility & VaR Impact</h3>
+      <p>Single-day moves of 7-11% in large-cap financial names (Schwab: ~$100B market cap) create meaningful P&L volatility. Desks holding wealth management names or correlated financials may see elevated VaR contributions. The intraday swing in LPLA (−11% midday → −8.3% close) also signals high intraday volatility that may not be fully captured in end-of-day risk metrics.</p>
+    </div>
+
+    <div class="card">
+      <h3>Structural vs. Sentiment</h3>
+      <p>The fundamental question is whether Hazel-type tools truly threaten wealth management revenues or whether this is sentiment-driven repricing. Tax planning is one component of wealth advisory — it doesn't replace portfolio management, estate planning, behavioral coaching, or relationship management. But it does commoditize a high-margin service line, and the market is pricing in the risk that more capabilities follow.</p>
+    </div>
+
+    <div class="card">
+      <h3>Big Tech Tax Angle</h3>
+      <p>Separately, Amazon, Meta, and Alphabet all reported significant drops in federal tax bills today due to AI datacenter investments combined with OBBBA depreciation and R&D provisions. This highlights how the AI buildout is creating both disruption (wealth mgmt selloff) and tax efficiency (Big Tech tax reduction) simultaneously.</p>
+    </div>
+  </div>
+
+  <!-- Sources -->
+  <div class="section">
+    <div class="section-label">Sources</div>
+    <p style="font-size: 12px; color: var(--text-dim); line-height: 1.8;">
+      Bloomberg, "Wealth Manager Stocks Sink as New AI Tool Sparks Disruption Fear" (Feb 10, 2026)<br>
+      CNBC, "The AI threat wrecked software stocks. Now financial stocks look next" (Feb 10, 2026)<br>
+      Yahoo Finance / WealthManagement.com, "Altruist Launches AI-Powered Tax Planning in Hazel" (Feb 10, 2026)<br>
+      Altruist Press Release via Business Wire (Feb 10, 2026)<br>
+      Sharecafe, "AI Tax Tool Triggers Wealth Stock Selloff" (Feb 11, 2026)<br>
+      CNN Business, "Anthropic's new AI tool sends shudders through software stocks" (Feb 4, 2026)<br>
+      Yahoo Finance, "Amazon, Meta, and Alphabet report plunging tax bills" (Feb 10, 2026)
+    </p>
+  </div>
+
+  <div class="footer">
+    Prepared for Mo · Senior Market Risk Specialist/Analyst · CIB Risk Management<br>
+    February 10, 2026 · Confidential — For Internal Use Only
+  </div>
+
+</div>
+</body>
+</html>
