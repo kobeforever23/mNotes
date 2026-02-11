@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFMP — Risk Factor Modeling Platform</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},startup:{typeset:false}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* === THEME SYSTEM === */
+[data-theme="dark"]{
+--bg0:#060a13;--bg1:#0a0e17;--bg2:#111827;--bg3:#1a2035;--bg4:#232b42;
+--border:#2a3455;--border2:#374163;--border3:#4a5580;
+--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--text4:#475569;
+--t1:#e2e8f0;--t2:#94a3b8;--t3:#64748b;
+--blue:#3b82f6;--blue2:#60a5fa;--blue3:#93bbfd;--cyan:#22d3ee;--green:#10b981;--green2:#34d399;
+--red:#ef4444;--red2:#f87171;--orange:#f59e0b;--purple:#a78bfa;--pink:#f472b6;--yellow:#fbbf24;
+--accent:#3b82f6;--accent-bg:rgba(59,130,246,.1);--gold:#f59e0b;
+--shadow:0 4px 24px rgba(0,0,0,.4);--shadow2:0 8px 40px rgba(0,0,0,.6);
+}
+[data-theme="light"]{
+--bg0:#f8fafc;--bg1:#f1f5f9;--bg2:#e2e8f0;--bg3:#cbd5e1;--bg4:#94a3b8;
+--border:#cbd5e1;--border2:#94a3b8;--border3:#64748b;
+--text:#0f172a;--text2:#334155;--text3:#64748b;--text4:#94a3b8;
+--t1:#0f172a;--t2:#334155;--t3:#64748b;
+--blue:#2563eb;--blue2:#3b82f6;--blue3:#1d4ed8;--cyan:#0891b2;--green:#059669;--green2:#10b981;
+--red:#dc2626;--red2:#ef4444;--orange:#d97706;--purple:#7c3aed;--pink:#db2777;--yellow:#ca8a04;
+--accent:#2563eb;--accent-bg:rgba(37,99,235,.1);--gold:#d97706;
+--shadow:0 4px 24px rgba(0,0,0,.08);--shadow2:0 8px 40px rgba(0,0,0,.12);
+}
+
+html,body{height:100%;font-family:'SF Mono','Cascadia Code','Fira Code','Consolas',monospace;background:var(--bg1);color:var(--text);font-size:13px;line-height:1.6;overflow:hidden;transition:background .3s,color .3s}
+#root{height:100%}
+::-webkit-scrollbar{width:7px;height:7px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+::selection{background:rgba(59,130,246,.3)}
+button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:all .15s}
+input,select,textarea{font-family:inherit;background:var(--bg1);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 11px;font-size:12px;outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:28px}
+table{border-collapse:collapse;width:100%}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);font-size:12px}
+th{background:var(--bg3);color:var(--text2);font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:.6px;position:sticky;top:0}
+tr:hover td{background:rgba(59,130,246,.04)}
+a{color:var(--blue2);text-decoration:none}a:hover{text-decoration:underline}
+
+/* === LAYOUT === */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:272px;min-width:272px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:width .25s,min-width .25s,opacity .25s;overflow:hidden;z-index:20}
+.sidebar.collapsed{width:0;min-width:0;opacity:0;border:none}
+.sidebar-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sidebar-brand{display:flex;align-items:center;gap:10px}
+.logo{font-size:18px;font-weight:800;color:var(--cyan);letter-spacing:-1px}
+.logo-sub{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;line-height:1.2}
+.sidebar-close{background:none;color:var(--text3);font-size:16px;padding:4px}
+.sidebar-close:hover{color:var(--text)}
+.sidebar-nav{flex:1;overflow-y:auto;padding:6px 0}
+.nav-group{margin-bottom:1px}
+.nav-btn{width:100%;display:flex;align-items:center;gap:8px;padding:9px 16px;background:none;color:var(--text2);font-size:12px;text-align:left}
+.nav-btn:hover{background:var(--bg3);color:var(--text)}
+.nav-btn.active{background:rgba(59,130,246,.08);color:var(--blue2);border-right:3px solid var(--blue)}
+.nav-num{color:var(--text4);font-size:10px;min-width:20px;font-weight:600}
+.nav-icon{font-size:14px;width:20px;text-align:center}
+.nav-subs{overflow:hidden}
+.nav-sub{width:100%;display:block;padding:6px 16px 6px 52px;background:none;color:var(--text3);font-size:11px;text-align:left}
+.nav-sub:hover{color:var(--text);background:var(--bg3)}
+.nav-sub.active{color:var(--cyan);font-weight:600}
+.sidebar-foot{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap}
+
+/* === MAIN === */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:44px;min-height:44px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px}
+.tb-btn{background:none;color:var(--text3);font-size:15px;padding:4px 6px;border-radius:4px}
+.tb-btn:hover{background:var(--bg3);color:var(--text)}
+.crumbs{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3)}
+.crumbs b{color:var(--text2);cursor:pointer}.crumbs b:hover{color:var(--text)}
+.crumbs .sep{color:var(--border2)}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.search-wrap{position:relative}
+.search-wrap input{width:240px;padding:6px 12px 6px 30px;background:var(--bg3);border:1px solid var(--border);font-size:11px;border-radius:6px}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:12px;pointer-events:none}
+.search-kbd{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--text4);background:var(--bg1);padding:1px 5px;border-radius:3px;border:1px solid var(--border)}
+.search-drop{position:absolute;top:calc(100% + 4px);right:0;width:380px;max-height:420px;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:8px;z-index:100;box-shadow:var(--shadow2)}
+.sr-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.sr-item:hover{background:var(--bg3)}
+.sr-title{font-size:12px;color:var(--text)}.sr-type{font-size:9px;color:var(--text4);text-transform:uppercase;background:var(--bg3);padding:2px 6px;border-radius:3px}
+
+/* === SETTINGS PANEL === */
+.settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center}
+.settings-panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:520px;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow2)}
+.sp-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.sp-title{font-size:15px;font-weight:700}.sp-close{background:none;color:var(--text3);font-size:18px}
+.sp-body{padding:20px}
+.sp-section{margin-bottom:20px}
+.sp-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:600}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.toggle-info{display:flex;flex-direction:column;gap:2px}
+.toggle-name{font-size:12px;color:var(--text);font-weight:500}
+.toggle-desc{font-size:10px;color:var(--text3)}
+.toggle{position:relative;width:40px;height:22px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;inset:0;background:var(--border2);border-radius:11px;transition:.2s}
+.toggle-track::before{content:'';position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle input:checked+.toggle-track{background:var(--blue)}
+.toggle input:checked+.toggle-track::before{transform:translateX(18px)}
+
+/* === CONTENT === */
+.content{flex:1;overflow-y:auto;padding:28px 36px;max-width:1200px}
+.content h1{font-size:24px;font-weight:800;margin-bottom:6px;color:var(--text);letter-spacing:-.5px}
+.content .subtitle{font-size:13px;color:var(--text3);margin-bottom:20px;font-weight:400}
+.content h2{font-size:17px;font-weight:700;margin:28px 0 12px;color:var(--text);display:flex;align-items:center;gap:8px}
+.content h2::before{content:'';width:3px;height:18px;background:var(--blue);border-radius:2px}
+.content h3{font-size:14px;font-weight:600;margin:20px 0 8px;color:var(--blue2)}
+.content p{margin-bottom:12px;color:var(--text2);line-height:1.75}
+.content ul,.content ol{margin:0 0 14px 22px;color:var(--text2)}
+.content li{margin-bottom:5px;line-height:1.65}
+.content code{background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:12px;color:var(--cyan)}
+.content hr{border:none;border-top:1px solid var(--border);margin:24px 0}
+
+/* === COMPONENTS === */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:16px;transition:border .15s}
+.card:hover{border-color:var(--border2)}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:14px;font-weight:700;color:var(--text)}
+.badge{font-size:10px;padding:3px 9px;border-radius:12px;font-weight:600;letter-spacing:.3px}
+.badge-blue{background:rgba(59,130,246,.12);color:var(--blue2)}
+.badge-green{background:rgba(16,185,129,.12);color:var(--green)}
+.badge-orange{background:rgba(245,158,11,.12);color:var(--orange)}
+.badge-red{background:rgba(239,68,68,.12);color:var(--red)}
+.badge-purple{background:rgba(167,139,250,.12);color:var(--purple)}
+.badge-cyan{background:rgba(34,211,238,.12);color:var(--cyan)}
+
+.math-block{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin:14px 0;overflow-x:auto;font-size:15px}
+
+.calc-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:18px 0}
+.calc-head{background:var(--bg3);padding:11px 18px;border-bottom:1px solid var(--border);font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px}
+.calc-head .ic{color:var(--cyan);font-size:15px}
+.calc-head .friendly{color:var(--text3);font-weight:400;font-size:11px;margin-left:auto}
+.calc-body{padding:18px}
+.calc-row{display:flex;gap:18px;flex-wrap:wrap}
+.calc-col{flex:1;min-width:260px}
+.calc-chart{width:100%;margin-top:14px}
+.calc-actions{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+
+.field{margin-bottom:12px}
+.field label{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;font-weight:600}
+.field label .friendly-label{text-transform:none;color:var(--text4);font-weight:400;font-size:10px}
+.field input,.field select{width:100%}
+.field-row{display:flex;gap:10px}
+.field-row .field{flex:1}
+.field .range-val{font-size:11px;color:var(--cyan);font-weight:600;margin-left:auto}
+
+.btn{padding:7px 16px;border-radius:6px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 2px 8px rgba(59,130,246,.3)}
+.btn-sm{padding:5px 11px;font-size:11px}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text2)}.btn-outline:hover{border-color:var(--blue);color:var(--blue2)}
+.btn-ghost{background:none;color:var(--text3);padding:4px 8px}.btn-ghost:hover{color:var(--text);background:var(--bg3)}
+.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{background:var(--red2)}
+
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px;overflow-x:auto}
+.tab{padding:9px 18px;background:none;color:var(--text3);font-size:12px;font-weight:500;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab:hover{color:var(--text)}.tab.on{color:var(--blue2);border-bottom-color:var(--blue);font-weight:600}
+
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:repeat(4,1fr)}
+
+.stat{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;transition:border .15s}
+.stat:hover{border-color:var(--border2)}
+.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:600;display:flex;align-items:center;gap:4px}
+.stat-label .friendly-hint{text-transform:none;font-weight:400;color:var(--text4);font-size:9px}
+.stat-val{font-size:22px;font-weight:800;margin-top:4px;letter-spacing:-.5px}
+.stat-sub{font-size:11px;margin-top:3px;color:var(--text3)}
+.cgreen{color:var(--green)}.cred{color:var(--red)}.cblue{color:var(--blue2)}.ccyan{color:var(--cyan)}.corange{color:var(--orange)}.cpurple{color:var(--purple)}.cpink{color:var(--pink)}.cyellow{color:var(--yellow)}
+
+.tip{position:relative;display:inline;border-bottom:1px dotted var(--text3);cursor:help}
+.tip .tip-box{display:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:10px 14px;font-size:11px;color:var(--text);white-space:normal;width:280px;z-index:60;box-shadow:var(--shadow);line-height:1.5;pointer-events:none}
+.tip .tip-box::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--border2)}
+.tip:hover .tip-box{display:block}
+
+.expand{overflow:hidden}
+.expand-trigger{background:none;color:var(--blue2);font-size:12px;padding:6px 0;cursor:pointer;display:flex;align-items:center;gap:5px;font-weight:500}
+.expand-trigger:hover{color:var(--cyan)}
+
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.3px}
+.tag-eq{background:rgba(59,130,246,.1);color:var(--blue2)}
+.tag-ir{background:rgba(34,211,238,.1);color:var(--cyan)}
+.tag-fx{background:rgba(16,185,129,.1);color:var(--green)}
+.tag-cr{background:rgba(245,158,11,.1);color:var(--orange)}
+.tag-cm{background:rgba(239,68,68,.1);color:var(--red)}
+.tag-vol{background:rgba(167,139,250,.1);color:var(--purple)}
+
+.tree-node{padding-left:18px}
+.tree-row{display:flex;align-items:center;gap:6px;padding:4px 0;cursor:pointer;font-size:12px;color:var(--text2)}
+.tree-row:hover{color:var(--text)}
+.tree-chevron{color:var(--text4);font-size:10px;width:14px;text-align:center;transition:transform .15s}
+.tree-chevron.open{transform:rotate(90deg)}
+.tree-leaf{color:var(--cyan);font-size:11px}
+
+.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:2px;transition:width .3s}
+
+.difficulty{display:flex;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.diff-btn{padding:5px 12px;font-size:10px;font-weight:600;background:none;color:var(--text3);border-right:1px solid var(--border)}
+.diff-btn:last-child{border-right:none}
+.diff-btn.on{background:var(--blue);color:#fff}
+.diff-btn:hover:not(.on){background:var(--bg3);color:var(--text)}
+
+@media(max-width:900px){
+.sidebar{width:220px;min-width:220px}
+.content{padding:16px}
+.g2,.g3,.g4{grid-template-columns:1fr}
+.calc-row{flex-direction:column}
+}
+@media print{
+.sidebar,.topbar{display:none!important}
+.content{padding:20px;max-width:none}
+.app{display:block}
+}
+
+/* === GRID2 HELPER === */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+
+/* === FOOTER === */
+.footer{padding:8px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;font-size:10px;color:var(--text4);background:var(--bg2);flex-wrap:wrap}
+
+/* === BTN-ICON === */
+.btn-icon{background:none;color:var(--text3);font-size:14px;padding:4px 6px;border-radius:4px}.btn-icon:hover{background:var(--bg3);color:var(--text)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+"use strict";
+
+// ============================================================
+// MATH & STATISTICS LIBRARY
+// ============================================================
+const M={
+sum:a=>a.reduce((s,v)=>s+v,0),
+mean:a=>a.length?M.sum(a)/a.length:0,
+variance:(a,ddof=1)=>{const m=M.mean(a);return M.sum(a.map(v=>(v-m)**2))/(a.length-ddof)},
+std:(a,ddof=1)=>Math.sqrt(M.variance(a,ddof)),
+cov:(a,b,ddof=1)=>{const ma=M.mean(a),mb=M.mean(b);return M.sum(a.map((v,i)=>(v-ma)*(b[i]-mb)))/(a.length-ddof)},
+corr:(a,b)=>M.cov(a,b)/M.std(a)/M.std(b),
+cumsum:a=>a.reduce((r,v)=>(r.push((r.length?r[r.length-1]:0)+v),r),[]),
+linspace:(a,b,n)=>Array.from({length:n},(_,i)=>a+i*(b-a)/(n-1)),
+range:(a,b,s=1)=>{const r=[];for(let i=a;i<b;i+=s)r.push(i);return r},
+dot:(a,b)=>M.sum(a.map((v,i)=>v*b[i])),
+matMul:(A,B)=>A.map(r=>B[0].map((_,j)=>M.dot(r,B.map(c=>c[j])))),
+transpose:A=>A[0].map((_,i)=>A.map(r=>r[i])),
+identity:n=>Array.from({length:n},(_,i)=>Array.from({length:n},(__,j)=>i===j?1:0)),
+min:a=>Math.min(...a),max:a=>Math.max(...a),
+median:a=>{const s=[...a].sort((x,y)=>x-y),m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2},
+skewness:(a)=>{const n=a.length,m=M.mean(a),s=M.std(a,0);return n/((n-1)*(n-2))*M.sum(a.map(v=>((v-m)/s)**3))},
+kurtosis:(a)=>{const n=a.length,m=M.mean(a),s=M.std(a,0);return M.sum(a.map(v=>((v-m)/s)**4))/n},
+normPDF:(x,mu=0,s=1)=>Math.exp(-.5*((x-mu)/s)**2)/(s*Math.sqrt(2*Math.PI)),
+normCDF:x=>{const t=1/(1+.2316419*Math.abs(x)),p=.3989422804*Math.exp(-x*x/2)*(t*(.3193815+t*(-.3565638+t*(1.781478+t*(-1.821256+t*1.3302744)))));return x>0?1-p:p},
+normInv:p=>{if(p<=0)return-Infinity;if(p>=1)return Infinity;const a=[-39.69683,220.9461,-275.9285,138.3578,-30.66479,2.506628],b=[-54.47609,161.5858,-155.6989,66.80131,-13.28068],c=[-.007784894,-.3223965,-2.400758,-2.549733,4.374664,2.938164],d=[.007784696,.3224671,2.445134,3.754409],pL=.02425;let q,r;if(p<pL){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}if(p<=1-pL){q=p-.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)}q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)},
+gammaLn:x=>{const c=[76.18009,-86.50532,24.01410,-1.231740,.1208651e-2,-.5395239e-5];let y=x,t=x+5.5;t-=(x+.5)*Math.log(t);let s=1.00000000019;for(let j=0;j<6;j++)s+=c[j]/++y;return-t+Math.log(2.506628274631*s/x)},
+chi2CDF:(x,k)=>{if(x<=0)return 0;return M.regGammaP(k/2,x/2)},
+regGammaP:(a,x)=>{if(x<=0)return 0;if(x<a+1){let s=1/a,t=1/a;for(let n=1;n<200;n++){t*=x/(a+n);s+=t;if(Math.abs(t)<1e-10)break}return s*Math.exp(-x+a*Math.log(x)-M.gammaLn(a))}let b=x+1-a,c=1e30,d=1/b,h=d;for(let i=1;i<200;i++){const an=-i*(i-a);b+=2;d=an*d+b;if(Math.abs(d)<1e-30)d=1e-30;c=b+an/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;h*=d*c;if(Math.abs(d*c-1)<1e-10)break}return 1-Math.exp(-x+a*Math.log(x)-M.gammaLn(a))*h},
+randN:(mu=0,s=1)=>{let u,v;do{u=Math.random();v=Math.random()}while(!u);return mu+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)},
+randNA:(n,mu=0,s=1)=>Array.from({length:n},()=>M.randN(mu,s)),
+cholesky:A=>{const n=A.length,L=Array.from({length:n},()=>new Array(n).fill(0));for(let i=0;i<n;i++)for(let j=0;j<=i;j++){let s=0;for(let k=0;k<j;k++)s+=L[i][k]*L[j][k];L[i][j]=i===j?Math.sqrt(Math.max(0,A[i][i]-s)):L[j][j]?(A[i][j]-s)/L[j][j]:0}return L},
+eigen:(A,maxIt=100)=>{const n=A.length;let a=A.map(r=>[...r]),v=M.identity(n);for(let it=0;it<maxIt;it++){let mx=0,p=0,q=1;for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)if(Math.abs(a[i][j])>mx){mx=Math.abs(a[i][j]);p=i;q=j}if(mx<1e-10)break;const th=.5*Math.atan2(2*a[p][q],a[p][p]-a[q][q]),co=Math.cos(th),si=Math.sin(th),na=a.map(r=>[...r]),nv=v.map(r=>[...r]);for(let i=0;i<n;i++){na[i][p]=co*a[i][p]+si*a[i][q];na[i][q]=-si*a[i][p]+co*a[i][q];na[p][i]=na[i][p];na[q][i]=na[i][q];nv[i][p]=co*v[i][p]+si*v[i][q];nv[i][q]=-si*v[i][p]+co*v[i][q]}na[p][p]=co*co*a[p][p]+2*si*co*a[p][q]+si*si*a[q][q];na[q][q]=si*si*a[p][p]-2*si*co*a[p][q]+co*co*a[q][q];na[p][q]=0;na[q][p]=0;a=na;v=nv}const vals=a.map((r,i)=>r[i]),idx=[...vals.keys()].sort((x,y)=>vals[y]-vals[x]);return{values:idx.map(i=>vals[i]),vectors:idx.map(i=>v.map(r=>r[i]))}},
+covMatrix:data=>{const n=data.length,p=data[0].length,mu=Array.from({length:p},(_,j)=>M.mean(data.map(r=>r[j]))),C=Array.from({length:p},()=>new Array(p).fill(0));for(let i=0;i<p;i++)for(let j=i;j<p;j++){let s=0;for(let k=0;k<n;k++)s+=(data[k][i]-mu[i])*(data[k][j]-mu[j]);C[i][j]=s/(n-1);C[j][i]=C[i][j]}return C},
+ewmaCov:(data,lam=.94)=>{const n=data.length,p=data[0].length;let C=Array.from({length:p},()=>new Array(p).fill(0));for(let i=0;i<p;i++)for(let j=0;j<p;j++)C[i][j]=data[0][i]*data[0][j];for(let t=1;t<n;t++)for(let i=0;i<p;i++)for(let j=0;j<p;j++)C[i][j]=lam*C[i][j]+(1-lam)*data[t][i]*data[t][j];return C},
+shrinkCov:(S,al=null)=>{const p=S.length;if(!al)al=Math.min(.5,1/p);const mu=M.sum(M.range(0,p).map(i=>S[i][i]))/p,F=M.identity(p).map(r=>r.map(v=>v*mu));return S.map((r,i)=>r.map((v,j)=>(1-al)*v+al*F[i][j]))},
+corrFromCov:C=>{const d=C.map((r,i)=>Math.sqrt(Math.max(0,r[i])));return C.map((r,i)=>r.map((v,j)=>d[i]&&d[j]?v/(d[i]*d[j]):i===j?1:0))},
+logReturns:p=>p.slice(1).map((v,i)=>Math.log(v/p[i])),
+simpleReturns:p=>p.slice(1).map((v,i)=>(v-p[i])/p[i]),
+absReturns:p=>p.slice(1).map((v,i)=>v-p[i]),
+garch11:(ret,om=1e-5,al=.05,be=.9)=>{const s2=[M.variance(ret)];for(let t=1;t<ret.length;t++)s2.push(om+al*ret[t-1]**2+be*s2[t-1]);return s2.map(Math.sqrt)},
+parametricVaR:(mu,sig,alpha=.99,h=1)=>-(mu*h+M.normInv(1-alpha)*sig*Math.sqrt(h)),
+historicalVaR:(ret,alpha=.99)=>{const s=[...ret].sort((a,b)=>a-b);return-s[Math.floor((1-alpha)*s.length)]},
+expectedShortfall:(ret,alpha=.99)=>{const s=[...ret].sort((a,b)=>a-b),idx=Math.floor((1-alpha)*s.length);return-M.mean(s.slice(0,Math.max(1,idx)))},
+parametricES:(mu,sig,alpha=.99)=>{const z=M.normInv(alpha);return-mu+sig*M.normPDF(z)/(1-alpha)},
+gbmPaths:(S0,mu,sig,T,steps,nP)=>{const dt=T/steps;return Array.from({length:nP},()=>{const p=[S0];for(let i=0;i<steps;i++)p.push(p[p.length-1]*Math.exp((mu-.5*sig*sig)*dt+sig*Math.sqrt(dt)*M.randN()));return p})},
+ouPaths:(x0,th,mu,sig,T,steps,nP)=>{const dt=T/steps;return Array.from({length:nP},()=>{const p=[x0];for(let i=0;i<steps;i++){const x=p[p.length-1];p.push(x+th*(mu-x)*dt+sig*Math.sqrt(dt)*M.randN())}return p})},
+bs:{
+d1:(S,K,r,s,T)=>(Math.log(S/K)+(r+s*s/2)*T)/(s*Math.sqrt(T)),
+d2:(S,K,r,s,T)=>M.bs.d1(S,K,r,s,T)-s*Math.sqrt(T),
+call:(S,K,r,s,T)=>{const d1=M.bs.d1(S,K,r,s,T),d2=M.bs.d2(S,K,r,s,T);return S*M.normCDF(d1)-K*Math.exp(-r*T)*M.normCDF(d2)},
+put:(S,K,r,s,T)=>{const d1=M.bs.d1(S,K,r,s,T),d2=M.bs.d2(S,K,r,s,T);return K*Math.exp(-r*T)*M.normCDF(-d2)-S*M.normCDF(-d1)},
+delta:(S,K,r,s,T,cp='c')=>{const d1=M.bs.d1(S,K,r,s,T);return cp==='c'?M.normCDF(d1):M.normCDF(d1)-1},
+gamma:(S,K,r,s,T)=>M.normPDF(M.bs.d1(S,K,r,s,T))/(S*s*Math.sqrt(T)),
+vega:(S,K,r,s,T)=>S*M.normPDF(M.bs.d1(S,K,r,s,T))*Math.sqrt(T)/100,
+theta:(S,K,r,s,T,cp='c')=>{const d1=M.bs.d1(S,K,r,s,T),d2=M.bs.d2(S,K,r,s,T),t1=-S*M.normPDF(d1)*s/(2*Math.sqrt(T));return(cp==='c'?t1-r*K*Math.exp(-r*T)*M.normCDF(d2):t1+r*K*Math.exp(-r*T)*M.normCDF(-d2))/365},
+rho:(S,K,r,s,T,cp='c')=>{const d2=M.bs.d2(S,K,r,s,T);return(cp==='c'?1:-1)*K*T*Math.exp(-r*T)*M.normCDF(cp==='c'?d2:-d2)/100},
+vanna:(S,K,r,s,T)=>{const d1=M.bs.d1(S,K,r,s,T),d2=M.bs.d2(S,K,r,s,T);return-M.normPDF(d1)*d2/s},
+volga:(S,K,r,s,T)=>{const d1=M.bs.d1(S,K,r,s,T),d2=M.bs.d2(S,K,r,s,T);return S*M.normPDF(d1)*Math.sqrt(T)*d1*d2/s},
+charm:(S,K,r,s,T)=>{const d1=M.bs.d1(S,K,r,s,T),d2=M.bs.d2(S,K,r,s,T);return-M.normPDF(d1)*(2*r*T-d2*s*Math.sqrt(T))/(2*T*s*Math.sqrt(T))},
+speed:(S,K,r,s,T)=>{const d1=M.bs.d1(S,K,r,s,T),g=M.bs.gamma(S,K,r,s,T);return-g/S*(d1/(s*Math.sqrt(T))+1)},
+},
+kupiecTest:(viol,n,alpha)=>{const p=1-alpha,pH=viol/n;if(!viol||viol===n)return{stat:0,pVal:1};const lr=2*(viol*Math.log(pH/p)+(n-viol)*Math.log((1-pH)/(1-p)));return{stat:lr,pVal:1-M.chi2CDF(lr,1)}},
+corrNormals:(n,R)=>{const L=M.cholesky(R),p=R.length;return Array.from({length:n},()=>{const z=M.randNA(p);return L.map(row=>M.dot(row,z))})},
+percentile:(a,p)=>{const s=[...a].sort((x,y)=>x-y),i=(s.length-1)*p/100,lo=Math.floor(i);return s[lo]+(s[Math.ceil(i)]-s[lo])*(i-lo)},
+histogram:(data,bins=30)=>{const mn=M.min(data),mx=M.max(data),w=(mx-mn)/bins||1,counts=new Array(bins).fill(0);data.forEach(v=>{const b=Math.min(Math.floor((v-mn)/w),bins-1);counts[b]++});return{edges:M.linspace(mn,mx,bins+1),counts,centers:M.linspace(mn+w/2,mx-w/2,bins)}},
+fmt:(v,d=2)=>typeof v==='number'?v.toFixed(d):'—',
+fmtPct:(v,d=2)=>(v*100).toFixed(d)+'%',
+fmtK:v=>Math.abs(v)>=1e6?(v/1e6).toFixed(1)+'M':Math.abs(v)>=1e3?(v/1e3).toFixed(1)+'K':v.toFixed(0),
+};
+
+// ============================================================
+// SAMPLE DATA
+// ============================================================
+const SAMPLE={
+eqPrices:(()=>{const p=[100];for(let i=0;i<252;i++)p.push(p[p.length-1]*Math.exp(.0003+.015*M.randN()));return p})(),
+fxPrices:(()=>{const p=[1.10];for(let i=0;i<252;i++)p.push(p[p.length-1]*Math.exp(.0001+.006*M.randN()));return p})(),
+tenors:[.25,.5,1,2,3,5,7,10,15,20,30],
+rates:[5.25,5.15,4.85,4.45,4.25,4.10,4.15,4.20,4.30,4.35,4.40],
+multiRet:(()=>{const corr=[[1,.6,.3,-.2,.1],[.6,1,.5,-.1,.2],[.3,.5,1,.1,.3],[-.2,-.1,.1,1,-.4],[.1,.2,.3,-.4,1]],vols=[.015,.018,.012,.008,.02],L=M.cholesky(corr);return Array.from({length:252},()=>{const z=M.randNA(5),c=L.map(row=>M.dot(row,z));return c.map((v,i)=>v*vols[i]+.0002)})})(),
+names:['US Equity','EU Equity','IG Credit','Govt Bonds','Commodities'],
+weights:[.30,.25,.20,.15,.10],
+};
+
+// ============================================================
+// EXPANDED GLOSSARY (200+ terms)
+// ============================================================
+const G={
+// Core Risk
+'VaR':['Value at Risk','Maximum expected loss over a time horizon at a given confidence level. E.g., 99% 1-day VaR of $10M means there is a 1% chance of losing more than $10M in one day.'],
+'ES':['Expected Shortfall (CVaR)','The average loss in the worst cases beyond VaR. Also called Conditional VaR. If 99% VaR is $10M, ES tells you the average loss when losses exceed $10M. A coherent risk measure.'],
+'PCA':['Principal Component Analysis','A technique that finds the main "directions" of variation in data. For yield curves, PC1≈level shifts (~85%), PC2≈slope changes (~10%), PC3≈curvature (~3%).'],
+'EWMA':['Exponentially Weighted Moving Average','Gives more importance to recent data. Controlled by decay factor λ (typically 0.94). Higher λ = slower reaction to new data, smoother estimates.'],
+'GARCH':['Generalized Autoregressive Conditional Heteroskedasticity','A model where tomorrow\'s volatility depends on today\'s return and today\'s volatility. Captures "volatility clustering" — big moves tend to follow big moves.'],
+'GBM':['Geometric Brownian Motion','The standard mathematical model for stock prices: dS=μSdt+σSdW. Prices follow a random walk with drift. Log returns are normally distributed.'],
+'Copula':['Dependency Structure Function','Separates how each variable behaves individually (marginals) from how they move together (dependence). Critical for modeling joint tail events.'],
+// Greeks
+'Delta':['Directional Sensitivity (Δ)','How much an option price changes per $1 move in the stock. Delta of 0.5 means option gains ~$0.50 if stock rises $1.'],
+'Gamma':['Convexity / Acceleration (Γ)','How fast delta changes as the stock moves. High gamma means delta is unstable — the position becomes more or less directional quickly.'],
+'Vega':['Volatility Sensitivity (ν)','How much an option price changes per 1% change in implied volatility. Long options have positive vega (benefit from vol increase).'],
+'Theta':['Time Decay (Θ)','How much value an option loses each day just from the passage of time. "The cost of holding insurance."'],
+'Rho':['Interest Rate Sensitivity (ρ)','How much an option price changes per 1% change in interest rates. Usually small but matters for long-dated options.'],
+'Vanna':['Delta-Vol Cross Sensitivity','How delta changes when volatility changes (or equivalently, how vega changes when stock moves). Important for vol traders.'],
+'Volga':['Vol-of-Vol Sensitivity (Vomma)','How vega changes when volatility changes. Measures the "convexity of vega" — important for exotic option pricing.'],
+'Charm':['Delta Decay','How delta changes with time passing. Important for dynamic hedging — tells you how to adjust hedges day-to-day.'],
+'Speed':['Gamma Sensitivity','How gamma changes as the stock moves. Third derivative of option price vs stock price.'],
+// Covariance & Correlation
+'Cholesky':['Matrix Square Root Decomposition','Breaks a correlation matrix into L×Lᵀ. Used to generate correlated random numbers for Monte Carlo simulation.'],
+'Correlation':['Linear Co-movement Measure','How closely two variables move together. +1 = perfect co-movement, -1 = perfect opposite, 0 = no linear relationship. Range: [-1, 1].'],
+'Covariance':['Joint Variability Measure','Like correlation but not normalized — measures both direction and magnitude of co-movement. Cov = Corr × σ₁ × σ₂.'],
+'Marchenko-Pastur':['Random Matrix Noise Boundary','Tells you which eigenvalues of a covariance matrix are real signal vs. just noise from having too few data points relative to variables.'],
+'Ledoit-Wolf':['Covariance Shrinkage Estimator','Improves covariance estimation by "shrinking" the noisy sample estimate toward a simpler, more stable target. Optimal shrinkage intensity found analytically.'],
+// Regulatory
+'FRTB':['Fundamental Review of the Trading Book','Basel III/IV overhaul of market risk capital rules. Replaced VaR with ES, added liquidity horizons, stricter desk-level validation.'],
+'IMA':['Internal Models Approach','Banks use their own models for capital calculation (subject to regulatory approval). More risk-sensitive but requires passing PLAT and RFET tests.'],
+'SA':['Standardized Approach','Regulator-prescribed formula for capital. Less risk-sensitive but simpler. Banks that fail IMA tests fall back to SA.'],
+'NMRF':['Non-Modellable Risk Factor','A risk factor without enough observable market data (fails RFET: need 24 prices in 12 months, no 90-day gap). Gets punitive capital treatment.'],
+'DRC':['Default Risk Charge','Capital charge for the risk that an issuer suddenly defaults (jump-to-default). Separate from market risk charges.'],
+'RRAO':['Residual Risk Add-On','Extra capital for exotic risks (correlation trading, gap risk, behavioral) not captured by standard sensitivities.'],
+'RFET':['Risk Factor Eligibility Test','Data sufficiency test: 24+ real prices in 12 months, no 90-day gap. Pass → modellable. Fail → NMRF (higher capital).'],
+'PLAT':['P&L Attribution Test','Compares risk model P&L to actual P&L. Must pass Spearman correlation (≥0.7) and KS test. Failure can disqualify desk from IMA.'],
+'CCAR':['Comprehensive Capital Analysis and Review','Fed stress testing requiring largest banks to project losses over 9 quarters under severe scenarios. Determines capital distribution limits.'],
+'DFAST':['Dodd-Frank Act Stress Tests','Regulatory stress tests for banks >$250B. Similar to CCAR but with Fed-prescribed scenarios only.'],
+'SR 11-7':['Model Risk Management Guidance','OCC/Fed guidance requiring independent model validation, ongoing monitoring, comprehensive documentation, and board oversight of all models.'],
+// Measures & Concepts
+'CS01':['Credit Spread Sensitivity','P&L impact of a 1 basis point parallel shift in credit spreads. Key metric for credit trading desks.'],
+'DV01':['Dollar Value of a Basis Point','P&L impact of a 1bp parallel shift in interest rates. The fundamental rate sensitivity measure.'],
+'KRD':['Key Rate Duration','Sensitivity to rate changes at specific maturity points (e.g., just the 5Y rate). More granular than DV01.'],
+'Basis Risk':['Hedge Mismatch Risk','Risk that a hedge doesn\'t perfectly offset the position because the hedging instrument and the position don\'t move identically.'],
+'Liquidity Horizon':['Time to Exit Position','How long it takes to unwind a position without significantly moving the market. Ranges from 10 days (large-cap equity) to 120 days (structured credit).'],
+'HHI':['Herfindahl-Hirschman Index (Concentration)','Sum of squared shares/weights. Measures how concentrated a portfolio is. HHI=1 means completely concentrated in one name; 1/N means equal-weight.'],
+'Wrong-Way Risk':['Adverse Correlation Risk','When your counterparty is more likely to default precisely when your exposure to them is highest. E.g., bought protection from a bank on banking sector default.'],
+'Tail Dependence':['Extreme Co-movement','Probability of joint extreme events (both assets crash simultaneously). Linear correlation misses this — copulas capture it.'],
+// Distributions & Statistics
+'EVT':['Extreme Value Theory','Statistical framework specifically for modeling rare, extreme events (the tails of distributions). Uses GPD for peaks-over-threshold.'],
+'GPD':['Generalized Pareto Distribution','The distribution that tail exceedances follow (by theorem). Shape parameter ξ>0 means heavy tails; ξ<0 means bounded tails.'],
+'GEV':['Generalized Extreme Value Distribution','Distribution of block maxima (e.g., worst monthly loss). Encompasses Gumbel, Fréchet, and Weibull distributions.'],
+'Hill Estimator':['Tail Index Estimator','Estimates how heavy the tail of a distribution is by looking at the ratio of extreme values. Higher value = heavier tail.'],
+'Cornish-Fisher':['Skewness/Kurtosis Adjustment','Adjusts normal VaR quantiles to account for non-normality (skew and excess kurtosis) of the actual return distribution.'],
+'Jarque-Bera':['Normality Test','Tests whether data is normally distributed by checking if skewness≈0 and kurtosis≈3. High JB statistic → reject normality.'],
+'Kupiec Test':['VaR Violation Rate Test','Backtesting: checks if the number of VaR breaches matches what we\'d expect (e.g., ~2.5 breaches per year for 99% daily VaR).'],
+'Christoffersen':['Conditional Coverage Test','Backtesting: checks both violation rate AND that violations don\'t cluster (are independent). More comprehensive than Kupiec.'],
+// Processes
+'Ornstein-Uhlenbeck':['Mean-Reverting Random Walk','dX=θ(μ-X)dt+σdW. Tends to drift back to a long-term mean μ. Used for interest rates and credit spreads that don\'t wander to infinity.'],
+'Heston Model':['Stochastic Volatility Model','Both the asset price AND its volatility are random. Volatility follows its own mean-reverting process. Generates realistic "vol smiles."'],
+'SABR':['Stochastic Alpha Beta Rho Model','Popular for interest rate options. Both forward rate and volatility are stochastic, connected by correlation ρ. Produces flexible vol surfaces.'],
+'CIR':['Cox-Ingersoll-Ross Process','dr=κ(θ-r)dt+σ√r·dW. Like OU but with √r ensuring rates stay non-negative (when 2κθ≥σ², the "Feller condition").'],
+'Jump-Diffusion':['Merton Model','Adds sudden jumps (Poisson arrivals) to GBM. Captures overnight gaps, earnings surprises, and crash risk that smooth diffusion misses.'],
+'Regime Switching':['Hamilton/Markov-Switching Model','Parameters (mean, vol) switch between distinct states (e.g., "calm" vs "crisis"). Current state is hidden, inferred from data.'],
+// Portfolio
+'Coherent Risk Measure':['Well-Behaved Risk Metric','Must satisfy 4 axioms: monotonicity, translation invariance, positive homogeneity, and subadditivity. ES is coherent; VaR is not.'],
+'Subadditivity':['Diversification Benefit Property','ρ(A+B) ≤ ρ(A) + ρ(B). Combining positions should not increase measured risk. VaR can violate this; ES always satisfies it.'],
+'Risk Parity':['Equal Risk Contribution Portfolio','Each asset contributes the same amount of risk to the portfolio. Typically overweights bonds and underweights equities vs. traditional 60/40.'],
+'Euler Decomposition':['Exact Risk Attribution','Decomposes total portfolio risk into contributions from each position that sum exactly to the total. Based on marginal risk contributions.'],
+'Marginal VaR':['Per-Unit Risk Contribution','How much VaR changes if you add one more unit of an asset. MVaR_i = (Σw)_i/σ_p × z_α.'],
+'Component VaR':['Position Risk Share','Weight × Marginal VaR. All component VaRs sum to total portfolio VaR. Shows "who is responsible" for risk.'],
+'Incremental VaR':['Impact of Adding a Position','Change in portfolio VaR from adding an entire position. Unlike marginal VaR, this is a discrete (not infinitesimal) change.'],
+'Tracking Error':['Active Risk vs Benchmark','Standard deviation of the difference between portfolio and benchmark returns. Measures how closely a portfolio follows its benchmark.'],
+// Data & Methods
+'Monte Carlo':['Random Simulation Method','Generate thousands of possible future scenarios randomly, reprice the portfolio under each, and analyze the resulting distribution of gains/losses.'],
+'Historical Simulation':['Past-Scenarios Method','Apply actual historical market moves (e.g., last 500 days) to today\'s portfolio. No distributional assumption needed but limited to observed history.'],
+'Filtered HS':['Volatility-Adjusted Historical Sim','Standardize historical returns by their GARCH volatility, then rescale by current volatility. Captures current regime while keeping non-parametric shapes.'],
+'Variance-Covariance':['Parametric / Normal VaR','Assumes returns are normally distributed. VaR = z × σ. Fast to compute but misses fat tails and skewness.'],
+'Antithetic Variates':['Paired Simulation Variance Reduction','For each random draw z, also use -z. Reduces Monte Carlo variance by ~50% with minimal extra computation.'],
+'Control Variates':['Known-Solution Variance Reduction','Use a simpler instrument with a known answer as a "control" to reduce noise in the Monte Carlo estimate of a complex instrument.'],
+'Importance Sampling':['Targeted Simulation','Oversample from the region of interest (e.g., the tail) and reweight. Can reduce MC variance by orders of magnitude for rare events.'],
+'Stratified Sampling':['Structured Random Sampling','Divide the probability space into strata and sample from each. Ensures even coverage and reduces variance by 30-60%.'],
+'Bootstrap':['Resampling Method','Draw random samples (with replacement) from the data to estimate uncertainty in any statistic. E.g., compute VaR on 1000 bootstrap samples → confidence interval.'],
+// ML
+'Autoencoder':['Neural Network Compressor','Neural network trained to compress data to a small bottleneck layer, then reconstruct. The bottleneck captures the essential "nonlinear factors."'],
+'GAN':['Generative Adversarial Network','Two neural networks compete: generator creates fake data, discriminator tries to detect it. Can generate realistic synthetic market scenarios.'],
+'HMM':['Hidden Markov Model','Probabilistic model with hidden states (regimes). Used to detect market regimes (bull/bear, low/high vol) from observable returns.'],
+};
+
+// ============================================================
+// STRESS SCENARIOS
+// ============================================================
+const SCENARIOS={
+'GFC 2008':{d:'Global Financial Crisis — Lehman collapse, credit freeze, equity crash',s:{equity:-.38,rates:-.02,credit:.035,fx:.08,commodity:-.35,vol:.80}},
+'COVID Mar 2020':{d:'Pandemic crash — fastest bear market in history',s:{equity:-.34,rates:-.015,credit:.025,fx:.05,commodity:-.25,vol:.65}},
+'Taper Tantrum 2013':{d:'Fed tapering announcement — EM sell-off, rates spike',s:{equity:-.06,rates:.013,credit:.005,fx:-.04,commodity:-.08,vol:.15}},
+'SVB 2023':{d:'Silicon Valley Bank collapse — regional banking crisis',s:{equity:-.08,rates:-.005,credit:.012,fx:.02,commodity:-.03,vol:.25}},
+'Black Monday 1987':{d:'Single-day 22.6% equity crash',s:{equity:-.226,rates:-.01,credit:.008,fx:.06,commodity:-.05,vol:1.50}},
+'LTCM 1998':{d:'Russian default + LTCM collapse — liquidity crisis',s:{equity:-.19,rates:-.012,credit:.02,fx:.10,commodity:-.15,vol:.40}},
+'Dot-Com 2000':{d:'Tech bubble burst — prolonged equity decline',s:{equity:-.45,rates:-.015,credit:.01,fx:-.05,commodity:-.10,vol:.30}},
+'EU Debt 2011':{d:'European sovereign debt crisis — periphery spreads blowout',s:{equity:-.20,rates:.005,credit:.025,fx:-.12,commodity:-.10,vol:.35}},
+'Asian Crisis 1997':{d:'Thai baht collapse, EM contagion',s:{equity:-.15,rates:.005,credit:.015,fx:-.15,commodity:-.12,vol:.30}},
+'Oil Collapse 2014':{d:'Oil price collapse from $100+ to sub-$50',s:{equity:-.05,rates:-.005,credit:.008,fx:.03,commodity:-.50,vol:.20}},
+'Brexit 2016':{d:'UK EU referendum shock — GBP crash',s:{equity:-.08,rates:-.005,credit:.005,fx:-.10,commodity:-.05,vol:.20}},
+'Volmageddon 2018':{d:'VIX spike, XIV termination — vol regime change',s:{equity:-.10,rates:.003,credit:.003,fx:.02,commodity:-.02,vol:1.00}},
+'China Deval 2015':{d:'CNY devaluation shock — EM fears',s:{equity:-.12,rates:-.003,credit:.008,fx:-.08,commodity:-.10,vol:.25}},
+'Turkey Crisis 2018':{d:'Lira collapse — EM contagion fears',s:{equity:-.06,rates:.002,credit:.010,fx:-.12,commodity:-.04,vol:.15}},
+'EM Tantrum 2022':{d:'Fed hawkish pivot — EM outflows',s:{equity:-.15,rates:.025,credit:.015,fx:-.08,commodity:-.08,vol:.20}},
+'Rates Shock +200bp':{d:'Hypothetical parallel rates shock +200bp',s:{equity:-.10,rates:.02,credit:.010,fx:.03,commodity:-.05,vol:.15}},
+};
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+const NAV=[
+{id:'theory',label:'Foundational Theory',icon:'📐',subs:[{id:'what-rf',l:'What Are Risk Factors'},{id:'rf-universe',l:'Risk Factor Universes'},{id:'rf-returns',l:'Risk Factor Returns'}]},
+{id:'topdown',label:'Top-Down Modeling',icon:'🔬',subs:[{id:'pca',l:'PCA'},{id:'factor-models',l:'Factor Models'},{id:'dim-reduce',l:'Dimensionality Reduction'}]},
+{id:'bottomup',label:'Bottom-Up Modeling',icon:'⚙️',subs:[{id:'dynamics',l:'Factor Dynamics'},{id:'covariance',l:'Covariance Estimation'},{id:'copulas',l:'Copulas & Tail Dependence'},{id:'volatility',l:'Volatility Modeling'}]},
+{id:'var',label:'Value-at-Risk',icon:'📊',subs:[{id:'param-var',l:'Parametric VaR'},{id:'hist-var',l:'Historical Simulation'},{id:'mc-var',l:'Monte Carlo VaR'},{id:'es',l:'Expected Shortfall'},{id:'backtest',l:'Backtesting'}]},
+{id:'stress',label:'Stress Testing',icon:'🔥',subs:[{id:'hist-stress',l:'Historical Scenarios'},{id:'hypo-stress',l:'Hypothetical Scenarios'},{id:'greeks',l:'Sensitivity / Greeks'},{id:'ccar',l:'CCAR / DFAST'}]},
+{id:'decomp',label:'Risk Decomposition',icon:'🧩',subs:[{id:'risk-decomp',l:'Risk Decomposition'},{id:'pnl-attr',l:'P&L Attribution'},{id:'risk-budget',l:'Risk Budgeting'}]},
+{id:'validation',label:'Model Validation',icon:'✓',subs:[{id:'stat-tests',l:'Statistical Tests'},{id:'model-risk',l:'Model Risk'}]},
+{id:'advanced',label:'Advanced Topics',icon:'🧠',subs:[{id:'liquidity',l:'Liquidity Risk'},{id:'evt',l:'Extreme Value Theory'},{id:'frtb',l:'FRTB'},{id:'ml',l:'ML in Risk'}]},
+{id:'calcs',label:'Calculators',icon:'🔢',subs:[{id:'c-ret',l:'Return Calculator'},{id:'c-cov',l:'Covariance Estimator'},{id:'c-pca',l:'PCA Engine'},{id:'c-var',l:'VaR Calculator'},{id:'c-greeks',l:'Greeks Calculator'},{id:'c-mc',l:'Monte Carlo Sim'},{id:'c-vol',l:'Volatility Lab'},{id:'c-stress',l:'Stress Test Engine'},{id:'c-bt',l:'Backtesting Suite'},{id:'c-dist',l:'Distribution Fitter'}]},
+{id:'ref',label:'Reference',icon:'📖',subs:[{id:'formulas',l:'Formula Reference'},{id:'glossary',l:'Glossary'},{id:'regulatory',l:'Regulatory'},{id:'real-world',l:'Real-World Context'}]},
+];
+
+// ============================================================
+// REACT CORE
+// ============================================================
+const{createElement:h,useState,useEffect,useRef,useCallback,useMemo,Fragment:F,createContext,useContext}=React;
+
+// Global Settings Context
+const Ctx=createContext();
+function useCfg(){return useContext(Ctx)}
+
+// ============================================================
+// SHARED COMPONENTS
+// ============================================================
+function MathB({tex,inline}){const r=useRef();useEffect(()=>{if(r.current&&window.MathJax&&MathJax.typesetPromise){r.current.innerHTML=inline?`\\(${tex}\\)`:`\\[${tex}\\]`;MathJax.typesetPromise([r.current]).catch(()=>{})}},[tex]);return h('span',{ref:r,className:inline?'math-inline':'math-block',style:inline?{}:{display:'block'}})}
+
+function Plot({data,layout,style,config}){const r=useRef();const{theme}=useCfg();useEffect(()=>{if(!r.current)return;const dark=theme==='dark';const base={paper_bgcolor:'transparent',plot_bgcolor:dark?'rgba(26,32,53,.5)':'rgba(241,245,249,.5)',font:{family:'SF Mono,Consolas,monospace',size:11,color:dark?'#94a3b8':'#334155'},margin:{t:32,r:20,b:42,l:52},xaxis:{gridcolor:dark?'#2a3455':'#cbd5e1',zerolinecolor:dark?'#374163':'#94a3b8'},yaxis:{gridcolor:dark?'#2a3455':'#cbd5e1',zerolinecolor:dark?'#374163':'#94a3b8'},legend:{bgcolor:'transparent',font:{size:10}},...layout};Plotly.newPlot(r.current,data,base,{responsive:true,displayModeBar:true,modeBarButtonsToRemove:['lasso2d','select2d'],displaylogo:false,...config});return()=>{if(r.current)Plotly.purge(r.current)};},[JSON.stringify(data),JSON.stringify(layout),theme]);return h('div',{ref:r,style:{width:'100%',minHeight:280,...style}})}
+
+function Tip({term,children}){const d=G[term];if(!d)return h('span',null,children||term);const{friendly}=useCfg();return h('span',{className:'tip'},children||term,h('span',{className:'tip-box'},h('b',null,friendly?d[0]:term),h('br'),d[1]))}
+
+function Expand({title,children,open:defOpen}){const[o,setO]=useState(defOpen||false);return h('div',{className:'card'},h('button',{className:'expand-trigger',onClick:()=>setO(!o)},o?'▾':'▸',' ',title),o&&h('div',{style:{marginTop:10}},children))}
+
+function TabPanel({tabs,active,onChange,children}){const controlled=typeof active==='number';const[a,setA]=useState(0);const cur=controlled?active:a;const set=controlled?onChange:setA;return h(F,null,h('div',{className:'tabs'},tabs.map((t,i)=>h('button',{key:i,className:'tab'+(i===cur?' on':''),onClick:()=>set(i)},t))),children?children[cur]:null)}
+
+function Toggle({checked,onChange,label,desc}){return h('div',{className:'toggle-row'},h('div',{className:'toggle-info'},h('div',{className:'toggle-name'},label),desc&&h('div',{className:'toggle-desc'},desc)),h('label',{className:'toggle'},h('input',{type:'checkbox',checked,onChange:e=>onChange(e.target.checked)}),h('span',{className:'toggle-track'})))}
+
+function Stat({label,val,value,color,hint,sub}){const{friendly}=useCfg();const v=val||value;return h('div',{className:'stat'},h('div',{className:'stat-label'},label,friendly&&hint&&h('span',{className:'friendly-hint'},' · ',hint)),h('div',{className:'stat-val '+(color||'')},v),sub&&h('div',{className:'stat-sub'},sub))}
+
+function CalcBox({title,friendly,children,onExport,onReset}){return h('div',{className:'calc-box'},h('div',{className:'calc-head'},h('span',{className:'ic'},'⚡'),title,friendly&&h('span',{className:'friendly'},friendly)),h('div',{className:'calc-body'},children,(onExport||onReset)&&h('div',{className:'calc-actions'},onReset&&h('button',{className:'btn btn-outline btn-sm',onClick:onReset},'↺ Reset'),onExport&&h('button',{className:'btn btn-outline btn-sm',onClick:onExport},'📋 Copy Results'))))}
+
+function Field({label,friendly,children,value,onChange,type,options}){const cfg=useCfg();
+const input=children||(type==='select'?h('select',{value:value,onChange:e=>onChange(e.target.value)},
+(options||[]).map(o=>Array.isArray(o)?h('option',{key:o[0],value:o[0]},o[1]):h('option',{key:o,value:o},o))):
+h('input',{type:'number',value:value,onChange:e=>onChange(e.target.value),step:'any'}));
+return h('div',{className:'field'},h('label',null,label,cfg.friendly&&friendly&&h('span',{className:'friendly-label'},' — ',friendly)),input)}
+
+function DifficultySelector(){const{difficulty,update}=useCfg();return h('div',{className:'difficulty'},['intro','standard','advanced'].map(d=>h('button',{key:d,className:'diff-btn'+(difficulty===d?' on':''),onClick:()=>update('difficulty',d)},d.charAt(0).toUpperCase()+d.slice(1))))}
+
+// Settings Panel
+function SettingsPanel({onClose}){const cfg=useCfg();const u=cfg.update;
+return h('div',{className:'settings-panel'},h('div',{className:'sp-head'},h('div',{className:'sp-title'},'⚙ Settings'),h('button',{className:'sp-close',onClick:onClose},'✕')),
+h('div',{className:'sp-body'},
+h('div',{className:'sp-section'},h('div',{className:'sp-label'},'Appearance'),h(Toggle,{label:'Dark Theme',desc:'Bloomberg Terminal-inspired dark mode',checked:cfg.theme==='dark',onChange:v=>u('theme',v?'dark':'light')})),
+h('div',{className:'sp-section'},h('div',{className:'sp-label'},'Content Display'),
+h(Toggle,{label:'Friendly Descriptions',desc:'Show plain-English explanations alongside technical terms',checked:cfg.friendly,onChange:v=>u('friendly',v)}),
+h(Toggle,{label:'Show Formulas',desc:'Display mathematical formulas (LaTeX)',checked:cfg.showMath,onChange:v=>u('showMath',v)}),
+h(Toggle,{label:'Show Derivations',desc:'Include full mathematical derivations',checked:cfg.showDerivations,onChange:v=>u('showDerivations',v)}),
+h(Toggle,{label:'Auto-Calculate',desc:'Automatically compute results when inputs change',checked:cfg.autoCalc,onChange:v=>u('autoCalc',v)})),
+h('div',{className:'sp-section'},h('div',{className:'sp-label'},'Difficulty Level'),h('p',{style:{fontSize:11,color:'var(--text3)',marginBottom:8}},'Controls depth of educational content shown'),h(DifficultySelector)),
+h('div',{className:'sp-section'},h('div',{className:'sp-label'},'Charts'),
+h(Toggle,{label:'Animate Charts',desc:'Enable chart transition animations',checked:cfg.animateCharts,onChange:v=>u('animateCharts',v)}),
+h(Toggle,{label:'Show Chart Toolbar',desc:'Display Plotly chart tools (zoom, pan, download)',checked:cfg.showChartTools,onChange:v=>u('showChartTools',v)}))))}
+
+// Conditional math display
+function MathDisplay({tex,inline}){const{showMath}=useCfg();if(!showMath)return null;return h(MathB,{tex,inline})}
+
+// Difficulty-gated content
+function DiffContent({level,children}){const{difficulty}=useCfg();const levels={intro:0,standard:1,advanced:2};const l=level.toLowerCase();const d=difficulty.toLowerCase();if((levels[l]||0)>(levels[d]||1))return null;return h(F,null,children)}
+
+// ============================================================
+// SECTION 1: FOUNDATIONAL THEORY
+// ============================================================
+function SecTheory(){return h('div',null,h(WhatRF),h(RFUniverse),h(RFReturns))}
+
+function WhatRF(){const cfg=useCfg();return h('div',null,
+h('h1',null,'What Are Risk Factors?'),h('p',{className:'subtitle'},'The building blocks of market risk measurement'),
+h('p',null,'A ',h(Tip,{term:'VaR'},'risk factor'),' is any market variable whose changes affect portfolio value. ',cfg.friendly?'Think of risk factors as the "ingredients" that determine your portfolio\'s profit or loss each day.':''),
+h(MathDisplay,{tex:'\\Delta V \\approx \\sum_{i=1}^{n} \\frac{\\partial V}{\\partial f_i} \\Delta f_i + \\frac{1}{2} \\sum_{i,j} \\frac{\\partial^2 V}{\\partial f_i \\partial f_j} \\Delta f_i \\Delta f_j'}),
+cfg.friendly&&h('p',{style:{fontSize:12,color:'var(--text3)',fontStyle:'italic'}},'Translation: Portfolio change ≈ sum of (sensitivity × factor move) + curvature effects'),
+h('h2',null,'Risk Factor Taxonomy'),
+h('div',{className:'grid g3'},...[
+{n:'Equity Prices',t:'tag-eq',d:'Stock prices, indices, ETFs',ex:'AAPL, S&P 500, STOXX 600'},
+{n:'Interest Rates',t:'tag-ir',d:'Full yield curves across tenors',ex:'SOFR 3M, 2Y, 5Y, 10Y, 30Y swaps'},
+{n:'FX Rates',t:'tag-fx',d:'Currency exchange rates',ex:'EUR/USD, USD/JPY, GBP/USD'},
+{n:'Credit Spreads',t:'tag-cr',d:'Default risk premiums',ex:'CDX IG, iTraxx, single-name CDS'},
+{n:'Commodity Prices',t:'tag-cm',d:'Physical goods pricing',ex:'WTI crude, gold, copper, wheat'},
+{n:'Volatility',t:'tag-vol',d:'Option-implied vol surfaces',ex:'VIX, swaption vols, FX vols'},
+].map((rf,i)=>h('div',{key:i,className:'card'},h('span',{className:'tag '+rf.t},rf.n),h('p',{style:{fontSize:11,margin:'6px 0 2px'}},rf.d),h('p',{style:{fontSize:10,color:'var(--text4)'}},rf.ex)))),
+h('h2',null,'Observable vs. Derived vs. Latent'),
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Type'),h('th',null,'What It Means'),h('th',null,'Examples'))),h('tbody',null,
+h('tr',null,h('td',null,h('span',{className:'badge badge-green'},'Observable')),h('td',null,'Directly quoted in markets'),h('td',null,'Equity prices, FX spot, Treasury yields')),
+h('tr',null,h('td',null,h('span',{className:'badge badge-blue'},'Derived')),h('td',null,'Computed from observables via models'),h('td',null,'Implied vol, zero rates, OAS')),
+h('tr',null,h('td',null,h('span',{className:'badge badge-purple'},'Latent')),h('td',null,'Hidden, estimated statistically'),h('td',null,'PCA factors, credit quality, liquidity premium')))),
+h(DiffContent,{level:'Standard'},h('h2',null,'Swap Risk Factor Mapping Example'),h('p',null,'A single 10Y USD interest rate swap maps to 20+ risk factors:'),
+h(CalcBox,{title:'10Y Swap — Risk Factor Decomposition',friendly:'How one trade connects to many market variables'},
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Factor'),h('th',null,'Type'),h('th',null,'DV01'))),h('tbody',null,...[
+['SOFR 3M','Rate','-$12,500'],['SOFR 1Y','Rate','-$48,200'],['SOFR 5Y','Rate','-$185,600'],['SOFR 10Y','Rate','-$245,000'],['OIS Basis','Basis','-$8,200'],['Cpty CDS','Credit','-$450'],['Funding','Funding','-$2,800']
+].map(([f,t,s],i)=>h('tr',{key:i},h('td',null,f),h('td',null,h('span',{className:'tag tag-ir'},t)),h('td',{style:{fontWeight:600}},s+'/bp'))))))));}
+
+function RFUniverse(){const[exp,setExp]=useState({});const toggle=k=>setExp(p=>({...p,[k]:!p[k]}));
+const tree={'Global (~300K+)':{'Equity (~80K)':{'N. America (~25K)':['US Large Cap ~3,000','US Small Cap ~2,000','Canada ~500'],'EMEA (~20K)':['UK ~1,500','Eurozone ~5,000'],'APAC (~35K)':['Japan ~3,500','China/HK ~8,000']},'Rates (~50K)':{'USD (~5K)':['SOFR: 1M→30Y','Treasury: On/Off-the-run','TIPS breakevens'],'EUR (~5K)':['ESTR curve','Bund curve'],'25+ currencies':['Each with full infrastructure']},'Credit (~100K)':{'CDS (~15K)':['IG, HY, EM Sovereign'],'Bond OAS (~80K)':['By issuer × seniority × tenor']},'FX (~2K)':{'G10':['EUR/USD, USD/JPY, GBP/USD...'],'EM':['~80 pairs']},'Commodity (~5K)':{'Energy':['WTI, Brent, NatGas'],'Metals':['Gold, Silver, Copper']},'Vol (~60K)':{'Eq Vol':['By name × strike × expiry'],'Rates Vol':['Swaption surfaces'],'FX Vol':['By pair × delta × expiry']}}};
+function renderTree(obj,d=0){return Object.entries(obj).map(([k,v])=>{if(Array.isArray(v))return h('div',{key:k,className:'tree-node',style:{paddingLeft:d*18}},h('div',{className:'tree-row'},h('span',{className:'tree-leaf'},'◆'),k),h('div',{style:{paddingLeft:20,fontSize:10,color:'var(--text4)'}},v.join(' · ')));const isO=exp[k];return h('div',{key:k,className:'tree-node',style:{paddingLeft:d*18}},h('div',{className:'tree-row',onClick:()=>toggle(k)},h('span',{className:'tree-chevron'+(isO?' open':'')},'>'),h('span',{style:{fontWeight:d<2?700:400}},k)),isO&&renderTree(v,d+1))})}
+return h('div',null,h('h1',null,'Risk Factor Universes'),h('p',{className:'subtitle'},'How banks organize hundreds of thousands of market variables'),
+h('div',{className:'grid g2'},h(Stat,{label:'Regulatory Min',val:'~10K',color:'cblue',hint:'minimum for compliance'}),h(Stat,{label:'Typical G-SIB',val:'300K+',color:'ccyan',hint:'what a large bank actually uses'})),
+h('h2',null,'Interactive Hierarchy'),h('div',{className:'card',style:{maxHeight:500,overflowY:'auto'}},renderTree(tree)));}
+
+function RFReturns(){const prices=useMemo(()=>SAMPLE.eqPrices.slice(0,60),[]);const lr=useMemo(()=>M.logReturns(prices),[prices]);const sr=useMemo(()=>M.simpleReturns(prices),[prices]);
+return h('div',null,h('h1',null,'Risk Factor Returns'),h('p',{className:'subtitle'},'How we measure changes in risk factors over time'),
+h(MathDisplay,{tex:'r_t^{\\text{log}} = \\ln\\frac{P_t}{P_{t-1}}, \\quad r_t^{\\text{simple}} = \\frac{P_t - P_{t-1}}{P_{t-1}}, \\quad r_t^{\\text{abs}} = P_t - P_{t-1}'}),
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Type'),h('th',null,'When to Use'),h('th',null,'Key Property'))),h('tbody',null,
+h('tr',null,h('td',null,'Log Returns'),h('td',null,'Equities, FX, commodities'),h('td',null,'Additive over time (daily → monthly)')),
+h('tr',null,h('td',null,'Simple Returns'),h('td',null,'Portfolio aggregation'),h('td',null,'Additive across assets')),
+h('tr',null,h('td',null,'Absolute Returns'),h('td',null,'Interest rates, spreads'),h('td',null,'Works when factor can go negative')))),
+h(CalcBox,{title:'Return Calculator',friendly:'Convert prices into different return measures'},
+h('div',{className:'grid g4'},h(Stat,{label:'Log Mean',val:M.fmt(M.mean(lr)*100,3)+'%',color:'ccyan',hint:'average daily log return'}),h(Stat,{label:'Log Std',val:M.fmt(M.std(lr)*100,3)+'%',color:'corange',hint:'daily volatility'}),h(Stat,{label:'Ann. Vol',val:M.fmt(M.std(lr)*Math.sqrt(252)*100,1)+'%',color:'cpurple',hint:'yearly volatility (×√252)'}),h(Stat,{label:'Simple Mean',val:M.fmt(M.mean(sr)*100,3)+'%',color:'cgreen',hint:'average daily simple return'})),
+h('div',{className:'calc-chart'},h(Plot,{data:[{y:lr.map(v=>v*100),name:'Log Returns',type:'scatter',mode:'lines',line:{color:'#22d3ee',width:1}},{y:sr.map(v=>v*100),name:'Simple Returns',type:'scatter',mode:'lines',line:{color:'#f59e0b',width:1}}],layout:{height:240,title:'Return Comparison (%)'}}))));}
+
+// ============================================================
+// SECTION 2: TOP-DOWN MODELING
+// ============================================================
+function SecTopDown(){return h('div',null,h(PCASection),h(FactorModels),h(DimReduce))}
+
+function PCASection(){const cfg=useCfg();const data=useMemo(()=>SAMPLE.multiRet,[]);const cov=useMemo(()=>M.covMatrix(data),[]);const eig=useMemo(()=>M.eigen(cov),[cov]);const tot=M.sum(eig.values),ve=eig.values.map(v=>v/tot),cv=M.cumsum(ve);
+return h('div',null,h('h1',null,'Principal Component Analysis'),h('p',{className:'subtitle'},'Finding the main drivers of co-movement'),
+cfg.friendly&&h('p',null,'PCA is like finding the "main themes" in how your risk factors move together. Instead of tracking thousands of individual factors, you might find that 3-5 underlying themes explain 95% of all movement.'),
+h(MathDisplay,{tex:'\\Sigma = V \\Lambda V^\\top \\quad \\text{(eigendecomposition of covariance)}'}),
+h(DiffContent,{level:'Standard'},h(Expand,{title:'Full Mathematical Derivation'},
+h('p',null,'The first PC maximizes variance:'),h(MathDisplay,{tex:'w_1 = \\arg\\max_{\\|w\\|=1} w^\\top \\Sigma w'}),h('p',null,'By Lagrange multipliers → eigenvalue problem: Σw = λw'))),
+h(CalcBox,{title:'PCA Engine — 5 Asset Returns',friendly:'Which "themes" drive our portfolio?'},
+h('div',{className:'grid g2'},
+h(Plot,{data:[{x:['PC1','PC2','PC3','PC4','PC5'],y:ve.map(v=>v*100),type:'bar',marker:{color:['#3b82f6','#22d3ee','#10b981','#f59e0b','#ef4444']}}],layout:{height:240,title:'Variance Explained per Component (%)'}}),
+h(Plot,{data:[{x:['PC1','PC2','PC3','PC4','PC5'],y:cv.map(v=>v*100),mode:'lines+markers',line:{color:'#22d3ee',width:2},marker:{size:8}}],layout:{height:240,title:'Cumulative Variance Explained (%)',yaxis:{range:[0,105]}}})),
+h('h3',null,'PC Loadings',cfg.friendly&&' (how each asset relates to each theme)'),
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Asset'),...eig.vectors.map((_,i)=>h('th',{key:i},'PC'+(i+1))))),h('tbody',null,...SAMPLE.names.map((n,i)=>h('tr',{key:i},h('td',null,n),...eig.vectors.map((v,j)=>h('td',{key:j,style:{color:v[i]>0?'var(--green)':'var(--red)',fontWeight:600}},M.fmt(v[i],3)))))))),
+h('h2',null,'Yield Curve PCA'),cfg.friendly&&h('p',null,'For interest rates, the first 3 PCs have clear economic meanings:'),
+h('div',{className:'grid g3'},h(Stat,{label:'PC1: Level',val:'~85%',color:'cblue',hint:'all rates move up/down together'}),h(Stat,{label:'PC2: Slope',val:'~10%',color:'ccyan',hint:'curve steepens or flattens'}),h(Stat,{label:'PC3: Curvature',val:'~3%',color:'cgreen',hint:'belly moves vs wings'})));}
+
+function FactorModels(){const cfg=useCfg();return h('div',null,h('h1',null,'Factor Models'),h('p',{className:'subtitle'},'Decomposing returns into systematic and idiosyncratic components'),
+cfg.friendly&&h('p',null,'Factor models answer: "Why did this stock move?" Was it the market, the sector, the size effect, or something unique to the company?'),
+h(MathDisplay,{tex:'R_i = \\alpha_i + \\sum_{j=1}^{K} \\beta_{ij} F_j + \\varepsilon_i'}),
+cfg.friendly&&h('p',{style:{fontSize:12,color:'var(--text3)',fontStyle:'italic'}},'Stock return = alpha + (exposure₁ × factor₁) + (exposure₂ × factor₂) + ... + unexplained noise'),
+h('h2',null,'Fama-French Three-Factor Model'),
+h(MathDisplay,{tex:'R_i - R_f = \\alpha_i + \\beta_{MKT}(R_m - R_f) + \\beta_{SMB} \\cdot SMB + \\beta_{HML} \\cdot HML + \\varepsilon_i'}),
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Factor'),h('th',null,'Full Name'),h('th',null,'Plain English'))),h('tbody',null,
+h('tr',null,h('td',null,'MKT'),h('td',null,'Market Excess Return'),h('td',null,'Did the overall market go up or down?')),
+h('tr',null,h('td',null,'SMB'),h('td',null,'Small Minus Big'),h('td',null,'Did small stocks beat large stocks?')),
+h('tr',null,h('td',null,'HML'),h('td',null,'High Minus Low'),h('td',null,'Did cheap (value) stocks beat expensive (growth) stocks?')))),
+h('h2',null,'Factor-Based Covariance'),h(MathDisplay,{tex:'\\Sigma = B F B^\\top + D'}),
+cfg.friendly&&h('p',null,'Instead of estimating a huge covariance matrix directly, we decompose it into factor covariance (small, F) plus idiosyncratic risk (diagonal, D). This makes estimation tractable even with 300K+ risk factors.'));}
+
+function DimReduce(){return h('div',null,h('h1',null,'Beyond PCA'),h('p',{className:'subtitle'},'Nonlinear and noise-robust dimensionality reduction'),
+h('h2',null,'Random Matrix Theory'),h(MathDisplay,{tex:'f(\\lambda)=\\frac{1}{2\\pi\\sigma^2 q}\\frac{\\sqrt{(\\lambda_+-\\lambda)(\\lambda-\\lambda_-)}}{\\lambda}'}),
+h('p',null,'The ',h(Tip,{term:'Marchenko-Pastur'}),' law separates signal from noise: eigenvalues above λ₊ = σ²(1+√q)² contain real information; those below are just noise from finite sampling.'),
+h('h2',null,'ICA, Autoencoders, t-SNE'),
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Method'),h('th',null,'What It Does'),h('th',null,'Use Case'))),h('tbody',null,
+h('tr',null,h('td',null,'ICA'),h('td',null,'Finds statistically independent (not just uncorrelated) components'),h('td',null,'Non-Gaussian factor extraction')),
+h('tr',null,h('td',null,h(Tip,{term:'Autoencoder'})),h('td',null,'Neural network learns nonlinear compression'),h('td',null,'Capturing complex, non-linear factor structure')),
+h('tr',null,h('td',null,'t-SNE/UMAP'),h('td',null,'Visualizes high-dimensional data in 2D/3D'),h('td',null,'Exploring risk factor clustering (not for modeling)')))));}
+
+// ============================================================
+// SECTION 3: BOTTOM-UP MODELING
+// ============================================================
+function SecBottomUp(){return h('div',null,h(DynamicsSection),h(CovSection),h(CopulaSection),h(VolSection))}
+
+function DynamicsSection(){const cfg=useCfg();const[model,setModel]=useState('gbm');const[nP,setNP]=useState(15);const[key,setKey]=useState(0);
+const paths=useMemo(()=>model==='gbm'?M.gbmPaths(100,.05,.2,1,252,nP):M.ouPaths(5,5,.05,.01,1,252,nP),[model,nP,key]);
+return h('div',null,h('h1',null,'Individual Risk Factor Dynamics'),h('p',{className:'subtitle'},'Mathematical models for how risk factors evolve over time'),
+h('h2',null,'Geometric Brownian Motion'),cfg.friendly&&h('p',null,'The "standard" model for stock prices — random walk with an upward drift. Prices can\'t go negative.'),
+h(MathDisplay,{tex:'dS = \\mu S\\,dt + \\sigma S\\,dW'}),
+h('h2',null,'Mean-Reverting Processes'),cfg.friendly&&h('p',null,'Used for rates and spreads that tend to pull back to a long-term average rather than wandering off.'),
+h(MathDisplay,{tex:'dX = \\theta(\\mu - X)dt + \\sigma\\,dW \\quad \\text{(Ornstein-Uhlenbeck)}'}),
+h(DiffContent,{level:'Standard'},h('h2',null,'Jump-Diffusion (Merton)'),h(MathDisplay,{tex:'dS = (\\mu-\\lambda k)S\\,dt + \\sigma S\\,dW + JS\\,dN'})),
+h(DiffContent,{level:'Advanced'},h('h2',null,'Heston Stochastic Volatility'),h(MathDisplay,{tex:'dS=\\mu S\\,dt+\\sqrt v S\\,dW_1, \\quad dv=\\kappa(\\theta-v)dt+\\xi\\sqrt v\\,dW_2'})),
+h(CalcBox,{title:'Path Simulator',friendly:'Watch risk factors evolve randomly'},
+h('div',{className:'calc-row'},h('div',{className:'calc-col'},
+h(Field,{label:'Model',friendly:'type of random process'},h('select',{value:model,onChange:e=>setModel(e.target.value)},h('option',{value:'gbm'},'GBM (Stock Prices)'),h('option',{value:'ou'},'Ornstein-Uhlenbeck (Rates)'))),
+h(Field,{label:'Paths',friendly:'number of simulations'},h('input',{type:'number',value:nP,min:1,max:50,onChange:e=>setNP(Math.min(50,+e.target.value))})),
+h('button',{className:'btn btn-primary',onClick:()=>setKey(k=>k+1)},'🔄 Regenerate'))),
+h('div',{className:'calc-chart'},h(Plot,{data:paths.map((p,i)=>({y:p,type:'scatter',mode:'lines',name:'Path '+(i+1),line:{width:1},showlegend:i<5})),layout:{height:320,title:model.toUpperCase()+' Simulated Paths',xaxis:{title:'Day'},yaxis:{title:'Value'}}}))));}
+
+function CovSection(){const data=useMemo(()=>SAMPLE.multiRet,[]);const sc=useMemo(()=>M.covMatrix(data),[]);const ec=useMemo(()=>M.ewmaCov(data,.94),[]);const shc=useMemo(()=>M.shrinkCov(sc,.3),[sc]);const corr=useMemo(()=>M.corrFromCov(sc),[sc]);
+return h('div',null,h('h1',null,'Covariance & Correlation Estimation'),h('p',{className:'subtitle'},'Measuring how risk factors move together'),
+h(MathDisplay,{tex:'\\hat\\Sigma_t^{EWMA}=\\lambda\\hat\\Sigma_{t-1}+(1-\\lambda)r_t r_t^\\top'}),
+h(CalcBox,{title:'Covariance Comparison',friendly:'Compare different ways of measuring co-movement'},
+h(Plot,{data:[{z:corr,x:SAMPLE.names,y:SAMPLE.names,type:'heatmap',colorscale:[[0,'#ef4444'],[.5,'var(--bg1)'],[1,'#3b82f6']],zmin:-1,zmax:1,text:corr.map(r=>r.map(v=>M.fmt(v,2))),texttemplate:'%{text}',textfont:{size:11}}],layout:{height:340,title:'Sample Correlation Matrix'}}),
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Asset'),h('th',null,'Sample Vol'),h('th',null,'EWMA Vol'),h('th',null,'Shrinkage Vol'))),h('tbody',null,...SAMPLE.names.map((n,i)=>h('tr',{key:i},h('td',null,n),h('td',null,M.fmt(Math.sqrt(sc[i][i]*252)*100,1)+'%'),h('td',null,M.fmt(Math.sqrt(ec[i][i]*252)*100,1)+'%'),h('td',null,M.fmt(Math.sqrt(shc[i][i]*252)*100,1)+'%')))))));}
+
+function CopulaSection(){const cfg=useCfg();const[cop,setCop]=useState('gaussian');const[rho,setRho]=useState(.6);const[nu,setNu]=useState(4);
+const samp=useMemo(()=>{const n=500,pts=M.corrNormals(n,[[1,rho],[rho,1]]);if(cop==='gaussian')return pts.map(p=>[M.normCDF(p[0]),M.normCDF(p[1])]);return pts.map(p=>{const chi2=M.sum(M.randNA(Math.max(2,nu)).map(x=>x*x)),scale=Math.sqrt(nu/chi2);return[M.normCDF(p[0]*scale),M.normCDF(p[1]*scale)]})},[cop,rho,nu]);
+return h('div',null,h('h1',null,'Copulas & Tail Dependence'),h('p',{className:'subtitle'},'Modeling how extremes happen together'),
+cfg.friendly&&h('p',null,'Correlation tells you about average co-movement. Copulas tell you about co-movement in the extremes — do assets crash together? This matters enormously for risk.'),
+h(MathDisplay,{tex:'F(x_1,...,x_d) = C(F_1(x_1),...,F_d(x_d)) \\quad \\text{(Sklar\'s Theorem)}'}),
+h(CalcBox,{title:'Copula Visualizer',friendly:'See how joint extreme behavior differs by model'},
+h('div',{className:'calc-row'},h('div',{className:'calc-col'},
+h(Field,{label:'Copula',friendly:'dependency model'},h('select',{value:cop,onChange:e=>setCop(e.target.value)},h('option',{value:'gaussian'},'Gaussian (no tail dependence)'),h('option',{value:'student-t'},'Student-t (tail dependence)'))),
+h(Field,{label:'ρ: '+M.fmt(rho,1),friendly:'how correlated'},h('input',{type:'range',min:-.9,max:.9,step:.1,value:rho,onChange:e=>setRho(+e.target.value),style:{width:'100%'}})),
+cop==='student-t'&&h(Field,{label:'ν: '+nu,friendly:'lower = heavier tails'},h('input',{type:'range',min:2,max:30,value:nu,onChange:e=>setNu(+e.target.value),style:{width:'100%'}})))),
+h('div',{className:'calc-chart'},h(Plot,{data:[{x:samp.map(p=>p[0]),y:samp.map(p=>p[1]),type:'scatter',mode:'markers',marker:{size:3,color:'var(--cyan)',opacity:.5}}],layout:{height:340,title:cop+' copula (uniform margins)',xaxis:{title:'U₁',range:[0,1]},yaxis:{title:'U₂',range:[0,1]}}}))));}
+
+function VolSection(){const prices=useMemo(()=>SAMPLE.eqPrices,[]);const lr=useMemo(()=>M.logReturns(prices),[]);
+const rv=useMemo(()=>{const w=20;return lr.map((_,i)=>i<w?null:M.std(lr.slice(i-w,i))*Math.sqrt(252)).filter(v=>v!==null)},[lr]);
+const gv=useMemo(()=>M.garch11(lr).map(v=>v*Math.sqrt(252)),[lr]);
+const ev=useMemo(()=>{let v=M.variance(lr.slice(0,20));return lr.map((r,i)=>{if(i>0)v=.94*v+.06*r*r;return Math.sqrt(v*252)})},[lr]);
+const cfg=useCfg();
+return h('div',null,h('h1',null,'Volatility Modeling'),h('p',{className:'subtitle'},'Estimating and forecasting risk factor uncertainty'),
+cfg.friendly&&h('p',null,'Volatility = how much a risk factor bounces around. Higher vol = more uncertainty = more risk. The challenge is that volatility itself changes over time.'),
+h(MathDisplay,{tex:'\\sigma_t^2 = \\omega + \\alpha\\varepsilon_{t-1}^2 + \\beta\\sigma_{t-1}^2 \\quad \\text{GARCH(1,1)}'}),
+cfg.friendly&&h('p',{style:{fontSize:12,color:'var(--text3)',fontStyle:'italic'}},'Tomorrow\'s variance = base level + weight × yesterday\'s squared return + weight × yesterday\'s variance'),
+h(CalcBox,{title:'Volatility Lab',friendly:'Compare different volatility estimation methods'},
+h('div',{className:'grid g3'},h(Stat,{label:'20d Rolling',val:M.fmt(rv[rv.length-1]*100,1)+'%',color:'cblue',hint:'simple moving window'}),h(Stat,{label:'GARCH',val:M.fmt(gv[gv.length-1]*100,1)+'%',color:'ccyan',hint:'time-varying model'}),h(Stat,{label:'EWMA λ=.94',val:M.fmt(ev[ev.length-1]*100,1)+'%',color:'corange',hint:'exponential weighting'})),
+h('div',{className:'calc-chart'},h(Plot,{data:[{y:rv.map(v=>v*100),name:'20d Rolling',line:{color:'#3b82f6',width:1.5}},{y:gv.map(v=>v*100),name:'GARCH(1,1)',line:{color:'#22d3ee',width:1.5}},{y:ev.map(v=>v*100),name:'EWMA',line:{color:'#f59e0b',width:1.5}}],layout:{height:300,title:'Annualized Volatility Comparison',yaxis:{title:'Vol (%)'}}}))));}
+
+// ============================================================
+// SECTION 4: VALUE-AT-RISK
+// ============================================================
+function SecVaR(){return h('div',null,h(ParamVaR),h(HistVaR),h(MCVaR),h(ESSection),h(BacktestSec))}
+
+function ParamVaR(){const cfg=useCfg();const[conf,setConf]=useState(.99);const[hor,setHor]=useState(10);const w=SAMPLE.weights;const data=SAMPLE.multiRet;const cov=useMemo(()=>M.covMatrix(data),[]);const pr=useMemo(()=>data.map(r=>M.dot(w,r)),[]);const mu=M.mean(pr),sig=M.std(pr);const pV=M.parametricVaR(mu,sig,conf,hor),pE=M.parametricES(mu*hor,sig*Math.sqrt(hor),conf);
+const pSig=Math.sqrt(w.reduce((s,wi,i)=>s+w.reduce((s2,wj,j)=>s2+wi*wj*cov[i][j],0),0));const cVaR=w.map((wi,i)=>{const ci=M.dot(cov[i],w);return wi*ci/pSig*M.normInv(conf)});
+return h('div',null,h('h1',null,'Parametric VaR'),h('p',{className:'subtitle'},'The fastest way to estimate potential losses'),
+cfg.friendly&&h('p',null,'Parametric VaR assumes returns follow a bell curve (normal distribution). It\'s fast but misses fat tails.'),
+h(MathDisplay,{tex:'VaR_\\alpha = -(\\mu h + z_\\alpha \\sigma\\sqrt{h}), \\quad VaR_p = z_\\alpha\\sqrt{w^\\top\\Sigma w\\cdot h}'}),
+cfg.friendly&&h('p',{style:{fontSize:12,color:'var(--text3)',fontStyle:'italic'}},'VaR = negative of (expected return + z-score × volatility × √horizon)'),
+h(CalcBox,{title:'Portfolio VaR Calculator',friendly:'How much could we lose?'},
+h('div',{className:'calc-row'},h('div',{className:'calc-col'},
+h(Field,{label:'Confidence',friendly:'how certain'},h('select',{value:conf,onChange:e=>setConf(+e.target.value)},h('option',{value:.95},'95%'),h('option',{value:.99},'99%'),h('option',{value:.999},'99.9%'))),
+h(Field,{label:'Horizon (days)',friendly:'time period'},h('input',{type:'number',value:hor,onChange:e=>setHor(Math.max(1,+e.target.value))}))),
+h('div',{className:'calc-col'},h('div',{className:'grid g2'},
+h(Stat,{label:'VaR',val:M.fmt(pV*100,2)+'%',color:'cred',hint:'max expected loss'}),
+h(Stat,{label:'ES',val:M.fmt(pE*100,2)+'%',color:'corange',hint:'avg loss if VaR breached'}),
+h(Stat,{label:'Daily σ',val:M.fmt(sig*100,3)+'%',color:'cblue',hint:'daily volatility'}),
+h(Stat,{label:'Ann Vol',val:M.fmt(sig*Math.sqrt(252)*100,1)+'%',color:'ccyan',hint:'yearly volatility'})))),
+h('h3',null,'Component VaR',cfg.friendly&&' — who contributes what risk?'),
+h(Plot,{data:[{x:SAMPLE.names,y:cVaR.map(v=>v*100),type:'bar',marker:{color:cVaR.map(v=>v>0?'#ef4444':'#10b981')}}],layout:{height:240,title:'Component VaR by Asset (%)'}})));}
+
+function HistVaR(){const pr=useMemo(()=>SAMPLE.multiRet.map(r=>M.dot(SAMPLE.weights,r)),[]);const h95=M.historicalVaR(pr,.95),h99=M.historicalVaR(pr,.99),hES=M.expectedShortfall(pr,.99);const hist=M.histogram(pr,40);const cfg=useCfg();
+return h('div',null,h('h1',null,'Historical Simulation VaR'),h('p',{className:'subtitle'},'Using actual past market moves — no distribution assumed'),
+cfg.friendly&&h('p',null,'Instead of assuming a bell curve, we take the actual worst days from history and ask: "What would happen to today\'s portfolio if those days repeated?"'),
+h(MathDisplay,{tex:'VaR_\\alpha^{HS}=-\\text{Percentile}_{1-\\alpha}(\\{\\Delta V_t\\})'}),
+h(CalcBox,{title:'Historical VaR Results',friendly:'What does history tell us about worst-case losses?'},
+h('div',{className:'grid g3'},h(Stat,{label:'95% VaR',val:M.fmt(h95*100,3)+'%',color:'corange',hint:'1-in-20 day loss'}),h(Stat,{label:'99% VaR',val:M.fmt(h99*100,3)+'%',color:'cred',hint:'1-in-100 day loss'}),h(Stat,{label:'99% ES',val:M.fmt(hES*100,3)+'%',color:'cpurple',hint:'avg loss beyond VaR'})),
+h(Plot,{data:[{x:hist.centers.map(v=>v*100),y:hist.counts,type:'bar',marker:{color:hist.centers.map(v=>v<-h99?'#ef4444':v<-h95?'#f59e0b':'#3b82f6')}}],layout:{height:280,title:'P&L Distribution (red=beyond 99% VaR, orange=beyond 95%)',xaxis:{title:'Return (%)'}}})));}
+
+function MCVaR(){const[nSim,setNSim]=useState(5000);const[res,setRes]=useState(null);const cfg=useCfg();
+const run=useCallback(()=>{const data=SAMPLE.multiRet,cov=M.covMatrix(data),mu=data[0].map((_,j)=>M.mean(data.map(r=>r[j]))),L=M.cholesky(cov),pnls=[];for(let i=0;i<nSim;i++){const z=M.randNA(5),c=L.map(row=>M.dot(row,z));pnls.push(M.dot(SAMPLE.weights,c.map((v,j)=>mu[j]+v)))}const s=[...pnls].sort((a,b)=>a-b);setRes({pnls,v95:-s[Math.floor(.05*nSim)],v99:-s[Math.floor(.01*nSim)],es99:-M.mean(s.slice(0,Math.floor(.01*nSim)))})},[nSim]);
+useEffect(()=>{run()},[]);
+return h('div',null,h('h1',null,'Monte Carlo VaR'),h('p',{className:'subtitle'},'Simulating thousands of possible futures'),
+cfg.friendly&&h('p',null,'Generate thousands of random but realistic scenarios. Reprice the portfolio under each. The resulting distribution shows all possible outcomes.'),
+h(MathDisplay,{tex:'z=L\\epsilon,\\;\\epsilon\\sim N(0,I),\\;\\Sigma=LL^\\top\\quad\\text{(Cholesky for correlated draws)}'}),
+h(CalcBox,{title:'Monte Carlo Engine',friendly:'Roll the dice thousands of times'},
+h('div',{className:'calc-row'},h('div',{className:'calc-col'},
+h(Field,{label:'Simulations',friendly:'how many scenarios'},h('input',{type:'number',value:nSim,onChange:e=>setNSim(Math.min(50000,+e.target.value))})),
+h('button',{className:'btn btn-primary',onClick:run},'▶ Run Simulation'))),
+res&&h(F,null,h('div',{className:'grid g3',style:{marginTop:14}},h(Stat,{label:'95% VaR',val:M.fmt(res.v95*100,3)+'%',color:'corange'}),h(Stat,{label:'99% VaR',val:M.fmt(res.v99*100,3)+'%',color:'cred'}),h(Stat,{label:'99% ES',val:M.fmt(res.es99*100,3)+'%',color:'cpurple'})),
+h(Plot,{data:[{x:res.pnls.map(v=>v*100),type:'histogram',nbinsx:60,marker:{color:'#3b82f6'}}],layout:{height:280,title:'Simulated P&L ('+M.fmtK(nSim)+' paths)',xaxis:{title:'%'}}}))));}
+
+function ESSection(){const cfg=useCfg();return h('div',null,h('h1',null,'Expected Shortfall (CVaR)'),h('p',{className:'subtitle'},'The average loss when things go really bad'),
+cfg.friendly&&h('p',null,'VaR tells you the threshold. ES tells you the average damage beyond that threshold. If 99% VaR is $10M, ES answers: "When we lose more than $10M, how much do we lose on average?"'),
+h(MathDisplay,{tex:'ES_\\alpha = E[L|L>VaR_\\alpha] = \\frac{1}{1-\\alpha}\\int_\\alpha^1 VaR_u\\,du'}),
+h('h2',null,'Why ES Over VaR?'),h('p',null,h(Tip,{term:'Subadditivity'}),': VaR can say diversification increases risk. ES never does.'),
+cfg.friendly&&h('div',{className:'card'},h('p',{style:{fontWeight:600,color:'var(--cyan)'}},'💡 Real-world analogy:'),h('p',null,'VaR is like knowing "the bridge can handle up to 10 tons." ES is knowing "when a truck over 10 tons crosses, the average overweight is 3 tons." ES tells you how bad "bad" really is.')),
+h('h2',null,'ES Under Normal Distribution'),h(MathDisplay,{tex:'ES_\\alpha=\\mu+\\sigma\\frac{\\phi(z_\\alpha)}{1-\\alpha}'}),
+h('div',{className:'grid g2'},h(Stat,{label:'99% VaR',val:'2.326σ',color:'cred',hint:'threshold'}),h(Stat,{label:'99% ES',val:'2.665σ',color:'cpurple',hint:'avg beyond threshold'})));}
+
+function BacktestSec(){const pr=useMemo(()=>SAMPLE.multiRet.map(r=>M.dot(SAMPLE.weights,r)),[]);const n=pr.length;const cfg=useCfg();
+const varS=useMemo(()=>{const w=50;return pr.map((_,i)=>i<w?M.parametricVaR(M.mean(pr.slice(0,Math.max(2,i+1))),M.std(pr.slice(0,Math.max(2,i+1))),.99,1):M.parametricVaR(M.mean(pr.slice(i-w,i)),M.std(pr.slice(i-w,i)),.99,1))},[pr]);
+const viol=pr.filter((r,i)=>-r>varS[i]).length;const kup=M.kupiecTest(viol,n,.99);const zone=viol<=4?'GREEN':viol<=9?'YELLOW':'RED';
+return h('div',null,h('h1',null,'VaR Backtesting'),h('p',{className:'subtitle'},'Checking if our risk model actually works'),
+cfg.friendly&&h('p',null,'We predicted VaR each day. Did losses actually exceed VaR only ~1% of the time? If violations are too frequent, the model underestimates risk.'),
+h(MathDisplay,{tex:'LR_{POF}=2[x\\ln(x/np)+(n-x)\\ln\\frac{1-x/n}{1-p}]\\sim\\chi^2(1)'}),
+h('h2',null,'Basel Traffic Light System'),
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Zone'),h('th',null,'Violations (250d, 99%)'),h('th',null,'Capital Add-On'),h('th',null,'What It Means'))),h('tbody',null,
+h('tr',null,h('td',null,h('span',{className:'badge badge-green'},'GREEN')),h('td',null,'0–4'),h('td',null,'+0'),h('td',null,'Model is working fine')),
+h('tr',null,h('td',null,h('span',{className:'badge badge-orange'},'YELLOW')),h('td',null,'5–9'),h('td',null,'+0.4 to +0.85'),h('td',null,'Possible issues, increased multiplier')),
+h('tr',null,h('td',null,h('span',{className:'badge badge-red'},'RED')),h('td',null,'10+'),h('td',null,'+1.0'),h('td',null,'Model is broken, serious problems')))),
+h(CalcBox,{title:'Backtest Dashboard',friendly:'How did our model perform?'},
+h('div',{className:'grid g4'},h(Stat,{label:'Observations',val:n,color:'cblue'}),h(Stat,{label:'Violations',val:viol,color:'cred',hint:'VaR breaches'}),h(Stat,{label:'Kupiec p-val',val:M.fmt(kup.pVal,4),color:'cpurple',hint:kup.pVal>.05?'PASS':'FAIL'}),h(Stat,{label:'Zone',val:zone,color:zone==='GREEN'?'cgreen':zone==='YELLOW'?'corange':'cred'})),
+h(Plot,{data:[{y:pr.map(v=>v*100),name:'Return',line:{color:'#3b82f6',width:1}},{y:varS.map(v=>-v*100),name:'-VaR',line:{color:'#ef4444',dash:'dash',width:1.5}}],layout:{height:260,title:'Returns vs VaR Threshold'}})));}
+
+// ============================================================
+// SECTION 5: STRESS TESTING
+// ============================================================
+function SecStress(){return h('div',null,h(HistStress),h(HypoStress),h(GreeksSec),h(CCARSec))}
+
+function HistStress(){const[sel,setSel]=useState('GFC 2008');const sc=SCENARIOS[sel];const cfg=useCfg();
+return h('div',null,h('h1',null,'Historical Stress Scenarios'),h('p',{className:'subtitle'},'What if past crises happen again to today\'s portfolio?'),
+cfg.friendly&&h('p',null,'We take the actual market moves from historical crises and apply them to our current positions. This shows how much we\'d lose if, say, 2008 repeated.'),
+h(Field,{label:'Scenario'},h('select',{value:sel,onChange:e=>setSel(e.target.value),style:{width:320}},...Object.keys(SCENARIOS).map(k=>h('option',{key:k,value:k},k)))),
+h('div',{className:'card'},h('div',{className:'card-head'},h('div',{className:'card-title'},sel),h('span',{className:'badge badge-red'},'STRESS')),h('p',{style:{marginBottom:14}},sc.d),
+h('div',{className:'grid g3'},...Object.entries(sc.s).map(([k,v])=>h(Stat,{key:k,label:k,val:(v>0?'+':'')+M.fmt(v*100,1)+'%',color:v<0?'cred':'cgreen',hint:v<0?'loss':'gain'}))),
+h(Plot,{data:[{x:Object.keys(sc.s),y:Object.values(sc.s).map(v=>v*100),type:'bar',marker:{color:Object.values(sc.s).map(v=>v<0?'#ef4444':'#10b981')}}],layout:{height:240,title:'Factor Shocks (%)'}})));}
+
+function HypoStress(){const[sh,setSh]=useState({equity:0,rates:0,credit:0,fx:0,vol:0});const cfg=useCfg();
+return h('div',null,h('h1',null,'Hypothetical Scenario Builder'),h('p',{className:'subtitle'},'Design your own "what-if" scenarios'),
+cfg.friendly&&h('p',null,'Drag the sliders to create your own crisis scenario. See how different combinations of shocks would impact portfolios.'),
+h(CalcBox,{title:'Custom Scenario',friendly:'Build your own stress test'},
+...Object.entries(sh).map(([k,v])=>h(Field,{key:k,label:k,friendly:v<0?'declining':'rising'},h('div',{style:{display:'flex',alignItems:'center',gap:10}},h('input',{type:'range',min:-50,max:50,value:v*100,onChange:e=>setSh(p=>({...p,[k]:+e.target.value/100})),style:{flex:1}}),h('span',{className:'range-val',style:{minWidth:50}},M.fmt(v*100,0)+'%')))),
+h(Plot,{data:[{x:Object.keys(sh),y:Object.values(sh).map(v=>v*100),type:'bar',marker:{color:Object.values(sh).map(v=>v<0?'#ef4444':'#10b981')}}],layout:{height:240,title:'Your Scenario'}}),
+h('button',{className:'btn btn-outline btn-sm',onClick:()=>setSh({equity:0,rates:0,credit:0,fx:0,vol:0})},'↺ Reset All')));}
+
+function GreeksSec(){const cfg=useCfg();const[S,setS]=useState(100);const[K,setK]=useState(100);const[r,setR]=useState(.05);const[sig,setSig]=useState(.2);const[T,setT]=useState(.5);const[cp,setCp]=useState('c');
+const g=useMemo(()=>({price:cp==='c'?M.bs.call(S,K,r,sig,T):M.bs.put(S,K,r,sig,T),delta:M.bs.delta(S,K,r,sig,T,cp),gamma:M.bs.gamma(S,K,r,sig,T),vega:M.bs.vega(S,K,r,sig,T),theta:M.bs.theta(S,K,r,sig,T,cp),rho:M.bs.rho(S,K,r,sig,T,cp),vanna:M.bs.vanna(S,K,r,sig,T),volga:M.bs.volga(S,K,r,sig,T),charm:M.bs.charm(S,K,r,sig,T),speed:M.bs.speed(S,K,r,sig,T)}),[S,K,r,sig,T,cp]);
+const spots=M.linspace(70,130,25),expiries=M.linspace(.05,1,15);const dSurf=expiries.map(t=>spots.map(s=>M.bs.delta(s,K,r,sig,t,cp)));
+return h('div',null,h('h1',null,'Sensitivity Analysis / Greeks'),h('p',{className:'subtitle'},'How option prices respond to market changes'),
+cfg.friendly&&h('p',null,'Greeks measure how sensitive an option is to different market factors. Delta = stock sensitivity, Gamma = acceleration, Vega = vol sensitivity, Theta = time decay.'),
+h(CalcBox,{title:'Black-Scholes Greeks Calculator',friendly:'All the sensitivities at a glance'},
+h('div',{className:'calc-row'},h('div',{className:'calc-col'},
+h(Field,{label:'Type'},h('select',{value:cp,onChange:e=>setCp(e.target.value)},h('option',{value:'c'},'Call'),h('option',{value:'p'},'Put'))),
+h('div',{className:'field-row'},h(Field,{label:'Spot',friendly:'current price'},h('input',{type:'number',value:S,onChange:e=>setS(+e.target.value)})),h(Field,{label:'Strike',friendly:'exercise price'},h('input',{type:'number',value:K,onChange:e=>setK(+e.target.value)}))),
+h('div',{className:'field-row'},h(Field,{label:'Vol (σ)'},h('input',{type:'number',value:sig,step:.01,onChange:e=>setSig(+e.target.value)})),h(Field,{label:'Time (T)'},h('input',{type:'number',value:T,step:.1,onChange:e=>setT(+e.target.value)}))),
+h(Field,{label:'Rate (r)'},h('input',{type:'number',value:r,step:.01,onChange:e=>setR(+e.target.value)}))),
+h('div',{className:'calc-col'},h('div',{className:'grid g2'},...[['Price','—',g.price],['Delta (Δ)','direction',g.delta],['Gamma (Γ)','acceleration',g.gamma],['Vega (ν)','vol sensitivity',g.vega],['Theta (Θ)','time decay',g.theta],['Rho (ρ)','rate sensitivity',g.rho],['Vanna','delta-vol cross',g.vanna],['Volga','vega convexity',g.volga],['Charm','delta decay',g.charm],['Speed','gamma change',g.speed]].map(([n,h2,v])=>h(Stat,{key:n,label:n,val:M.fmt(v,4),color:'ccyan',hint:cfg.friendly?h2:undefined}))))),
+h('h3',null,'Delta Surface (3D)'),
+h(Plot,{data:[{z:dSurf,x:spots,y:expiries,type:'surface',colorscale:'Viridis'}],layout:{height:380,title:'Delta vs Spot × Expiry',scene:{xaxis:{title:'Spot'},yaxis:{title:'Expiry'},zaxis:{title:'Delta'}}}})));}
+
+function CCARSec(){const q=['Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8','Q9'];const sa=[{g:-3.2,u:10.1,s:-50},{g:-2.5,u:10.8,s:-55},{g:-1,u:10.5,s:-45},{g:.5,u:10,s:-35},{g:1.5,u:9.2,s:-20},{g:2,u:8.5,s:-10},{g:2.5,u:7.8,s:0},{g:2.8,u:7.2,s:5},{g:3,u:6.8,s:10}];const cfg=useCfg();
+return h('div',null,h('h1',null,'CCAR / DFAST'),h('p',{className:'subtitle'},'Regulatory stress testing for the largest banks'),
+cfg.friendly&&h('p',null,'The Fed tells the biggest banks: "Assume the economy crashes this specific way for 9 quarters. Show us you have enough capital to survive."'),
+h(Plot,{data:[{x:q,y:sa.map(v=>v.g),name:'GDP Growth %',line:{color:'#3b82f6'}},{x:q,y:sa.map(v=>v.u),name:'Unemployment %',yaxis:'y2',line:{color:'#ef4444'}}],layout:{height:280,title:'Severely Adverse Scenario',yaxis:{title:'GDP %'},yaxis2:{title:'Unemp %',overlaying:'y',side:'right'}}}),
+h(Plot,{data:[{x:q,y:sa.map(v=>v.s),type:'bar',marker:{color:sa.map(v=>v.s<0?'#ef4444':'#10b981')}}],layout:{height:220,title:'S&P 500 Cumulative Change (%)'}}));}
+
+// ============================================================
+// SECTION 6: RISK DECOMPOSITION
+// ============================================================
+function SecDecomp(){return h('div',null,h(RiskDecompSec),h(PnLAttr),h(RiskBudget))}
+
+function RiskDecompSec(){const cfg=useCfg();const w=SAMPLE.weights;const cov=useMemo(()=>M.covMatrix(SAMPLE.multiRet),[]);const pV=w.reduce((s,wi,i)=>s+w.reduce((s2,wj,j)=>s2+wi*wj*cov[i][j],0),0),pS=Math.sqrt(pV);
+const standalone=w.map((wi,i)=>wi*Math.sqrt(cov[i][i]));const marginal=w.map((_,i)=>M.dot(cov[i],w)/pS);const component=w.map((wi,i)=>wi*marginal[i]);const divBen=M.sum(standalone)-pS;
+return h('div',null,h('h1',null,'Risk Decomposition'),h('p',{className:'subtitle'},'Who contributes what to total portfolio risk?'),
+cfg.friendly&&h('p',null,'Euler decomposition splits total risk into additive pieces — each asset gets a "risk bill" that sums exactly to the portfolio total. This is how risk budgets work at banks.'),
+h(MathDisplay,{tex:'RC_i=w_i\\frac{(\\Sigma w)_i}{\\sigma_p},\\quad\\sum_i RC_i = \\sigma_p'}),
+h(CalcBox,{title:'Euler Risk Decomposition',friendly:'Breaking down total risk into pieces'},
+h('div',{className:'grid g2'},h(Stat,{label:'Portfolio Vol',val:M.fmt(pS*Math.sqrt(252)*100,2)+'%',color:'cblue',hint:'total annualized risk'}),h(Stat,{label:'Diversification Benefit',val:M.fmt(divBen*Math.sqrt(252)*100,2)+'%',color:'cgreen',hint:'risk saved by combining assets'})),
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Asset'),h('th',null,'Weight'),h('th',null,'Standalone'),h('th',null,'Marginal'),h('th',null,'Component'),h('th',null,'% of Risk'))),h('tbody',null,...SAMPLE.names.map((n,i)=>h('tr',{key:i},h('td',null,n),h('td',null,M.fmt(w[i]*100,0)+'%'),h('td',null,M.fmt(standalone[i]*Math.sqrt(252)*100,2)+'%'),h('td',null,M.fmt(marginal[i]*Math.sqrt(252)*100,2)+'%'),h('td',null,M.fmt(component[i]*Math.sqrt(252)*100,2)+'%'),h('td',{style:{fontWeight:700}},M.fmt(component[i]/pS*100,1)+'%'))))),
+h(Plot,{data:[{values:component.map(Math.abs),labels:SAMPLE.names,type:'pie',hole:.4,marker:{colors:['#3b82f6','#22d3ee','#10b981','#f59e0b','#ef4444']}}],layout:{height:280,title:'Risk Contribution'}})));}
+
+function PnLAttr(){const cfg=useCfg();const fm=[.012,-.005,.003,-.001,.008],dl=[.6,-.3,.2,-.4,.15],dPnL=fm.map((m,i)=>dl[i]*m),theta=-.002,total=M.sum(dPnL)+theta;
+return h('div',null,h('h1',null,'P&L Attribution'),h('p',{className:'subtitle'},'Explaining where profit and loss came from'),
+cfg.friendly&&h('p',null,'Each day, we decompose P&L into: "How much came from rates? From equities? From time decay?" This is how trading desks explain their daily results.'),
+h(MathDisplay,{tex:'\\Delta P\\approx\\sum\\delta_i\\Delta f_i+\\frac{1}{2}\\sum\\Gamma_{ij}\\Delta f_i\\Delta f_j+\\Theta\\Delta t'}),
+h(CalcBox,{title:'P&L Waterfall',friendly:'Where did today\'s P&L come from?'},
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Factor'),h('th',null,'Move'),h('th',null,'P&L (bps)'))),h('tbody',null,...SAMPLE.names.map((n,i)=>h('tr',{key:i},h('td',null,n),h('td',null,M.fmt(fm[i]*100,2)+'%'),h('td',{style:{color:dPnL[i]>0?'var(--green)':'var(--red)',fontWeight:600}},M.fmt(dPnL[i]*10000,1)))),h('tr',{style:{fontWeight:700}},h('td',null,'Theta'),h('td',null,'—'),h('td',null,M.fmt(theta*10000,1))),h('tr',{style:{fontWeight:700,borderTop:'2px solid var(--border)'}},h('td',null,'TOTAL'),h('td',null,'—'),h('td',{style:{color:total>0?'var(--green)':'var(--red)'}},M.fmt(total*10000,1))))),
+h(Plot,{data:[{x:[...SAMPLE.names,'Theta'],y:[...dPnL.map(v=>v*10000),theta*10000],type:'waterfall',connector:{line:{color:'var(--border)'}},increasing:{marker:{color:'#10b981'}},decreasing:{marker:{color:'#ef4444'}}}],layout:{height:260,title:'P&L Waterfall (bps)'}})));}
+
+function RiskBudget(){const cfg=useCfg();return h('div',null,h('h1',null,'Risk Budgeting'),h('p',{className:'subtitle'},'Allocating risk across the portfolio'),
+cfg.friendly&&h('p',null,'Risk parity means every asset contributes equally to total risk. This usually means more bonds (low vol, high weight) and fewer equities (high vol, low weight).'),
+h(MathDisplay,{tex:'RC_i = w_i\\frac{(\\Sigma w)_i}{\\sigma_p}=\\frac{\\sigma_p}{N}\\;\\forall i'}),
+h('h2',null,'Risk Limit Framework'),
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Limit'),h('th',null,'Metric'),h('th',null,'Typical Level'),h('th',null,cfg.friendly?'What Happens on Breach':'Escalation'))),h('tbody',null,
+h('tr',null,h('td',null,'VaR'),h('td',null,'99% 1-day'),h('td',null,'$50M desk'),h('td',null,'CRO must approve')),
+h('tr',null,h('td',null,'Stress'),h('td',null,'Worst scenario'),h('td',null,'2× VaR'),h('td',null,'Risk committee')),
+h('tr',null,h('td',null,'Sensitivity'),h('td',null,'DV01, CS01'),h('td',null,'Per desk'),h('td',null,'Desk head')),
+h('tr',null,h('td',null,'Concentration'),h('td',null,'Single name'),h('td',null,'% portfolio'),h('td',null,'Portfolio mgr')))));}
+
+// ── Section 7: Model Validation ─────────────────────────────────────
+function SecValidation(){return h('div',null,h(StatTests),h(BacktestVal),h(ModelRisk));}
+
+function StatTests(){const cfg=useCfg();
+const[pv,setPv]=useState(null);
+const run=()=>{const v=SAMPLE.returns.map(r=>r[0]);const n=v.length;const mu=M.mean(v);const sig=M.std(v);
+const sorted=[...v].sort((a,b)=>a-b);const ks=Math.max(...sorted.map((x,i)=>Math.max(Math.abs((i+1)/n-M.Phi((x-mu)/sig)),Math.abs(i/n-M.Phi((x-mu)/sig)))));
+const jb_s=v.reduce((s,x)=>s+Math.pow((x-mu)/sig,3),0)/n;const jb_k=v.reduce((s,x)=>s+Math.pow((x-mu)/sig,4),0)/n;
+const jbStat=n/6*(jb_s*jb_s+(jb_k-3)*(jb_k-3)/4);
+const lb=10;let ac=[];for(let k=1;k<=lb;k++){let c=0;for(let t=k;t<n;t++)c+=(v[t]-mu)*(v[t-k]-mu);ac.push(c/n/(sig*sig));}
+const lbStat=n*(n+2)*ac.reduce((s,r,k)=>s+r*r/(n-k-1),0);
+setPv({ks,jb:jbStat,lb:lbStat,jb_s,jb_k});};
+return h('div',null,h('h1',null,'Statistical Tests'),h('p',{className:'subtitle'},'Validating distributional assumptions'),
+cfg.friendly&&h('p',null,'Before trusting a model, we check if the data actually follows the distribution we assumed. These tests catch problems like fat tails or autocorrelation.'),
+h(DiffContent,{level:'intro'},h('p',null,'Model validation asks: "Does reality match our assumptions?" If returns are not normal (they rarely are), our VaR numbers could be dangerously wrong.')),
+h(MathDisplay,{tex:'D_n=\\sup_x|F_n(x)-F(x)|\\quad\\text{(Kolmogorov-Smirnov)}'}),
+h(MathDisplay,{tex:'JB=\\frac{n}{6}\\left(S^2+\\frac{(K-3)^2}{4}\\right)\\quad\\text{(Jarque-Bera)}'}),
+h(MathDisplay,{tex:'Q_{LB}=n(n+2)\\sum_{k=1}^{h}\\frac{\\hat\\rho_k^2}{n-k}\\quad\\text{(Ljung-Box)}'}),
+h(CalcBox,{title:'Distribution Tests',friendly:'Does the data fit a bell curve?'},
+h('button',{className:'btn',onClick:run},'Run All Tests'),
+pv&&h('div',{style:{marginTop:12}},
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Test'),h('th',null,'Statistic'),h('th',null,cfg.friendly?'Verdict':'Interpretation'))),h('tbody',null,
+h('tr',null,h('td',null,'K-S'),h('td',null,M.fmt(pv.ks,4)),h('td',null,pv.ks>0.05?'❌ Reject normality':'✅ Cannot reject')),
+h('tr',null,h('td',null,'Jarque-Bera'),h('td',null,M.fmt(pv.jb,2)),h('td',null,pv.jb>5.99?'❌ Non-normal (skew/kurtosis)':'✅ Approx. normal')),
+h('tr',null,h('td',null,'Ljung-Box(10)'),h('td',null,M.fmt(pv.lb,2)),h('td',null,pv.lb>18.31?'❌ Autocorrelation detected':'✅ No serial dependence')),
+h('tr',null,h('td',null,'Skewness'),h('td',null,M.fmt(pv.jb_s,3)),h('td',null,Math.abs(pv.jb_s)>0.5?'Notable asymmetry':'Near symmetric')),
+h('tr',null,h('td',null,'Excess Kurtosis'),h('td',null,M.fmt(pv.jb_k-3,3)),h('td',null,pv.jb_k>4?'Fat tails present':'Near mesokurtic')))),
+h(DiffContent,{level:'advanced'},h('p',null,'Critical values: K-S depends on sample size (use Lilliefors tables for estimated parameters). JB ~ χ²(2); critical value at 5% = 5.99. Ljung-Box(10) ~ χ²(10); critical value at 5% = 18.31.')))));}
+
+function BacktestVal(){const cfg=useCfg();
+const[res,setRes]=useState(null);
+const run=()=>{const rets=SAMPLE.returns.map(r=>r[0]);const n=rets.length;const cl=0.99;const varLevel=M.mean(rets)-M.norminv(cl)*M.std(rets);
+let exc=0;rets.forEach(r=>{if(r<varLevel)exc++;});
+const pHat=exc/n;const kupiec=2*(exc*Math.log(pHat/(1-cl))+(n-exc)*Math.log((1-pHat)/cl));
+const zones=kupiec<3.84?'green':kupiec<6.63?'yellow':'red';
+setRes({exc,n,pHat,kupiec,zones,varLevel});};
+return h('div',null,h('h2',null,'Backtesting Framework'),cfg.friendly&&h('p',null,'Backtesting checks: "If we had used this model in the past, would it have been accurate?"'),
+h(MathDisplay,{tex:'LR_{POF}=-2\\ln\\left(\\frac{(1-p)^{n-x}p^x}{(1-\\hat p)^{n-\\hat x}\\hat p^{\\hat x}}\\right)\\sim\\chi^2(1)'}),
+h(CalcBox,{title:'Kupiec POF Test',friendly:'Was VaR right in the past?'},
+h('button',{className:'btn',onClick:run},'Run Backtest'),
+res&&h('div',{style:{marginTop:12}},
+h(Stat,{label:'Exceptions',value:res.exc+'/'+res.n,hint:'Days VaR was breached'}),
+h(Stat,{label:'Exception Rate',value:M.fmt(res.pHat*100,2)+'%',hint:'Expected: 1%'}),
+h(Stat,{label:'Kupiec LR',value:M.fmt(res.kupiec,3)}),
+h(Stat,{label:'Traffic Light',value:res.zones.toUpperCase(),hint:res.zones==='green'?'Model adequate':res.zones==='yellow'?'Questionable':'Reject model'}),
+h(DiffContent,{level:'advanced'},h('p',null,'Under Basel, banks in the red zone face a multiplier of 4× on their market risk capital charge. The test has limited power for short samples — 250 days gives only ~60% power to detect a true exception rate of 2%.')))),
+h(DiffContent,{level:'standard'},h('h3',null,'Basel Traffic Light'),h('table',null,h('thead',null,h('tr',null,h('th',null,'Zone'),h('th',null,'Exceptions (250d)'),h('th',null,'Plus Factor'),h('th',null,cfg.friendly?'What It Means':'Implication'))),h('tbody',null,
+h('tr',null,h('td',{style:{color:'#10b981'}},'Green'),h('td',null,'0–4'),h('td',null,'0.00'),h('td',null,'Model is fine')),
+h('tr',null,h('td',{style:{color:'#eab308'}},'Yellow'),h('td',null,'5–9'),h('td',null,'0.40–0.85'),h('td',null,'Needs investigation')),
+h('tr',null,h('td',{style:{color:'#ef4444'}},'Red'),h('td',null,'10+'),h('td',null,'1.00'),h('td',null,'Model rejected'))))));}
+
+function ModelRisk(){const cfg=useCfg();return h('div',null,h('h2',null,'Model Risk Management'),
+cfg.friendly&&h('p',null,'Models are simplifications of reality — they are always wrong, but some are useful. Model risk management ensures we know HOW wrong they might be.'),
+h(DiffContent,{level:'intro'},h('p',null,'SR 11-7 (Fed) and SS1/23 (PRA) require banks to have a model risk management framework covering development, validation, and ongoing monitoring.')),
+h('h3',null,'Model Risk Taxonomy'),h('table',null,h('thead',null,h('tr',null,h('th',null,'Risk Type'),h('th',null,'Description'),h('th',null,cfg.friendly?'Plain English':'Example'))),h('tbody',null,
+h('tr',null,h('td',null,'Specification'),h('td',null,'Wrong functional form'),h('td',null,'Using normal when returns have fat tails')),
+h('tr',null,h('td',null,'Estimation'),h('td',null,'Parameter uncertainty'),h('td',null,'Correlation flips sign in small samples')),
+h('tr',null,h('td',null,'Implementation'),h('td',null,'Code bugs'),h('td',null,'Off-by-one error in date alignment')),
+h('tr',null,h('td',null,'Application'),h('td',null,'Used outside intended scope'),h('td',null,'Equity model applied to crypto')))),
+h(DiffContent,{level:'advanced'},h('h3',null,'Validation Best Practices'),h('ul',null,
+h('li',null,'Independent validation team (second line of defense)'),
+h('li',null,'Challenger models for benchmarking'),
+h('li',null,'Outcome analysis — compare predicted vs actual'),
+h('li',null,'Sensitivity analysis — how stable are outputs to input perturbations?'),
+h('li',null,'Annual review cycle with documented findings'),
+h('li',null,'Model tiering: Tier 1 (material) models get deeper scrutiny'))));}
+
+// ── Section 8: Advanced Topics ──────────────────────────────────────
+function SecAdvanced(){return h('div',null,h(LiqSection),h(EVTSection),h(FRTBSection),h(MLSection));}
+
+function LiqSection(){const cfg=useCfg();
+const[d,setD]=useState({spread:0.02,depth:1e6,vol:0.20,pos:5e6});
+const liqVaR=()=>{const halfSpread=d.spread/2;const impCost=d.pos/d.depth*d.vol*0.1;return halfSpread+impCost;};
+return h('div',null,h('h1',null,'Liquidity Risk'),h('p',{className:'subtitle'},'When markets dry up'),
+cfg.friendly&&h('p',null,'Liquidity risk is the danger that you can\'t sell fast enough without moving the price against you. In a crisis, this cost can dwarf your VaR.'),
+h(MathDisplay,{tex:'LVaR = VaR + \\frac{s}{2} + \\sigma_s\\cdot z_{\\alpha}\\cdot\\sqrt{\\frac{Q}{ADV}}'}),
+h(CalcBox,{title:'Liquidity-Adjusted VaR',friendly:'How much extra could you lose from illiquidity?'},
+h(Field,{label:'Bid-Ask Spread',friendly:'Cost to trade round-trip',value:d.spread,onChange:v=>setD({...d,spread:+v})}),
+h(Field,{label:'Market Depth ($)',friendly:'How much can you trade before moving price',value:d.depth,onChange:v=>setD({...d,depth:+v})}),
+h(Field,{label:'Annualized Vol',value:d.vol,onChange:v=>setD({...d,vol:+v})}),
+h(Field,{label:'Position Size ($)',value:d.pos,onChange:v=>setD({...d,pos:+v})}),
+h(Stat,{label:'Liquidity Cost',value:M.fmt(liqVaR()*100,2)+'%',hint:'Extra cost from illiquidity'})),
+h(DiffContent,{level:'standard'},h('h3',null,'Liquidity Horizons (FRTB)'),h('table',null,h('thead',null,h('tr',null,h('th',null,'Category'),h('th',null,'Horizon'),h('th',null,cfg.friendly?'Why':'Rationale'))),h('tbody',null,
+h('tr',null,h('td',null,'Large-cap equity'),h('td',null,'10 days'),h('td',null,'Deep, liquid markets')),
+h('tr',null,h('td',null,'Small-cap equity'),h('td',null,'20 days'),h('td',null,'Thinner order books')),
+h('tr',null,h('td',null,'IG credit'),h('td',null,'40 days'),h('td',null,'OTC, less frequent trading')),
+h('tr',null,h('td',null,'HY credit'),h('td',null,'60 days'),h('td',null,'Sparse liquidity')),
+h('tr',null,h('td',null,'Exotic rates'),h('td',null,'120 days'),h('td',null,'Bespoke, hard to hedge'))))));}
+
+function EVTSection(){const cfg=useCfg();
+const[xi,setXi]=useState(0.25);const[beta,setBeta]=useState(0.01);const[u,setU]=useState(-0.02);
+const gpd=x=>1-Math.pow(1+xi*(x-u)/beta,-1/xi);
+const xs=[];for(let x=u;x>u-0.15;x-=0.001)xs.push(x);
+return h('div',null,h('h1',null,'Extreme Value Theory'),h('p',{className:'subtitle'},'Modeling the tails that matter'),
+cfg.friendly&&h('p',null,'Normal distributions dramatically underestimate extreme events. EVT provides a mathematically rigorous way to model just the tails — the catastrophic losses that keep risk managers up at night.'),
+h(MathDisplay,{tex:'G_{\\xi,\\beta}(x)=\\begin{cases}1-(1+\\xi x/\\beta)^{-1/\\xi}&\\xi\\neq0\\\\1-e^{-x/\\beta}&\\xi=0\\end{cases}'}),
+h(DiffContent,{level:'standard'},h(MathDisplay,{tex:'\\text{Fisher-Tippett: }\\;M_n\\xrightarrow{d}G_{\\xi}\\quad\\text{(Block Maxima)}'}),
+h('p',null,'The Pickands-Balkema-de Haan theorem shows that for a high enough threshold u, exceedances follow a Generalized Pareto Distribution (GPD).')),
+h(CalcBox,{title:'GPD Tail Estimator',friendly:'How bad can extreme losses get?'},
+h(Field,{label:'Shape (ξ)',friendly:'Tail heaviness (>0 = fat tails)',value:xi,onChange:v=>setXi(+v)}),
+h(Field,{label:'Scale (β)',value:beta,onChange:v=>setBeta(+v)}),
+h(Field,{label:'Threshold (u)',friendly:'Where the tail begins',value:u,onChange:v=>setU(+v)}),
+h(Plot,{data:[{x:xs,y:xs.map(x=>gpd(x)),type:'scatter',mode:'lines',name:'GPD CDF',line:{color:'var(--accent)'}}],layout:{height:250,title:'GPD Tail Distribution',xaxis:{title:'Loss'},yaxis:{title:'Cumulative Probability'}}}),
+h(Stat,{label:'VaR 99.9%',value:M.fmt((u+beta/xi*(Math.pow(0.001,-xi)-1))*100,2)+'%',hint:'1-in-1000 day loss'})),
+h(DiffContent,{level:'advanced'},h('h3',null,'Hill Estimator'),h(MathDisplay,{tex:'\\hat\\xi_{Hill}=\\frac{1}{k}\\sum_{i=1}^{k}\\ln X_{(n-i+1)}-\\ln X_{(n-k)}'}),
+h('p',null,'The Hill estimator provides a simple, consistent estimate of the tail index. Choose k via the Hill plot — look for a stable region.')));}
+
+function FRTBSection(){const cfg=useCfg();return h('div',null,h('h1',null,'FRTB Framework'),h('p',{className:'subtitle'},'Fundamental Review of the Trading Book'),
+cfg.friendly&&h('p',null,'FRTB is the new global standard for how banks must calculate market risk capital. It replaces the old VaR-based approach with Expected Shortfall and adds many new requirements.'),
+h('h2',null,'Key Changes from Basel 2.5'),h('table',null,h('thead',null,h('tr',null,h('th',null,'Feature'),h('th',null,'Old (Basel 2.5)'),h('th',null,'New (FRTB)'))),h('tbody',null,
+h('tr',null,h('td',null,'Risk Measure'),h('td',null,'99% VaR'),h('td',null,'97.5% ES')),
+h('tr',null,h('td',null,'Liquidity'),h('td',null,'10-day horizon'),h('td',null,'Varying horizons (10-120d)')),
+h('tr',null,h('td',null,'Diversification'),h('td',null,'Full benefit'),h('td',null,'Partial (ρ-weighted)')),
+h('tr',null,h('td',null,'Default Risk'),h('td',null,'IRC'),h('td',null,'DRC (jump-to-default)')),
+h('tr',null,h('td',null,'Desk Structure'),h('td',null,'Flexible'),h('td',null,'Strict desk-level approval')))),
+h(DiffContent,{level:'standard'},h('h2',null,'IMA Capital Formula'),
+h(MathDisplay,{tex:'C_{IMA}=\\max\\left(IMCC_{t-1},m_c\\cdot IMCC_{avg}\\right)+\\max\\left(SES_{t-1},m_c\\cdot SES_{avg}\\right)+DRC'}),
+h(MathDisplay,{tex:'IMCC=\\rho\\cdot IMCC_{ALL}+(1-\\rho)\\sum_i IMCC_i'}),
+h('p',null,'Where ρ (typically 0.5) controls diversification benefit across risk classes, and mₖ is the multiplier (≥1.5).')),
+h(DiffContent,{level:'advanced'},h('h2',null,'Standardized Approach (SA)'),
+h(MathDisplay,{tex:'K_{SA}=K_{SBM}+K_{DRC,SA}+K_{RRAO}'}),
+h('p',null,'The SA uses sensitivities (delta, vega, curvature) aggregated across buckets with prescribed correlations. Banks must compute SA alongside IMA as a floor.'),
+h('h3',null,'P&L Attribution Test (PLAT)'),h('table',null,h('thead',null,h('tr',null,h('th',null,'Metric'),h('th',null,'Green'),h('th',null,'Amber'),h('th',null,'Red'))),h('tbody',null,
+h('tr',null,h('td',null,'Spearman Corr'),h('td',null,'>0.7'),h('td',null,'0.6–0.7'),h('td',null,'<0.6')),
+h('tr',null,h('td',null,'KS Test p-val'),h('td',null,'>0.09'),h('td',null,'0.04–0.09'),h('td',null,'<0.04'))))));}
+
+function MLSection(){const cfg=useCfg();return h('div',null,h('h1',null,'Machine Learning in Risk'),h('p',{className:'subtitle'},'Where ML adds value — and where it doesn\'t'),
+cfg.friendly&&h('p',null,'Machine learning can enhance risk modeling, but it brings its own risks: overfitting, lack of interpretability, and the danger of data snooping. Here\'s where it genuinely helps.'),
+h('h2',null,'Proven Applications'),h('table',null,h('thead',null,h('tr',null,h('th',null,'Application'),h('th',null,'Method'),h('th',null,cfg.friendly?'Why It Works':'Rationale'))),h('tbody',null,
+h('tr',null,h('td',null,'Proxy/Missing Data'),h('td',null,'Random Forest, kNN'),h('td',null,'Interpolates risk factors with missing history')),
+h('tr',null,h('td',null,'Scenario Generation'),h('td',null,'GAN, VAE'),h('td',null,'Creates realistic stress scenarios beyond historical')),
+h('tr',null,h('td',null,'Regime Detection'),h('td',null,'HMM, Clustering'),h('td',null,'Identifies market regimes (calm vs crisis)')),
+h('tr',null,h('td',null,'Anomaly Detection'),h('td',null,'Isolation Forest, DBSCAN'),h('td',null,'Catches data quality issues automatically')),
+h('tr',null,h('td',null,'Curve Construction'),h('td',null,'Neural Networks'),h('td',null,'Faster than bootstrap for real-time')))),
+h(DiffContent,{level:'standard'},h('h3',null,'Model Interpretability (SR 11-7 Compliant)'),h('ul',null,
+h('li',null,'SHAP values for feature importance decomposition'),
+h('li',null,'Partial dependence plots for marginal effects'),
+h('li',null,'Surrogate models (fit interpretable model to ML predictions)'),
+h('li',null,'Attention weights in transformer-based models')),
+h('h3',null,'Pitfalls'),h('ul',null,
+h('li',null,'Lookahead bias — always use expanding/rolling windows, never full-sample fits'),
+h('li',null,'Overfitting — use cross-validation with temporal splits (no shuffling!)'),
+h('li',null,'Non-stationarity — retrain frequently; market dynamics change'),
+h('li',null,'Regulatory acceptance — supervisors prefer interpretable models'))));}
+
+// ── Section 9: Interactive Calculators ───────────────────────────────
+function SecCalcs(){const cfg=useCfg();
+const[tab,setTab]=useState(0);
+const calcs=['Returns','Covariance','PCA','VaR','ES','Greeks','Stress','Bonds','Options','Portfolio'];
+return h('div',null,h('h1',null,cfg.friendly?'Interactive Calculators':'Computation Lab'),
+h('p',{className:'subtitle'},'Hands-on tools for every major risk concept'),
+h(TabPanel,{tabs:calcs,active:tab,onChange:setTab}),
+tab===0&&h(CalcReturns),tab===1&&h(CalcCov),tab===2&&h(CalcPCACalc),tab===3&&h(CalcVaRTool),
+tab===4&&h(CalcES),tab===5&&h(CalcGreeks),tab===6&&h(CalcStressTool),tab===7&&h(CalcBonds),
+tab===8&&h(CalcOptions),tab===9&&h(CalcPortfolio));}
+
+function CalcReturns(){const cfg=useCfg();
+const[prices,setPrices]=useState('100,102,101,105,103,107,110');
+const calc=()=>{const p=prices.split(',').map(Number).filter(x=>!isNaN(x));if(p.length<2)return null;
+const log=[];const simple=[];for(let i=1;i<p.length;i++){log.push(Math.log(p[i]/p[i-1]));simple.push(p[i]/p[i-1]-1);}
+return{log,simple,logMu:M.mean(log),logSig:M.std(log),simpMu:M.mean(simple),simpSig:M.std(simple)};};
+const r=calc();
+return h(CalcBox,{title:'Return Calculator',friendly:'Convert prices to returns & stats'},
+h(Field,{label:'Prices (comma-sep)',friendly:'Enter historical prices',value:prices,onChange:setPrices}),
+r&&h('div',null,h('div',{className:'grid2'},
+h(Stat,{label:'Log Mean',value:M.fmt(r.logMu*100,4)+'%',hint:'Average daily log return'}),
+h(Stat,{label:'Log StdDev',value:M.fmt(r.logSig*100,4)+'%',hint:'Daily volatility'}),
+h(Stat,{label:'Annualized Vol',value:M.fmt(r.logSig*Math.sqrt(252)*100,2)+'%',hint:'σ × √252'}),
+h(Stat,{label:'Simple Mean',value:M.fmt(r.simpMu*100,4)+'%'})),
+h(Plot,{data:[{y:r.log.map(v=>v*100),type:'bar',name:'Log Returns (%)',marker:{color:'var(--accent)'}}],layout:{height:220,title:'Log Returns (%)',xaxis:{title:'Period'}}})));}
+
+function CalcCov(){const cfg=useCfg();
+const[method,setMethod]=useState('sample');const[lam,setLam]=useState(0.94);
+const rets=SAMPLE.returns;const cov=method==='ewma'?M.ewmaCov(rets,lam):method==='shrink'?M.shrinkCov(rets):M.covMatrix(rets);
+const cor=cov.map((row,i)=>row.map((v,j)=>v/Math.sqrt(cov[i][i]*cov[j][j])));
+return h(CalcBox,{title:'Covariance Estimator',friendly:'How do assets move together?'},
+h('div',{className:'grid2'},
+h(Field,{label:'Method',value:method,onChange:setMethod,type:'select',options:[['sample','Sample'],['ewma','EWMA'],['shrink','Ledoit-Wolf']]}),
+method==='ewma'&&h(Field,{label:'Lambda (λ)',friendly:'Decay factor (0.94 = RiskMetrics)',value:lam,onChange:v=>setLam(+v)})),
+h('h3',null,'Correlation Matrix'),
+h('table',null,h('thead',null,h('tr',null,h('th',null,''),SAMPLE.names.map((n,i)=>h('th',{key:i},n)))),
+h('tbody',null,SAMPLE.names.map((n,i)=>h('tr',{key:i},h('td',{style:{fontWeight:600}},n),cor[i].map((v,j)=>h('td',{key:j,style:{background:v>0.5?'rgba(16,185,129,0.2)':v<-0.2?'rgba(239,68,68,0.2)':'transparent',textAlign:'center'}},M.fmt(v,3))))))),
+h(Plot,{data:[{z:cor,x:SAMPLE.names,y:SAMPLE.names,type:'heatmap',colorscale:'RdBu',zmin:-1,zmax:1}],layout:{height:300,title:'Correlation Heatmap'}}));}
+
+function CalcPCACalc(){const cov=M.covMatrix(SAMPLE.returns);const eig=M.eigenJacobi(cov);
+const total=eig.values.reduce((a,b)=>a+b,0);const pctVar=eig.values.map(v=>v/total*100);const cumVar=pctVar.reduce((a,v,i)=>{a.push((a[i-1]||0)+v);return a;},[]);
+return h(CalcBox,{title:'PCA Decomposition',friendly:'Which hidden factors drive your portfolio?'},
+h(Stat,{label:'PC1 Explained',value:M.fmt(pctVar[0],1)+'%',hint:'First principal component'}),
+h(Stat,{label:'Top 2 PCs',value:M.fmt(cumVar[1],1)+'%',hint:'Cumulative variance explained'}),
+h(Plot,{data:[{x:SAMPLE.names.map((_,i)=>'PC'+(i+1)),y:pctVar,type:'bar',name:'Individual',marker:{color:'var(--accent)'}},{x:SAMPLE.names.map((_,i)=>'PC'+(i+1)),y:cumVar,type:'scatter',mode:'lines+markers',name:'Cumulative',yaxis:'y2',line:{color:'var(--gold)'}}],layout:{height:280,title:'Scree Plot',yaxis:{title:'% Variance'},yaxis2:{title:'Cumulative %',overlaying:'y',side:'right',range:[0,105]}}}),
+h('h3',null,'PC1 Loadings'),h('table',null,h('thead',null,h('tr',null,h('th',null,'Factor'),h('th',null,'Loading'),h('th',null,'Interpretation'))),h('tbody',null,SAMPLE.names.map((n,i)=>h('tr',{key:i},h('td',null,n),h('td',null,M.fmt(eig.vectors[i][0],4)),h('td',null,Math.abs(eig.vectors[i][0])>0.4?'Strong driver':'Weak influence'))))));}
+
+function CalcVaRTool(){const cfg=useCfg();
+const[conf,setConf]=useState(0.99);const[horizon,setHorizon]=useState(10);const[notional,setNotional]=useState(1e8);
+const rets=SAMPLE.returns.map(r=>r[0]);const mu=M.mean(rets);const sig=M.std(rets);
+const pVar=-(mu*horizon+M.norminv(1-conf)*sig*Math.sqrt(horizon))*notional;
+const sorted=[...rets].sort((a,b)=>a-b);const hIdx=Math.floor(rets.length*(1-conf));const hVar=-sorted[hIdx]*Math.sqrt(horizon)*notional;
+return h(CalcBox,{title:'VaR Calculator',friendly:'Maximum expected loss'},
+h('div',{className:'grid2'},
+h(Field,{label:'Confidence',value:conf,onChange:v=>setConf(+v)}),
+h(Field,{label:'Horizon (days)',value:horizon,onChange:v=>setHorizon(+v)}),
+h(Field,{label:'Notional ($)',value:notional,onChange:v=>setNotional(+v)})),
+h('div',{className:'grid2'},
+h(Stat,{label:'Parametric VaR',value:'$'+M.fmt(pVar,0),hint:'Assumes normal distribution'}),
+h(Stat,{label:'Historical VaR',value:'$'+M.fmt(hVar,0),hint:'Based on actual past returns'}),
+h(Stat,{label:'Daily Vol',value:M.fmt(sig*100,2)+'%'}),
+h(Stat,{label:'Annualized Vol',value:M.fmt(sig*Math.sqrt(252)*100,2)+'%'})));}
+
+function CalcES(){const cfg=useCfg();
+const[conf,setConf]=useState(0.975);
+const rets=SAMPLE.returns.map(r=>r[0]);const sorted=[...rets].sort((a,b)=>a-b);
+const cutoff=Math.floor(rets.length*(1-conf));const tail=sorted.slice(0,cutoff);
+const es=-M.mean(tail);const varVal=-sorted[cutoff];
+return h(CalcBox,{title:'Expected Shortfall',friendly:'Average loss in worst-case scenarios'},
+h(Field,{label:'Confidence',value:conf,onChange:v=>setConf(+v)}),
+h('div',{className:'grid2'},
+h(Stat,{label:'ES',value:M.fmt(es*100,2)+'%',hint:'Average loss beyond VaR'}),
+h(Stat,{label:'VaR',value:M.fmt(varVal*100,2)+'%',hint:'Threshold loss'}),
+h(Stat,{label:'ES/VaR Ratio',value:M.fmt(es/varVal,3),hint:'>1 always; higher = fatter tails'}),
+h(Stat,{label:'Tail Obs',value:cutoff,hint:'Number of observations in tail'})),
+h(Plot,{data:[{x:sorted.map(v=>v*100),type:'histogram',nbinsx:50,name:'Return Distribution',marker:{color:'var(--accent)'}},{x:[varVal*-100,varVal*-100],y:[0,15],type:'scatter',mode:'lines',name:'VaR',line:{color:'var(--gold)',dash:'dash',width:2}},{x:[es*-100,es*-100],y:[0,15],type:'scatter',mode:'lines',name:'ES',line:{color:'var(--red)',width:2}}],layout:{height:260,title:'Return Distribution with VaR & ES'}}));}
+
+function CalcGreeks(){const[S,setS]=useState(100);const[K,setK]=useState(100);const[T,setT]=useState(0.25);
+const[r,setR]=useState(0.05);const[sig,setSig]=useState(0.20);
+const g=M.greeks(S,K,T,r,sig);
+const spots=[];for(let s=S*0.7;s<=S*1.3;s+=S*0.01)spots.push(s);
+const prices=spots.map(s=>M.greeks(s,K,T,r,sig).price);const deltas=spots.map(s=>M.greeks(s,K,T,r,sig).delta);
+return h(CalcBox,{title:'Black-Scholes Greeks',friendly:'Option sensitivity dashboard'},
+h('div',{className:'grid2'},
+h(Field,{label:'Spot (S)',value:S,onChange:v=>setS(+v)}),
+h(Field,{label:'Strike (K)',value:K,onChange:v=>setK(+v)}),
+h(Field,{label:'Time (years)',value:T,onChange:v=>setT(+v)}),
+h(Field,{label:'Rate (r)',value:r,onChange:v=>setR(+v)}),
+h(Field,{label:'Vol (σ)',value:sig,onChange:v=>setSig(+v)})),
+h('div',{className:'grid2'},
+h(Stat,{label:'Price',value:'$'+M.fmt(g.price,4)}),
+h(Stat,{label:'Delta (Δ)',value:M.fmt(g.delta,4),hint:'$/$ spot move'}),
+h(Stat,{label:'Gamma (Γ)',value:M.fmt(g.gamma,6),hint:'Δ change per $ move'}),
+h(Stat,{label:'Vega (ν)',value:M.fmt(g.vega,4),hint:'$ per 1% vol move'}),
+h(Stat,{label:'Theta (Θ)',value:M.fmt(g.theta,4),hint:'$ lost per day'}),
+h(Stat,{label:'Rho (ρ)',value:M.fmt(g.rho,4),hint:'$ per 1% rate move'})),
+h(Plot,{data:[{x:spots,y:prices,type:'scatter',mode:'lines',name:'Price',line:{color:'var(--accent)'}},{x:spots,y:deltas.map(d=>d*S*0.5),type:'scatter',mode:'lines',name:'Delta (scaled)',line:{color:'var(--gold)',dash:'dash'}}],layout:{height:260,title:'Option Price & Delta vs Spot'}}));}
+
+function CalcStressTool(){const cfg=useCfg();
+const[scIdx,setScIdx]=useState(0);const sc=SCENARIOS[scIdx];
+const pnl=SAMPLE.names.map((_,i)=>sc.shocks[i]*0.01*(1+0.5*Math.random()));
+const total=pnl.reduce((a,b)=>a+b,0);
+return h(CalcBox,{title:'Stress Test Lab',friendly:'What if a crisis hits?'},
+h(Field,{label:'Scenario',value:scIdx,onChange:v=>setScIdx(+v),type:'select',options:SCENARIOS.map((s,i)=>[i,s.name])}),
+h('p',null,sc.desc),
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Factor'),h('th',null,'Shock'),h('th',null,cfg.friendly?'Impact on Portfolio':'P&L Impact'))),h('tbody',null,
+SAMPLE.names.map((n,i)=>h('tr',{key:i},h('td',null,n),h('td',null,M.fmt(sc.shocks[i],1)+'%'),h('td',{style:{color:pnl[i]<0?'var(--red)':'var(--green)'}},M.fmt(pnl[i]*100,2)+'%'))),
+h('tr',{style:{fontWeight:700,borderTop:'2px solid var(--border)'}},h('td',null,'TOTAL'),h('td',null,'—'),h('td',{style:{color:total<0?'var(--red)':'var(--green)'}},M.fmt(total*100,2)+'%')))),
+h(Plot,{data:[{x:SAMPLE.names,y:pnl.map(v=>v*100),type:'bar',marker:{color:pnl.map(v=>v<0?'#ef4444':'#10b981')}}],layout:{height:250,title:sc.name+' — P&L Impact (%)'}}));}
+
+function CalcBonds(){const[face,setFace]=useState(1000);const[cpn,setCpn]=useState(0.05);
+const[ytm,setYtm]=useState(0.04);const[mat,setMat]=useState(10);const[freq,setFreq]=useState(2);
+const n=mat*freq;const c=face*cpn/freq;const y=ytm/freq;
+let price=0,dur=0,conv=0;for(let t=1;t<=n;t++){const pv=c/Math.pow(1+y,t);price+=pv;dur+=t/freq*pv;conv+=t/freq*((t/freq)+1/freq)*pv;}
+price+=face/Math.pow(1+y,n);dur+=mat*face/Math.pow(1+y,n);conv+=mat*(mat+1/freq)*face/Math.pow(1+y,n);
+const macD=dur/price;const modD=macD/(1+y);conv=conv/(price*Math.pow(1+y,2));
+return h(CalcBox,{title:'Bond Analytics',friendly:'Price, duration & convexity calculator'},
+h('div',{className:'grid2'},
+h(Field,{label:'Face Value',value:face,onChange:v=>setFace(+v)}),
+h(Field,{label:'Coupon Rate',value:cpn,onChange:v=>setCpn(+v)}),
+h(Field,{label:'YTM',value:ytm,onChange:v=>setYtm(+v)}),
+h(Field,{label:'Maturity (yrs)',value:mat,onChange:v=>setMat(+v)}),
+h(Field,{label:'Freq (per yr)',value:freq,onChange:v=>setFreq(+v)})),
+h('div',{className:'grid2'},
+h(Stat,{label:'Price',value:'$'+M.fmt(price,2)}),
+h(Stat,{label:'Macaulay Duration',value:M.fmt(macD,3)+' yrs',hint:'Weighted avg time to cash flows'}),
+h(Stat,{label:'Modified Duration',value:M.fmt(modD,3),hint:'% price change per 1% yield move'}),
+h(Stat,{label:'DV01',value:'$'+M.fmt(modD*price/10000,4),hint:'Dollar value of 1bp yield change'}),
+h(Stat,{label:'Convexity',value:M.fmt(conv,2),hint:'Curvature — helps when rates move a lot'})));}
+
+function CalcOptions(){const[S,setS]=useState(100);const[K,setK]=useState(100);const[T,setT]=useState(0.25);
+const[r,setR]=useState(0.05);const[sig,setSig]=useState(0.20);const[N,setN]=useState(10000);
+const[res,setRes]=useState(null);
+const run=()=>{let sum=0;const payoffs=[];
+for(let i=0;i<N;i++){const z=M.randNormal();const ST=S*Math.exp((r-0.5*sig*sig)*T+sig*Math.sqrt(T)*z);
+const payoff=Math.max(ST-K,0)*Math.exp(-r*T);sum+=payoff;payoffs.push(payoff);}
+const mcPrice=sum/N;const bsPrice=M.greeks(S,K,T,r,sig).price;const se=M.std(payoffs)/Math.sqrt(N);
+setRes({mcPrice,bsPrice,se,payoffs});};
+return h(CalcBox,{title:'Monte Carlo Options Pricer',friendly:'Price options using random simulations'},
+h('div',{className:'grid2'},
+h(Field,{label:'Spot',value:S,onChange:v=>setS(+v)}),
+h(Field,{label:'Strike',value:K,onChange:v=>setK(+v)}),
+h(Field,{label:'Time (yrs)',value:T,onChange:v=>setT(+v)}),
+h(Field,{label:'Vol',value:sig,onChange:v=>setSig(+v)}),
+h(Field,{label:'Simulations',value:N,onChange:v=>setN(+v)})),
+h('button',{className:'btn',onClick:run},'Run Monte Carlo'),
+res&&h('div',{style:{marginTop:12}},h('div',{className:'grid2'},
+h(Stat,{label:'MC Price',value:'$'+M.fmt(res.mcPrice,4)}),
+h(Stat,{label:'B-S Price',value:'$'+M.fmt(res.bsPrice,4)}),
+h(Stat,{label:'Std Error',value:'$'+M.fmt(res.se,4),hint:'MC estimation uncertainty'}),
+h(Stat,{label:'Error',value:M.fmt(Math.abs(res.mcPrice-res.bsPrice)/res.bsPrice*100,2)+'%',hint:'MC vs analytical'})),
+h(Plot,{data:[{x:res.payoffs,type:'histogram',nbinsx:60,marker:{color:'var(--accent)'}}],layout:{height:240,title:'Payoff Distribution'}})));}
+
+function CalcPortfolio(){const cfg=useCfg();
+const[w,setW]=useState(SAMPLE.names.map(()=>1/SAMPLE.names.length));
+const cov=M.covMatrix(SAMPLE.returns);const means=SAMPLE.returns[0].map((_,j)=>M.mean(SAMPLE.returns.map(r=>r[j])));
+const portRet=w.reduce((s,wi,i)=>s+wi*means[i],0);
+const portVar=w.reduce((s,wi,i)=>s+w.reduce((s2,wj,j)=>s2+wi*wj*cov[i][j],0),0);
+const portVol=Math.sqrt(portVar);const sharpe=portRet/portVol*Math.sqrt(252);
+const mrc=cov.map((row,i)=>row.reduce((s,v,j)=>s+v*w[j],0)/portVol);
+return h(CalcBox,{title:'Portfolio Optimizer',friendly:'Build & analyze your portfolio'},
+SAMPLE.names.map((n,i)=>h(Field,{key:i,label:n+' Weight',value:M.fmt(w[i],2),onChange:v=>{const nw=[...w];nw[i]=+v;setW(nw);}})),
+h('div',{className:'grid2'},
+h(Stat,{label:'Expected Return',value:M.fmt(portRet*252*100,2)+'% ann.',hint:'Weighted average return'}),
+h(Stat,{label:'Portfolio Vol',value:M.fmt(portVol*Math.sqrt(252)*100,2)+'% ann.'}),
+h(Stat,{label:'Sharpe Ratio',value:M.fmt(sharpe,3),hint:'>1 is good, >2 is excellent'}),
+h(Stat,{label:'99% VaR (1d)',value:M.fmt(M.norminv(0.99)*portVol*100,2)+'%'})),
+h(Plot,{data:[{labels:SAMPLE.names,values:mrc.map(v=>Math.abs(v)),type:'pie',marker:{colors:['#f59e0b','#3b82f6','#10b981','#ef4444','#8b5cf6']}}],layout:{height:280,title:cfg.friendly?'Who Contributes Most Risk?':'Marginal Risk Contribution'}}));}
+
+// ── Section 10: Reference ───────────────────────────────────────────
+function SecRef(){const cfg=useCfg();
+const[tab,setTab]=useState(0);
+return h('div',null,h('h1',null,'Reference Library'),
+h(TabPanel,{tabs:['Formulas','Glossary','Regulations','Real-World'],active:tab,onChange:setTab}),
+tab===0&&h(FormulaRef),tab===1&&h(GlossaryRef),tab===2&&h(RegRef),tab===3&&h(RealWorld));}
+
+function FormulaRef(){return h('div',null,h('h2',null,'Formula Reference'),
+h('h3',null,'Returns'),
+h(MathDisplay,{tex:'r_t^{\\text{simple}}=\\frac{P_t-P_{t-1}}{P_{t-1}},\\quad r_t^{\\text{log}}=\\ln\\frac{P_t}{P_{t-1}}'}),
+h('h3',null,'Covariance'),
+h(MathDisplay,{tex:'\\hat\\Sigma_{ij}=\\frac{1}{T-1}\\sum_{t=1}^T(r_{it}-\\bar r_i)(r_{jt}-\\bar r_j)'}),
+h(MathDisplay,{tex:'\\hat\\Sigma^{EWMA}_t=\\lambda\\hat\\Sigma_{t-1}+(1-\\lambda)r_tr_t^\\top'}),
+h('h3',null,'VaR / ES'),
+h(MathDisplay,{tex:'VaR_\\alpha=-\\mu-\\sigma\\Phi^{-1}(1-\\alpha)'}),
+h(MathDisplay,{tex:'ES_\\alpha=\\mu+\\sigma\\frac{\\phi(\\Phi^{-1}(\\alpha))}{1-\\alpha}'}),
+h('h3',null,'PCA'),
+h(MathDisplay,{tex:'\\Sigma=V\\Lambda V^\\top,\\quad\\Lambda=\\text{diag}(\\lambda_1,\\ldots,\\lambda_n)'}),
+h('h3',null,'Black-Scholes'),
+h(MathDisplay,{tex:'C=S\\Phi(d_1)-Ke^{-rT}\\Phi(d_2),\\quad d_{1,2}=\\frac{\\ln(S/K)+(r\\pm\\sigma^2/2)T}{\\sigma\\sqrt T}'}),
+h('h3',null,'GARCH(1,1)'),
+h(MathDisplay,{tex:'\\sigma_t^2=\\omega+\\alpha r_{t-1}^2+\\beta\\sigma_{t-1}^2'}),
+h('h3',null,'Greeks'),
+h(MathDisplay,{tex:'\\Delta=\\Phi(d_1),\\quad\\Gamma=\\frac{\\phi(d_1)}{S\\sigma\\sqrt T},\\quad\\mathcal{V}=S\\phi(d_1)\\sqrt T'}),
+h(MathDisplay,{tex:'\\Theta=-\\frac{S\\phi(d_1)\\sigma}{2\\sqrt T}-rKe^{-rT}\\Phi(d_2),\\quad\\rho=KTe^{-rT}\\Phi(d_2)'}),
+h('h3',null,'Copulas'),
+h(MathDisplay,{tex:'C(u_1,\\ldots,u_n)=\\Phi_n\\left(\\Phi^{-1}(u_1),\\ldots,\\Phi^{-1}(u_n);\\Sigma\\right)'}),
+h('h3',null,'EVT (GPD)'),
+h(MathDisplay,{tex:'G_{\\xi,\\beta}(x)=1-\\left(1+\\xi\\frac{x}{\\beta}\\right)^{-1/\\xi}'}));}
+
+function GlossaryRef(){const cfg=useCfg();
+const[filter,setFilter]=useState('');
+const entries=Object.entries(G).filter(([k])=>k.toLowerCase().includes(filter.toLowerCase())).sort((a,b)=>a[0].localeCompare(b[0]));
+return h('div',null,h('h2',null,cfg.friendly?'Complete Glossary':'Terminology Reference'),
+h('input',{type:'text',placeholder:'Search glossary...',value:filter,onChange:e=>setFilter(e.target.value),style:{width:'100%',padding:10,marginBottom:16,background:'var(--bg2)',border:'1px solid var(--border)',borderRadius:8,color:'var(--t1)',fontSize:14}}),
+h('p',{style:{color:'var(--t3)',marginBottom:12}},entries.length+' terms'),
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Term'),cfg.friendly&&h('th',null,'Plain English'),h('th',null,'Definition'))),
+h('tbody',null,entries.slice(0,100).map(([k,v])=>h('tr',{key:k},h('td',{style:{fontWeight:600,whiteSpace:'nowrap'}},k),cfg.friendly&&h('td',{style:{color:'var(--accent)'}},v[0]),h('td',null,v[1]))))));}
+
+function RegRef(){const cfg=useCfg();return h('div',null,h('h2',null,'Regulatory Framework'),
+h('table',null,h('thead',null,h('tr',null,h('th',null,'Regulation'),h('th',null,'Jurisdiction'),h('th',null,cfg.friendly?'What It Covers':'Scope'),h('th',null,'Key Requirement'))),h('tbody',null,
+h('tr',null,h('td',null,'Basel III / CRR3'),h('td',null,'Global / EU'),h('td',null,'Bank capital adequacy'),h('td',null,'Min capital ratios, leverage ratio, LCR')),
+h('tr',null,h('td',null,'FRTB (Basel 3.1)'),h('td',null,'Global'),h('td',null,'Market risk capital'),h('td',null,'ES-based IMA, SA with sensitivities')),
+h('tr',null,h('td',null,'CCAR / DFAST'),h('td',null,'US'),h('td',null,'Stress testing'),h('td',null,'Annual Fed stress test, capital planning')),
+h('tr',null,h('td',null,'SR 11-7'),h('td',null,'US'),h('td',null,'Model risk management'),h('td',null,'Model validation, governance, inventory')),
+h('tr',null,h('td',null,'SS1/23'),h('td',null,'UK'),h('td',null,'Model risk management'),h('td',null,'PRA model risk principles')),
+h('tr',null,h('td',null,'IFRS 9'),h('td',null,'Global'),h('td',null,'Expected credit losses'),h('td',null,'Forward-looking ECL estimation')),
+h('tr',null,h('td',null,'Dodd-Frank'),h('td',null,'US'),h('td',null,'Financial reform'),h('td',null,'Volcker Rule, clearing mandates')),
+h('tr',null,h('td',null,'EMIR'),h('td',null,'EU'),h('td',null,'OTC derivatives'),h('td',null,'Central clearing, trade reporting')),
+h('tr',null,h('td',null,'MiFID II'),h('td',null,'EU'),h('td',null,'Markets regulation'),h('td',null,'Transparency, best execution')),
+h('tr',null,h('td',null,'SA-CCR'),h('td',null,'Global'),h('td',null,'Counterparty credit risk'),h('td',null,'Replacement cost + PFE')))));}
+
+function RealWorld(){const cfg=useCfg();return h('div',null,h('h2',null,cfg.friendly?'Lessons from History':'Historical Case Studies'),
+h(Expand,{title:'1987 Black Monday — Portfolio Insurance Failure'},h('p',null,'On Oct 19 1987 the Dow fell 22.6% in one day. Portfolio insurance (dynamic hedging via futures) created a feedback loop: falling prices triggered selling, pushing prices lower.'),
+h('ul',null,h('li',null,'All correlations went to 1'),h('li',null,'VaR models showed zero probability of a 22% move'),h('li',null,'Led to circuit breakers and endogenous risk awareness'))),
+h(Expand,{title:'1998 LTCM — Convergence Trade Blowup'},h('p',null,'LTCM leveraged 25:1 on convergence trades. When Russia defaulted all spreads widened simultaneously. Their VaR model assumed calm-market correlations would hold.'),
+h('ul',null,h('li',null,'Leverage amplifies losses non-linearly'),h('li',null,'Liquidity vanishes when you need it most'),h('li',null,'Calm-period calibration fails in crises'))),
+h(Expand,{title:'2008 Global Financial Crisis'},h('p',null,'CDOs got AAA ratings based on Gaussian copula models that assumed housing prices could not fall nationally. The correlation assumptions were wrong.'),
+h('ul',null,h('li',null,'Wrong distributional assumptions destroyed hundreds of billions'),h('li',null,'Tail correlation spiked to near 1'),h('li',null,'Led to Basel III, FRTB, modern stress testing'))),
+h(Expand,{title:'2012 London Whale — VaR Model Gaming'},h('p',null,'JPMorgan CIO desk modified their VaR model to halve reported risk. Old model: $132M VaR, new model: $67M. Actual losses exceeded $6 billion.'),
+h('ul',null,h('li',null,'Model risk includes deliberate manipulation'),h('li',null,'Independent validation is essential'),h('li',null,'Led to SR 11-7 enforcement'))),
+h(Expand,{title:'2021 Archegos — Concentrated Swap Positions'},h('p',null,'Archegos used total return swaps to build concentrated positions invisible to prime brokers. Unwinding caused $10B+ in bank losses.'),
+h('ul',null,h('li',null,'Concentration risk beyond single-name limits'),h('li',null,'Opaque OTC positions hide total exposure'),h('li',null,'Multiple PB structure prevented risk aggregation'))));}
+
+// ── Main App ────────────────────────────────────────────────────────
+const SECTIONS=[
+{id:'theory',label:'Theory',icon:'📐',comp:SecTheory},
+{id:'topdown',label:'Top-Down',icon:'🔭',comp:SecTopDown},
+{id:'bottomup',label:'Bottom-Up',icon:'🔬',comp:SecBottomUp},
+{id:'var',label:'VaR & ES',icon:'📉',comp:SecVaR},
+{id:'stress',label:'Stress Testing',icon:'🌪️',comp:SecStress},
+{id:'decomp',label:'Decomposition',icon:'🧩',comp:SecDecomp},
+{id:'validation',label:'Validation',icon:'✅',comp:SecValidation},
+{id:'advanced',label:'Advanced',icon:'🚀',comp:SecAdvanced},
+{id:'calcs',label:'Calculators',icon:'🧮',comp:SecCalcs},
+{id:'ref',label:'Reference',icon:'📚',comp:SecRef}
+];
+
+function App(){
+const[cfg,setCfg]=useState({theme:'dark',friendly:true,showMath:true,showDerivations:false,autoCalc:true,animateCharts:true,showChartTools:false,difficulty:'standard'});
+const[secIdx,setSecIdx]=useState(0);
+const[sideOpen,setSideOpen]=useState(true);
+const[settingsOpen,setSettingsOpen]=useState(false);
+const[search,setSearch]=useState('');
+const[searchOpen,setSearchOpen]=useState(false);
+const[breadcrumb,setBreadcrumb]=useState(['Home','Theory']);
+
+const update=(k,v)=>{const nc={...cfg,[k]:v};setCfg(nc);if(k==='theme')document.documentElement.setAttribute('data-theme',v);};
+
+useEffect(()=>{document.documentElement.setAttribute('data-theme',cfg.theme);},[]);
+
+// Keyboard shortcuts
+useEffect(()=>{const handler=e=>{
+if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();setSearchOpen(o=>!o);}
+if(e.key==='Escape'){setSearchOpen(false);setSettingsOpen(false);}
+if((e.ctrlKey||e.metaKey)&&e.key==='b'){e.preventDefault();setSideOpen(o=>!o);}
+};window.addEventListener('keydown',handler);return()=>window.removeEventListener('keydown',handler);},[]);
+
+const nav=i=>{setSecIdx(i);setBreadcrumb(['Home',SECTIONS[i].label]);setSearchOpen(false);setSearch('');};
+
+const filteredSections=search?SECTIONS.filter(s=>s.label.toLowerCase().includes(search.toLowerCase())):SECTIONS;
+
+const CurSection=SECTIONS[secIdx].comp;
+
+return h(Ctx.Provider,{value:{...cfg,update}},
+// Settings overlay
+settingsOpen&&h('div',{className:'settings-overlay',onClick:e=>{if(e.target===e.currentTarget)setSettingsOpen(false);}},
+h(SettingsPanel,{onClose:()=>setSettingsOpen(false)})),
+
+// Search overlay
+searchOpen&&h('div',{className:'settings-overlay',onClick:e=>{if(e.target===e.currentTarget)setSearchOpen(false);}},
+h('div',{style:{background:'var(--bg1)',border:'1px solid var(--border)',borderRadius:12,padding:20,width:500,maxWidth:'90vw'}},
+h('input',{type:'text',placeholder:'Search sections... (Esc to close)',value:search,onChange:e=>setSearch(e.target.value),autoFocus:true,style:{width:'100%',padding:12,fontSize:16,background:'var(--bg2)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',marginBottom:12}}),
+h('div',null,filteredSections.map(s=>{const idx=SECTIONS.indexOf(s);return h('div',{key:s.id,onClick:()=>nav(idx),style:{padding:'10px 14px',cursor:'pointer',borderRadius:8,display:'flex',alignItems:'center',gap:10,background:idx===secIdx?'rgba(59,130,246,.1)':'transparent'}},
+h('span',{style:{fontSize:18}},s.icon),h('span',{style:{color:'var(--text)'}},s.label));})))),
+
+// Layout
+h('div',{className:'app'},
+// Sidebar
+h('aside',{className:'sidebar'+(sideOpen?'':' collapsed')},
+h('div',{className:'sidebar-head'},
+h('div',{className:'sidebar-brand'},
+h('span',{style:{fontSize:20}},'📊'),
+h('div',null,h('div',{className:'logo'},'RFMP'),h('div',{className:'logo-sub'},'Risk Factor Platform v2'))),
+h('button',{className:'sidebar-close',onClick:()=>setSideOpen(false)},'✕')),
+h('nav',{className:'sidebar-nav'},SECTIONS.map((s,i)=>h('div',{key:s.id,className:'nav-group'},
+h('button',{className:'nav-btn'+(i===secIdx?' active':''),onClick:()=>nav(i)},
+h('span',{className:'nav-num'},(i+1<10?'0':'')+(i+1)),h('span',{className:'nav-icon'},s.icon),h('span',null,s.label))))),
+h('div',{className:'sidebar-foot'},
+h('button',{className:'btn btn-sm btn-outline',onClick:()=>setSettingsOpen(true)},'⚙️ Settings'),
+h('button',{className:'btn btn-sm btn-outline',onClick:()=>update('theme',cfg.theme==='dark'?'light':'dark')},cfg.theme==='dark'?'☀️ Light':'🌙 Dark'))),
+
+// Main
+h('div',{className:'main'},
+// Topbar
+h('header',{className:'topbar'},
+!sideOpen&&h('button',{className:'tb-btn',onClick:()=>setSideOpen(true),title:'Open sidebar (Ctrl+B)'},'☰'),
+h('div',{className:'crumbs'},h('b',null,'Home'),h('span',{className:'sep'},'›'),h('b',null,SECTIONS[secIdx].label)),
+h('div',{className:'tb-right'},
+h('button',{className:'btn btn-sm btn-ghost',onClick:()=>setSearchOpen(true),title:'Search (Ctrl+K)'},'🔍 Ctrl+K'),
+h(DifficultySelector),
+h('button',{className:'btn btn-sm btn-ghost',onClick:()=>update('friendly',!cfg.friendly),title:'Toggle friendly mode'},cfg.friendly?'💬 Friendly':'📝 Technical'),
+h('button',{className:'btn btn-sm btn-ghost',onClick:()=>setSettingsOpen(true)},'⚙️'))),
+
+// Content
+h('div',{className:'content'},h(CurSection)),
+
+// Footer
+h('footer',{className:'footer'},
+h('span',null,'Risk Factor Modeling Platform v2.0'),
+h('span',null,'·'),
+h('span',null,cfg.difficulty.charAt(0).toUpperCase()+cfg.difficulty.slice(1)+' Mode'),
+h('span',null,'·'),
+h('span',null,cfg.friendly?'Friendly ON':'Technical'),
+h('span',null,'·'),
+h('span',null,Object.keys(G).length+' terms'),
+h('span',null,'·'),
+h('span',null,'Ctrl+K Search · Ctrl+B Sidebar')))));}
+
+// ── Mount ───────────────────────────────────────────────────────────
+const root=ReactDOM.createRoot(document.getElementById('root'));
+root.render(h(App));
+
+</script>
+</body>
+</html>
