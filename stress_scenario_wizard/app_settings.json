@@ -1,0 +1,29 @@
+{
+  "root_path": "stress_outputs",
+  "autosave_enabled": true,
+  "autosave_interval_seconds": 180,
+  "ai_narrative_enabled": false,
+  "ai_provider": "OPENAI",
+  "ai_model": "gpt-4o-mini",
+  "save_last_session": true,
+  "governance": {
+    "mode": "MANDATORY",
+    "mandatory_export_approval": true,
+    "severe_requires_cro": true,
+    "pnl_threshold_for_senior_routing": 10000000.0,
+    "approval_expiry_days": 30,
+    "reminder_hours": 24,
+    "escalation_hours": 48,
+    "response_method": "IN_APP",
+    "approval_rule_default": "UNANIMOUS"
+  },
+  "email": {
+    "mode": "DISABLED",
+    "smtp_server": "smtp.example.com",
+    "smtp_port": 587,
+    "smtp_tls": true,
+    "smtp_user": "",
+    "smtp_password_key": "stress_wizard.smtp.password",
+    "draft_mode": true
+  }
+}

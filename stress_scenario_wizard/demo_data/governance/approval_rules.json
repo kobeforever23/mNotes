@@ -1,0 +1,25 @@
+{
+  "mandatory_approval_for_export": true,
+  "severity_requirements": {
+    "Moderate": ["Desk Head"],
+    "Severe": ["Desk Head", "Risk Manager"],
+    "Extreme": ["CRO", "Risk Manager"]
+  },
+  "conditional_routing": {
+    "pnl_threshold": 10000000,
+    "auto_add_role": "Senior Management",
+    "auto_add_email": "senior.management@bank.com"
+  },
+  "expiration_policy_days": 30,
+  "reapproval_triggers": [
+    "shock_change",
+    "narrative_change",
+    "calibration_change"
+  ],
+  "compliance_hold": {
+    "enabled": true,
+    "release_role": "Compliance Officer"
+  },
+  "reminder_hours": 24,
+  "escalation_hours": 48
+}

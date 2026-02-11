@@ -1,0 +1,7 @@
+{
+  "python_core": "OK",
+  "plotly": "OK",
+  "pyside6": "FAIL: No module named 'PySide6'",
+  "calc_and_governance": "OK",
+  "demo_files": "OK"
+}

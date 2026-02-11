@@ -1,0 +1,19 @@
+[
+  {
+    "name": "Stress Testing Committee",
+    "members": [
+      {"name": "Jane Smith", "email": "jane.smith@bank.com", "role": "Approver"},
+      {"name": "Mark Jones", "email": "mark.jones@bank.com", "role": "Approver"},
+      {"name": "Desk Heads", "email": "desk.heads@bank.com", "role": "Reviewer"},
+      {"name": "Compliance Archive", "email": "compliance.archive@bank.com", "role": "FYI"},
+      {"name": "CRO Escalation", "email": "cro.office@bank.com", "role": "Escalation"}
+    ]
+  },
+  {
+    "name": "Model Validation",
+    "members": [
+      {"name": "Model Validation Lead", "email": "mv.lead@bank.com", "role": "Approver"},
+      {"name": "Model Risk Reviewer", "email": "mrm.review@bank.com", "role": "Reviewer"}
+    ]
+  }
+]
