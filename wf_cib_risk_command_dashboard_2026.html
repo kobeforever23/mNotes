@@ -1,0 +1,2817 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wells-Style CIB Risk Command Dashboard | Executive Edition 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a1628;
+      --bg-2: #0f1d33;
+      --panel: #1a2332;
+      --panel-2: #121b2b;
+      --line: rgba(255, 255, 255, 0.08);
+      --line-strong: rgba(255, 255, 255, 0.18);
+      --text: #e0e8f0;
+      --muted: #9fb0c4;
+      --white: #ffffff;
+      --good: #00c896;
+      --good-soft: rgba(0, 200, 150, 0.2);
+      --amber: #f5a623;
+      --amber-soft: rgba(245, 166, 35, 0.2);
+      --bad: #e74c3c;
+      --bad-soft: rgba(231, 76, 60, 0.2);
+      --blue: #55b4ff;
+      --mono: "Space Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+      --body: "DM Sans", "Segoe UI", sans-serif;
+      --shadow: 0 18px 50px rgba(2, 8, 18, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background:
+        radial-gradient(1100px 500px at 115% -15%, rgba(85, 180, 255, 0.18), transparent 60%),
+        radial-gradient(900px 420px at -15% -20%, rgba(0, 200, 150, 0.14), transparent 55%),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      min-height: 100%;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 310px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: linear-gradient(180deg, rgba(10, 22, 40, 0.98), rgba(15, 29, 51, 0.98));
+      border-right: 1px solid var(--line);
+      padding: 18px 16px 28px;
+    }
+
+    .brand {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 12px 12px 14px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+
+    .brand .kicker {
+      font-size: 11px;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: var(--blue);
+      font-weight: 700;
+    }
+
+    .brand h1 {
+      margin: 8px 0 6px;
+      font-size: 21px;
+      line-height: 1.15;
+      color: var(--white);
+      letter-spacing: 0.01em;
+    }
+
+    .brand .sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .asof {
+      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: #c7d6e6;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+      margin: 10px 0 14px;
+    }
+
+    .nav button {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.02);
+      color: #d6e1ed;
+      border-radius: 10px;
+      padding: 10px 11px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .nav button:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--line-strong);
+    }
+
+    .nav button.active {
+      border-color: rgba(85, 180, 255, 0.7);
+      background: linear-gradient(90deg, rgba(85, 180, 255, 0.16), rgba(85, 180, 255, 0.05));
+      color: var(--white);
+    }
+
+    .controls {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    .controls h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: #d6e1ed;
+      letter-spacing: 0.02em;
+    }
+
+    .control {
+      margin-bottom: 11px;
+    }
+
+    .control label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 5px;
+      gap: 8px;
+    }
+
+    .control .val {
+      color: #d7ebff;
+      font-family: var(--mono);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    input[type="number"],
+    input[type="text"],
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(12, 23, 39, 0.85);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 9px;
+      font: inherit;
+      font-size: 12px;
+    }
+
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .side-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      border: 1px solid var(--line-strong);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--white);
+      padding: 8px 9px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(85, 180, 255, 0.65);
+      background: rgba(85, 180, 255, 0.14);
+    }
+
+    .btn.wide {
+      grid-column: 1 / -1;
+    }
+
+    .main {
+      padding: 16px 18px 24px;
+      overflow-x: hidden;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: linear-gradient(180deg, rgba(10, 22, 40, 0.96), rgba(10, 22, 40, 0.65));
+      backdrop-filter: blur(8px);
+      margin: -16px -18px 12px;
+      padding: 16px 18px 13px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(140px, 1fr));
+      gap: 8px;
+    }
+
+    .kpi {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 10px;
+      padding: 9px;
+      min-height: 70px;
+    }
+
+    .kpi .name {
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .kpi .value {
+      font-family: var(--mono);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.1;
+    }
+
+    .kpi .delta {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #c5d4e3;
+    }
+
+    .delta.good {
+      color: var(--good);
+    }
+
+    .delta.warn {
+      color: var(--amber);
+    }
+
+    .delta.bad {
+      color: var(--bad);
+    }
+
+    .tab {
+      display: none;
+      animation: fadeIn 0.28s ease;
+    }
+
+    .tab.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(26, 35, 50, 0.98), rgba(18, 27, 43, 0.97));
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .section h2 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0.01em;
+      color: var(--white);
+    }
+
+    .section .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 10px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .plot {
+      width: 100%;
+      min-height: 320px;
+    }
+
+    .plot.small {
+      min-height: 260px;
+    }
+
+    .metric-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .metric-row {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 8px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .metric-row .label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .metric-row .val {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--white);
+      font-weight: 700;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 7px;
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 10px;
+      border: 1px solid var(--line);
+      color: #cde0f4;
+      background: rgba(255, 255, 255, 0.04);
+      white-space: nowrap;
+    }
+
+    .pill.good {
+      color: var(--good);
+      border-color: rgba(0, 200, 150, 0.5);
+      background: var(--good-soft);
+    }
+
+    .pill.warn {
+      color: var(--amber);
+      border-color: rgba(245, 166, 35, 0.5);
+      background: var(--amber-soft);
+    }
+
+    .pill.bad {
+      color: var(--bad);
+      border-color: rgba(231, 76, 60, 0.5);
+      background: var(--bad-soft);
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(8, 18, 32, 0.7);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      min-width: 1080px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 7px 7px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: rgba(18, 27, 43, 0.98);
+      color: #d7e5f5;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    tbody tr:hover {
+      background: rgba(85, 180, 255, 0.09);
+    }
+
+    td input,
+    td select {
+      min-width: 90px;
+      padding: 6px 6px;
+      font-size: 11px;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr) auto;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .alert {
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      font-size: 12px;
+      line-height: 1.45;
+      background: rgba(255, 255, 255, 0.03);
+      color: #d3e0ef;
+    }
+
+    .alert.warn {
+      border-color: rgba(245, 166, 35, 0.5);
+      background: rgba(245, 166, 35, 0.12);
+    }
+
+    .alert.bad {
+      border-color: rgba(231, 76, 60, 0.5);
+      background: rgba(231, 76, 60, 0.12);
+    }
+
+    .alert.good {
+      border-color: rgba(0, 200, 150, 0.5);
+      background: rgba(0, 200, 150, 0.12);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 7px;
+    }
+
+    .list li {
+      border: 1px solid var(--line);
+      padding: 8px;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.03);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .list li .ttl {
+      color: var(--white);
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .source-table table {
+      min-width: 100%;
+    }
+
+    .source-table a {
+      color: #87cbff;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .source-table a:hover {
+      text-decoration: underline;
+    }
+
+    .footer-note {
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .context-menu {
+      position: fixed;
+      min-width: 180px;
+      border: 1px solid var(--line-strong);
+      background: rgba(14, 22, 35, 0.98);
+      border-radius: 9px;
+      box-shadow: var(--shadow);
+      z-index: 200;
+      overflow: hidden;
+      display: none;
+    }
+
+    .context-menu button {
+      width: 100%;
+      text-align: left;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .context-menu button:hover {
+      background: rgba(85, 180, 255, 0.18);
+    }
+
+    .mono {
+      font-family: var(--mono);
+    }
+
+    @media (max-width: 1500px) {
+      .kpi-grid {
+        grid-template-columns: repeat(4, minmax(140px, 1fr));
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+
+      .grid-2,
+      .split {
+        grid-template-columns: 1fr;
+      }
+
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+
+      .filters {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="appRoot">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="kicker">Executive Risk Command Center</div>
+        <h1>CIB Risk Dashboard</h1>
+        <p class="sub">Built for Head of CIB Risk and Head of CIB Portfolio Risk. Seeded with latest public Wells-style CIB data and Fed stress assumptions.</p>
+        <div class="asof" id="globalAsOf">Data snapshot: 2026-02-12</div>
+      </div>
+
+      <nav class="nav" id="navTabs">
+        <button data-tab="overview" class="active">01 Command Overview</button>
+        <button data-tab="portfolio">02 Portfolio Credit Risk</button>
+        <button data-tab="market">03 Market + Counterparty</button>
+        <button data-tab="stress">04 Stress + Capital Lab</button>
+        <button data-tab="functions">05 Risk Function Map</button>
+        <button data-tab="board">06 Board Pack Generator</button>
+      </nav>
+
+      <section class="controls">
+        <h3>Scale + Scenario Controls</h3>
+
+        <div class="control">
+          <label for="scenarioSelect">Active scenario <span class="val" id="scenarioNameLabel">Severe Adverse</span></label>
+          <select id="scenarioSelect"></select>
+        </div>
+
+        <div class="control">
+          <label for="enterpriseFte">Enterprise FTE (supports 250k+) <span class="val" id="enterpriseFteVal">216,906</span></label>
+          <input id="enterpriseFte" type="range" min="25000" max="300000" step="1000" />
+        </div>
+
+        <div class="control">
+          <label for="cibSharePct">CIB share of enterprise FTE <span class="val" id="cibShareVal">8.7%</span></label>
+          <input id="cibSharePct" type="range" min="3" max="25" step="0.1" />
+        </div>
+
+        <div class="control">
+          <label for="pdMultiplier">PD stress multiplier <span class="val" id="pdMultiplierVal">2.40x</span></label>
+          <input id="pdMultiplier" type="range" min="0.8" max="3.5" step="0.05" />
+        </div>
+
+        <div class="control">
+          <label for="lgdAdd">LGD add-on (pp) <span class="val" id="lgdAddVal">18 pp</span></label>
+          <input id="lgdAdd" type="range" min="0" max="35" step="1" />
+        </div>
+
+        <div class="control">
+          <label for="varMult">Market loss multiplier <span class="val" id="varMultVal">2.80x</span></label>
+          <input id="varMult" type="range" min="1" max="4.5" step="0.05" />
+        </div>
+
+        <div class="control">
+          <label for="rwaInflation">Stress RWA inflation <span class="val" id="rwaInflationVal">16%</span></label>
+          <input id="rwaInflation" type="range" min="0" max="35" step="1" />
+        </div>
+
+        <div class="control">
+          <label for="discountRate">Discount rate for NPV <span class="val" id="discountRateVal">10%</span></label>
+          <input id="discountRate" type="range" min="0" max="18" step="0.5" />
+        </div>
+
+        <label class="check-row"><input id="autoScale" type="checkbox" /> Auto-scale exposure and limits when FTE changes</label>
+      </section>
+
+      <div class="side-actions">
+        <button class="btn" id="saveStateBtn">Save Local</button>
+        <button class="btn" id="loadStateBtn">Load Local</button>
+        <button class="btn" id="undoBtn">Undo</button>
+        <button class="btn" id="redoBtn">Redo</button>
+        <button class="btn" id="importPortfolioBtn">Import CSV</button>
+        <button class="btn" id="exportPortfolioBtn">Export CSV</button>
+        <button class="btn" id="exportPngBtn">Export PNG</button>
+        <button class="btn" id="exportPdfBtn">Export PDF</button>
+        <button class="btn wide" id="printBtn">Print Active View</button>
+        <button class="btn wide" id="resetBtn">Reset to Baseline</button>
+        <input id="csvFileInput" type="file" accept=".csv" class="hidden" />
+      </div>
+
+      <div class="footer-note">
+        Responsible transition and governance note: This tool supports decision-grade planning, not automatic decisions. Major risk actions should be validated through formal governance, model risk review, legal review, and regulator-facing documentation.
+      </div>
+    </aside>
+
+    <main class="main" id="mainContent">
+      <header class="topbar">
+        <div class="kpi-grid" id="kpiGrid"></div>
+      </header>
+
+      <section class="tab active" id="tab-overview">
+        <div class="section">
+          <div class="section-header">
+            <div>
+              <h2>CIB War Board: Risk-Weighted Portfolio Map</h2>
+              <p class="hint">Treemap sized by exposure and colored by composite risk intensity (credit + market + concentration + quality).</p>
+            </div>
+            <div class="pill" id="overviewScaleTag">Scale factor 1.00x</div>
+          </div>
+          <div id="treemapPlot" class="plot"></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="section">
+            <div class="section-header">
+              <h2>Market and Funding Tape (Public Data)</h2>
+              <p class="hint">Latest available official observations, timestamped.</p>
+            </div>
+            <div class="table-wrap">
+              <table id="marketTapeTable">
+                <thead>
+                  <tr>
+                    <th>Indicator</th>
+                    <th>Value</th>
+                    <th>As Of</th>
+                    <th>Signal</th>
+                    <th>Source</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-header">
+              <h2>Immediate CRO Priorities (30 Days)</h2>
+              <p class="hint">Auto-ranked actions based on current utilization and stress sensitivity.</p>
+            </div>
+            <ul class="list" id="priorityActions"></ul>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="section">
+            <div class="section-header">
+              <h2>Revenue and Loss Context</h2>
+              <p class="hint">CIB quarterly economics vs expected and stressed losses.</p>
+            </div>
+            <canvas id="revLossChart" height="190"></canvas>
+          </div>
+
+          <div class="section">
+            <div class="section-header">
+              <h2>Risk Posture Summary</h2>
+              <p class="hint">Key risk and capital diagnostics for Head of CIB Risk.</p>
+            </div>
+            <div class="metric-list" id="riskPostureList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab" id="tab-portfolio">
+        <div class="section">
+          <div class="section-header">
+            <div>
+              <h2>Granular Portfolio Table (Editable)</h2>
+              <p class="hint">Right-click a row for quick priority/watchlist actions. All edits recalculate in real time.</p>
+            </div>
+            <div class="pill" id="portfolioRowCount">0 desks</div>
+          </div>
+
+          <div class="filters">
+            <input id="portfolioSearch" type="text" placeholder="Search desk / owner / action" />
+            <select id="portfolioLobFilter">
+              <option value="all">All LOBs</option>
+            </select>
+            <select id="portfolioPriorityFilter">
+              <option value="all">All priorities</option>
+              <option value="P1">P1</option>
+              <option value="P2">P2</option>
+              <option value="P3">P3</option>
+            </select>
+            <select id="portfolioRiskFilter">
+              <option value="all">All risk levels</option>
+              <option value="critical">Critical (80+)</option>
+              <option value="high">High (65-79)</option>
+              <option value="moderate">Moderate (50-64)</option>
+              <option value="low">Low (&lt;50)</option>
+            </select>
+            <button class="btn" id="addPortfolioRowBtn">Add Desk</button>
+          </div>
+
+          <div class="table-wrap">
+            <table id="portfolioTable">
+              <thead>
+                <tr>
+                  <th>LOB</th>
+                  <th>Desk / Portfolio</th>
+                  <th>EAD ($Bn)</th>
+                  <th>PD %</th>
+                  <th>LGD %</th>
+                  <th>Criticized %</th>
+                  <th>Nonaccrual %</th>
+                  <th>1D VaR ($MM)</th>
+                  <th>VaR Limit ($MM)</th>
+                  <th>NCO ($MM)</th>
+                  <th>RWA Density %</th>
+                  <th>Priority</th>
+                  <th>Owner</th>
+                  <th>Action</th>
+                  <th>EL ($MM)</th>
+                  <th>Risk Score</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="section">
+            <div class="section-header">
+              <h2>Credit Quality Heat by Desk</h2>
+              <p class="hint">PD x LGD vs criticized/nonaccrual intensity.</p>
+            </div>
+            <div id="creditHeatPlot" class="plot small"></div>
+          </div>
+
+          <div class="section">
+            <div class="section-header">
+              <h2>Concentration and Expected Loss</h2>
+              <p class="hint">Top expected-loss contributors, ranked for portfolio risk decisions.</p>
+            </div>
+            <div id="concentrationPlot" class="plot small"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab" id="tab-market">
+        <div class="grid-2">
+          <div class="section">
+            <div class="section-header">
+              <h2>Counterparty Risk Map</h2>
+              <p class="hint">Bubble size = EAD, X = utilization, Y = wrong-way risk score.</p>
+            </div>
+            <div id="counterpartyBubble" class="plot"></div>
+          </div>
+
+          <div class="section">
+            <div class="section-header">
+              <h2>Limit Framework and Breaches</h2>
+              <p class="hint">Traffic-light thresholds with owner and remediation requirement.</p>
+            </div>
+            <div class="table-wrap">
+              <table id="limitTable">
+                <thead>
+                  <tr>
+                    <th>Metric</th>
+                    <th>Current</th>
+                    <th>Amber</th>
+                    <th>Red</th>
+                    <th>Status</th>
+                    <th>Owner</th>
+                    <th>Commentary</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="section">
+            <div class="section-header">
+              <h2>VaR and sVaR Utilization Trend</h2>
+              <p class="hint">Quarterly path under current assumptions.</p>
+            </div>
+            <canvas id="varTrendChart" height="190"></canvas>
+          </div>
+
+          <div class="section">
+            <div class="section-header">
+              <h2>Counterparty Watchlist</h2>
+              <p class="hint">Focused list for Head of CIB Portfolio Risk daily call.</p>
+            </div>
+            <div class="table-wrap">
+              <table id="counterpartyTable">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Rating</th>
+                    <th>EAD ($MM)</th>
+                    <th>PFE95 ($MM)</th>
+                    <th>Util %</th>
+                    <th>WWR</th>
+                    <th>Collateral</th>
+                    <th>Flag</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab" id="tab-stress">
+        <div class="section">
+          <div class="section-header">
+            <h2>Scenario Engine and Capital Trajectory</h2>
+            <p class="hint">Severe adverse anchored to Fed 2026 supervisory parameters; scenario assumptions are editable.</p>
+          </div>
+          <div class="split">
+            <div>
+              <div id="capitalTrajectoryPlot" class="plot small"></div>
+            </div>
+            <div>
+              <div id="stressWaterfallPlot" class="plot small"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="section">
+            <div class="section-header">
+              <h2>Scenario Comparison Matrix</h2>
+              <p class="hint">Compare expected loss, capital hit, and headroom by strategy posture.</p>
+            </div>
+            <div class="table-wrap">
+              <table id="scenarioTable">
+                <thead>
+                  <tr>
+                    <th>Scenario</th>
+                    <th>Credit Loss ($Bn)</th>
+                    <th>Market+CCR Loss ($Bn)</th>
+                    <th>Total Pre-Tax Loss ($Bn)</th>
+                    <th>Stressed CET1 %</th>
+                    <th>Headroom vs 8.5% (bp)</th>
+                    <th>Risk Call</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-header">
+              <h2>Monte Carlo Distribution (1,000 Runs)</h2>
+              <p class="hint">Assumptions varied ±20%. Output shows P10 / P50 / P90 net capital impact.</p>
+            </div>
+            <div id="monteCarloPlot" class="plot small"></div>
+            <div class="alert" id="monteCarloSummary"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab" id="tab-functions">
+        <div class="grid-2">
+          <div class="section">
+            <div class="section-header">
+              <h2>Risk Function Ownership Map</h2>
+              <p class="hint">Operating model map for Head of CIB Risk and direct reports.</p>
+            </div>
+            <div class="table-wrap">
+              <table id="functionMapTable">
+                <thead>
+                  <tr>
+                    <th>Function</th>
+                    <th>Primary Owner</th>
+                    <th>Core KPI</th>
+                    <th>Target</th>
+                    <th>Status</th>
+                    <th>Cadence</th>
+                    <th>Escalation Trigger</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-header">
+              <h2>90-Day Execution Plan</h2>
+              <p class="hint">Cross-stripe initiatives with dependencies and accountable executives.</p>
+            </div>
+            <div id="ganttPlot" class="plot"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header">
+            <h2>Governance and Ethical Risk Notes</h2>
+            <p class="hint">Regulatory, legal, and reputational controls to maintain.</p>
+          </div>
+          <div class="split">
+            <div class="alert warn">
+              <strong>Regulatory posture:</strong> Major concentration or strategy shifts should be run through SR 11-7 model risk governance, formal limit governance, and documented challenge.
+            </div>
+            <div class="alert bad">
+              <strong>Conduct and fairness risk:</strong> Counterparty decisions and portfolio de-risking actions require consistent criteria and adverse-impact review to avoid unintentional bias or reputation damage.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab" id="tab-board">
+        <div class="section">
+          <div class="section-header">
+            <h2>Executive Narrative Generator</h2>
+            <p class="hint">One-click board-ready summary and talking points, tied to current scenario.</p>
+          </div>
+          <textarea id="boardNarrative"></textarea>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px;">
+            <button class="btn" id="regenNarrativeBtn">Regenerate Narrative</button>
+            <button class="btn" id="copyNarrativeBtn">Copy Narrative</button>
+            <button class="btn" id="downloadBriefBtn">Download .txt Brief</button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="section">
+            <div class="section-header">
+              <h2>Board Q&A Prep</h2>
+              <p class="hint">Likely board and regulator questions with suggested responses.</p>
+            </div>
+            <ul class="list" id="qaList"></ul>
+          </div>
+
+          <div class="section">
+            <div class="section-header">
+              <h2>Source Provenance and Confidence</h2>
+              <p class="hint">Traceability for every seeded external number.</p>
+            </div>
+            <div class="table-wrap source-table">
+              <table id="sourceTable">
+                <thead>
+                  <tr>
+                    <th>Data Point</th>
+                    <th>Value</th>
+                    <th>As Of</th>
+                    <th>Confidence</th>
+                    <th>Source</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="contextMenu" class="context-menu">
+    <button data-action="p1">Set Priority P1</button>
+    <button data-action="p2">Set Priority P2</button>
+    <button data-action="p3">Set Priority P3</button>
+    <button data-action="watch">Toggle Watchlist Flag</button>
+    <button data-action="duplicate">Duplicate Desk Row</button>
+    <button data-action="delete">Delete Desk Row</button>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "wf_cib_risk_dashboard_exec_2026_v1";
+    const TODAY = "2026-02-12";
+
+    const DEFAULT_STATE = {
+      metadata: {
+        institutionName: "Wells-Style CIB (Public Data Seed)",
+        dataSnapshotDate: TODAY,
+        enterpriseFTE: 216906,
+        cibSharePct: 8.7,
+        autoScale: true,
+        lastScenarioKey: "severe_adverse"
+      },
+      regulatory: {
+        companyCet1RatioPct: 10.6,
+        companyRwaBn: 1293.4,
+        requiredCet1MinPct: 8.5,
+        managementBufferBps: 120,
+        lcrPct: 121,
+        nsfrPct: 116,
+        scbPct: 2.5,
+        gsibPct: 1.5,
+        asOf: "2025-12-31"
+      },
+      cibPublics: {
+        qtrRevenueBn: 4.616,
+        qtrNetIncomeBn: 1.639,
+        avgLoansBn: 312.866,
+        loansBn: 333.509,
+        depositsBn: 224.146,
+        tradingAssetsBn: 398.491,
+        ncoMm: 450,
+        provisionMm: 74,
+        aclMm: 4228,
+        npaMm: 3973,
+        asOf: "2025-12-31"
+      },
+      assumptions: {
+        pdStressMultiplier: 2.4,
+        lgdAddPp: 18,
+        marketLossMultiplier: 2.8,
+        ccrShockMultiplier: 1.8,
+        rwaInflationPct: 16,
+        fundingSpreadShockBps: 55,
+        discountRatePct: 10,
+        taxRatePct: 24,
+        monteCarloRuns: 1000
+      },
+      scenarios: [
+        { key: "baseline", name: "Baseline / Current Trend", pdMult: 1.0, lgdAdd: 0, marketMult: 1.0, ccrMult: 1.0, rwaInfl: 2, fundingBps: 15, note: "Soft landing with manageable spread volatility." },
+        { key: "adverse", name: "Adverse / Credit Re-Widening", pdMult: 1.6, lgdAdd: 8, marketMult: 1.7, ccrMult: 1.3, rwaInfl: 8, fundingBps: 35, note: "Growth downshift with persistent spread pressure." },
+        { key: "severe_adverse", name: "Severe Adverse (Fed 2026-style)", pdMult: 2.4, lgdAdd: 18, marketMult: 2.8, ccrMult: 1.8, rwaInfl: 16, fundingBps: 55, note: "Anchored to Fed severe adverse path (equities -58%, CRE -39%, unemployment shock)." },
+        { key: "idiosyncratic", name: "Idiosyncratic Counterparty Event", pdMult: 1.25, lgdAdd: 6, marketMult: 2.1, ccrMult: 3.0, rwaInfl: 6, fundingBps: 40, note: "Large counterparty default + volatility spike without full macro recession." },
+        { key: "custom", name: "Custom", pdMult: 2.4, lgdAdd: 18, marketMult: 2.8, ccrMult: 1.8, rwaInfl: 16, fundingBps: 55, note: "Editable live with control sliders." }
+      ],
+      marketTape: [
+        { id: "SOFR", label: "SOFR", value: 3.65, unit: "%", asOf: "2026-02-11", signal: "neutral", source: "FRED / NY Fed" },
+        { id: "EFFR", label: "EFFR", value: 3.64, unit: "%", asOf: "2026-02-10", signal: "neutral", source: "FRED / NY Fed" },
+        { id: "UST10", label: "UST 10Y", value: 4.16, unit: "%", asOf: "2026-02-10", signal: "watch", source: "FRED / Treasury" },
+        { id: "VIX", label: "VIX", value: 17.79, unit: "idx", asOf: "2026-02-10", signal: "watch", source: "FRED / Cboe" },
+        { id: "IGOAS", label: "US IG OAS", value: 0.77, unit: "%", asOf: "2026-02-10", signal: "watch", source: "FRED / ICE BofA" },
+        { id: "HYOAS", label: "US HY OAS", value: 2.86, unit: "%", asOf: "2026-02-10", signal: "watch", source: "FRED / ICE BofA" },
+        { id: "USD", label: "USD Broad Index", value: 118.2407, unit: "idx", asOf: "2026-02-06", signal: "neutral", source: "FRED" },
+        { id: "WTI", label: "WTI", value: 64.53, unit: "$/bbl", asOf: "2026-02-09", signal: "neutral", source: "FRED / EIA" }
+      ],
+      portfolios: [
+        { id: "BK-IGC", lob: "Banking", desk: "Investment Grade Corporate", eadBn: 24.8, pdPct: 0.85, lgdPct: 35, criticizedPct: 4.2, nonaccrualPct: 0.3, var1dMm: 18, varLimitMm: 42, ncoAnnualMm: 22, rwaDensityPct: 58, owner: "Portfolio Risk - Banking", priority: "P1", action: "Re-underwrite lower cushion credits before covenant resets.", flagged: false },
+        { id: "BK-LF", lob: "Banking", desk: "Leveraged Finance", eadBn: 18.7, pdPct: 2.8, lgdPct: 47, criticizedPct: 11.4, nonaccrualPct: 1.4, var1dMm: 26, varLimitMm: 45, ncoAnnualMm: 48, rwaDensityPct: 84, owner: "Portfolio Risk - Banking", priority: "P1", action: "Tighten sponsor concentration and second-lien appetite.", flagged: true },
+        { id: "BK-SF", lob: "Banking", desk: "Sponsor Finance", eadBn: 15.2, pdPct: 2.4, lgdPct: 45, criticizedPct: 10.1, nonaccrualPct: 1.1, var1dMm: 19, varLimitMm: 37, ncoAnnualMm: 39, rwaDensityPct: 82, owner: "Portfolio Risk - Banking", priority: "P1", action: "Accelerate EBITDA downside recuts and watchlist refresh.", flagged: true },
+        { id: "BK-TMT", lob: "Banking", desk: "Technology, Media, Telecom", eadBn: 12.1, pdPct: 1.9, lgdPct: 42, criticizedPct: 8.3, nonaccrualPct: 0.8, var1dMm: 14, varLimitMm: 34, ncoAnnualMm: 25, rwaDensityPct: 76, owner: "Portfolio Risk - Banking", priority: "P2", action: "Reprice cash-burn borrowers and reduce covenant-lite structures.", flagged: false },
+        { id: "BK-HC", lob: "Banking", desk: "Healthcare and Pharma", eadBn: 9.4, pdPct: 1.2, lgdPct: 37, criticizedPct: 5.5, nonaccrualPct: 0.5, var1dMm: 11, varLimitMm: 28, ncoAnnualMm: 18, rwaDensityPct: 62, owner: "Portfolio Risk - Banking", priority: "P2", action: "Focus on reimbursement-sensitive and trial-stage exposures.", flagged: false },
+        { id: "BK-EN", lob: "Banking", desk: "Energy and Power", eadBn: 8.5, pdPct: 2.1, lgdPct: 44, criticizedPct: 8.9, nonaccrualPct: 1.0, var1dMm: 16, varLimitMm: 30, ncoAnnualMm: 30, rwaDensityPct: 81, owner: "Portfolio Risk - Banking", priority: "P1", action: "Tighten reserve-based lending advance rates.", flagged: true },
+        { id: "BK-FIG", lob: "Banking", desk: "Financial Institutions Group", eadBn: 10.2, pdPct: 1.1, lgdPct: 34, criticizedPct: 4.7, nonaccrualPct: 0.4, var1dMm: 13, varLimitMm: 27, ncoAnnualMm: 17, rwaDensityPct: 56, owner: "Portfolio Risk - Banking", priority: "P2", action: "Review non-bank leverage and liquidity waterfall documentation.", flagged: false },
+        { id: "BK-ABL", lob: "Banking", desk: "Asset-Based Lending", eadBn: 7.9, pdPct: 1.5, lgdPct: 41, criticizedPct: 7.2, nonaccrualPct: 0.7, var1dMm: 9, varLimitMm: 22, ncoAnnualMm: 16, rwaDensityPct: 69, owner: "Portfolio Risk - Banking", priority: "P2", action: "Strengthen borrowing-base audit cadence.", flagged: false },
+
+        { id: "CRE-OFF", lob: "Commercial Real Estate", desk: "Office", eadBn: 29.4, pdPct: 3.8, lgdPct: 52, criticizedPct: 18.5, nonaccrualPct: 2.7, var1dMm: 22, varLimitMm: 40, ncoAnnualMm: 70, rwaDensityPct: 101, owner: "Portfolio Risk - CRE", priority: "P1", action: "Drive sponsor equity injections and accelerate workout decisions.", flagged: true },
+        { id: "CRE-MF", lob: "Commercial Real Estate", desk: "Multifamily", eadBn: 25.3, pdPct: 1.4, lgdPct: 36, criticizedPct: 6.4, nonaccrualPct: 0.6, var1dMm: 12, varLimitMm: 29, ncoAnnualMm: 38, rwaDensityPct: 67, owner: "Portfolio Risk - CRE", priority: "P2", action: "Monitor rent-growth deceleration and refinance cliffs.", flagged: false },
+        { id: "CRE-IND", lob: "Commercial Real Estate", desk: "Industrial", eadBn: 18.7, pdPct: 1.0, lgdPct: 33, criticizedPct: 4.1, nonaccrualPct: 0.3, var1dMm: 10, varLimitMm: 24, ncoAnnualMm: 16, rwaDensityPct: 58, owner: "Portfolio Risk - CRE", priority: "P3", action: "Maintain discipline on cap-rate assumptions in lower-liquidity markets.", flagged: false },
+        { id: "CRE-RET", lob: "Commercial Real Estate", desk: "Retail", eadBn: 12.6, pdPct: 2.7, lgdPct: 47, criticizedPct: 12.2, nonaccrualPct: 1.4, var1dMm: 9, varLimitMm: 20, ncoAnnualMm: 27, rwaDensityPct: 85, owner: "Portfolio Risk - CRE", priority: "P1", action: "Exit weak secondary-mall exposures and tighten DSCR floors.", flagged: true },
+        { id: "CRE-HOT", lob: "Commercial Real Estate", desk: "Hospitality", eadBn: 14.2, pdPct: 3.1, lgdPct: 49, criticizedPct: 14.6, nonaccrualPct: 1.9, var1dMm: 11, varLimitMm: 21, ncoAnnualMm: 32, rwaDensityPct: 92, owner: "Portfolio Risk - CRE", priority: "P1", action: "Reassess convention-market hotel assumptions and sponsor liquidity.", flagged: true },
+        { id: "CRE-CON", lob: "Commercial Real Estate", desk: "Construction and Land", eadBn: 10.8, pdPct: 2.9, lgdPct: 50, criticizedPct: 13.5, nonaccrualPct: 1.6, var1dMm: 8, varLimitMm: 17, ncoAnnualMm: 25, rwaDensityPct: 95, owner: "Portfolio Risk - CRE", priority: "P1", action: "Tighten loan-to-cost exceptions and completion guarantees.", flagged: true },
+        { id: "CRE-DC", lob: "Commercial Real Estate", desk: "Data Centers & Digital Infra", eadBn: 9.9, pdPct: 1.2, lgdPct: 35, criticizedPct: 5.4, nonaccrualPct: 0.4, var1dMm: 9, varLimitMm: 18, ncoAnnualMm: 9, rwaDensityPct: 61, owner: "Portfolio Risk - CRE", priority: "P2", action: "Monitor power pricing pass-through and tenant concentration.", flagged: false },
+        { id: "CRE-OTH", lob: "Commercial Real Estate", desk: "Other CRE", eadBn: 6.5, pdPct: 2.0, lgdPct: 44, criticizedPct: 9.2, nonaccrualPct: 1.1, var1dMm: 6, varLimitMm: 14, ncoAnnualMm: 13, rwaDensityPct: 79, owner: "Portfolio Risk - CRE", priority: "P2", action: "Rebaseline appraisal refresh intervals for stress sectors.", flagged: false },
+
+        { id: "MKT-PB", lob: "Markets", desk: "Prime Brokerage Financing", eadBn: 18.6, pdPct: 1.0, lgdPct: 29, criticizedPct: 3.9, nonaccrualPct: 0.2, var1dMm: 39, varLimitMm: 60, ncoAnnualMm: 2, rwaDensityPct: 41, owner: "Counterparty Risk", priority: "P1", action: "Pre-position IM add-ons for high-beta hedge fund books.", flagged: true },
+        { id: "MKT-DRV", lob: "Markets", desk: "Derivatives Receivables", eadBn: 16.4, pdPct: 0.8, lgdPct: 27, criticizedPct: 3.4, nonaccrualPct: 0.1, var1dMm: 35, varLimitMm: 58, ncoAnnualMm: 1, rwaDensityPct: 37, owner: "Counterparty Risk", priority: "P1", action: "Increase wrong-way risk overlay on concentrated sectors.", flagged: true },
+        { id: "MKT-REPO", lob: "Markets", desk: "Securities Financing / Repo", eadBn: 22.5, pdPct: 0.5, lgdPct: 19, criticizedPct: 2.1, nonaccrualPct: 0.0, var1dMm: 28, varLimitMm: 65, ncoAnnualMm: 0, rwaDensityPct: 22, owner: "Liquidity + CCR", priority: "P2", action: "Tighten collateral eligibility during event windows.", flagged: false },
+        { id: "MKT-SC", lob: "Markets", desk: "Structured Credit Warehousing", eadBn: 11.2, pdPct: 2.2, lgdPct: 46, criticizedPct: 8.8, nonaccrualPct: 0.8, var1dMm: 30, varLimitMm: 43, ncoAnnualMm: 2, rwaDensityPct: 89, owner: "Market Risk", priority: "P1", action: "Reduce lower-liquidity inventory and add jump-risk hedges.", flagged: true },
+        { id: "MKT-MAC", lob: "Markets", desk: "Macro Trading Inventory", eadBn: 9.8, pdPct: 0.9, lgdPct: 25, criticizedPct: 3.0, nonaccrualPct: 0.1, var1dMm: 42, varLimitMm: 64, ncoAnnualMm: 0, rwaDensityPct: 31, owner: "Market Risk", priority: "P2", action: "Trim long-end duration and increase optional hedges.", flagged: false },
+        { id: "MKT-FX", lob: "Markets", desk: "FX and Rates Inventory", eadBn: 8.7, pdPct: 0.7, lgdPct: 24, criticizedPct: 2.7, nonaccrualPct: 0.1, var1dMm: 37, varLimitMm: 59, ncoAnnualMm: 0, rwaDensityPct: 29, owner: "Market Risk", priority: "P2", action: "Limit event-day USD/JPY risk warehousing.", flagged: false },
+        { id: "MKT-EQD", lob: "Markets", desk: "Equity Derivatives Exposures", eadBn: 7.4, pdPct: 1.3, lgdPct: 33, criticizedPct: 5.2, nonaccrualPct: 0.2, var1dMm: 33, varLimitMm: 48, ncoAnnualMm: 2, rwaDensityPct: 45, owner: "Market Risk", priority: "P1", action: "Increase downside convexity coverage and tighten concentration bands.", flagged: true },
+        { id: "MKT-MUNI", lob: "Markets", desk: "Municipal / EM Financing", eadBn: 4.7, pdPct: 1.8, lgdPct: 41, criticizedPct: 7.1, nonaccrualPct: 0.5, var1dMm: 14, varLimitMm: 24, ncoAnnualMm: 1, rwaDensityPct: 72, owner: "Portfolio Risk - Markets", priority: "P2", action: "Rebalance stressed-liquidity names and shorten tenor.", flagged: false }
+      ],
+      counterparties: [
+        { id: "CP-001", name: "Global Macro Fund A", type: "Hedge Fund", rating: "BBB", eadMm: 1840, pfe95Mm: 2710, limitMm: 3000, utilizationPct: 90.3, wrongWayScore: 8.2, collateralQuality: 3, watch: true },
+        { id: "CP-002", name: "Multi-Strategy Fund B", type: "Hedge Fund", rating: "BBB-", eadMm: 1610, pfe95Mm: 2420, limitMm: 2800, utilizationPct: 86.4, wrongWayScore: 7.6, collateralQuality: 3, watch: true },
+        { id: "CP-003", name: "Insurance Group C", type: "Insurance", rating: "A", eadMm: 980, pfe95Mm: 1190, limitMm: 2100, utilizationPct: 46.7, wrongWayScore: 3.8, collateralQuality: 4, watch: false },
+        { id: "CP-004", name: "Broker Dealer D", type: "Broker Dealer", rating: "A-", eadMm: 1320, pfe95Mm: 2070, limitMm: 2500, utilizationPct: 71.6, wrongWayScore: 5.7, collateralQuality: 4, watch: false },
+        { id: "CP-005", name: "Commodity Trader E", type: "Commodity", rating: "BBB", eadMm: 1160, pfe95Mm: 1980, limitMm: 1900, utilizationPct: 98.4, wrongWayScore: 8.7, collateralQuality: 2, watch: true },
+        { id: "CP-006", name: "Private Credit Platform F", type: "Private Credit", rating: "BB+", eadMm: 920, pfe95Mm: 1760, limitMm: 1400, utilizationPct: 95.0, wrongWayScore: 8.9, collateralQuality: 2, watch: true },
+        { id: "CP-007", name: "Regional Bank G", type: "Bank", rating: "BBB+", eadMm: 730, pfe95Mm: 1010, limitMm: 1800, utilizationPct: 40.6, wrongWayScore: 4.1, collateralQuality: 4, watch: false },
+        { id: "CP-008", name: "Sovereign Wealth H", type: "Sovereign", rating: "AA", eadMm: 860, pfe95Mm: 980, limitMm: 2500, utilizationPct: 34.4, wrongWayScore: 2.3, collateralQuality: 5, watch: false },
+        { id: "CP-009", name: "Volatility Fund I", type: "Hedge Fund", rating: "BB", eadMm: 680, pfe95Mm: 1430, limitMm: 900, utilizationPct: 95.6, wrongWayScore: 9.1, collateralQuality: 2, watch: true },
+        { id: "CP-010", name: "Pension Pool J", type: "Asset Manager", rating: "A", eadMm: 420, pfe95Mm: 610, limitMm: 1300, utilizationPct: 32.3, wrongWayScore: 2.7, collateralQuality: 5, watch: false },
+        { id: "CP-011", name: "Broker Dealer K", type: "Broker Dealer", rating: "A", eadMm: 1040, pfe95Mm: 1620, limitMm: 1900, utilizationPct: 85.3, wrongWayScore: 6.9, collateralQuality: 3, watch: true },
+        { id: "CP-012", name: "Family Office L", type: "Family Office", rating: "NR", eadMm: 390, pfe95Mm: 890, limitMm: 700, utilizationPct: 95.7, wrongWayScore: 8.4, collateralQuality: 2, watch: true }
+      ],
+      functionMap: [
+        { func: "Portfolio Credit Risk (Banking)", owner: "Head of CIB Portfolio Risk", kpi: "Criticized asset ratio", target: "< 8.0%", status: "Amber", cadence: "Weekly", trigger: "Any core vertical > 10% criticized" },
+        { func: "Portfolio Credit Risk (CRE)", owner: "Head of CIB Portfolio Risk", kpi: "Office CRE nonaccrual ratio", target: "< 2.5%", status: "Red", cadence: "Weekly", trigger: "Office nonaccrual > 3.0%" },
+        { func: "Counterparty Credit Risk", owner: "Head of CIB Risk", kpi: "Top-20 net EAD utilization", target: "< 80%", status: "Amber", cadence: "Daily", trigger: "Any top counterparty > 95%" },
+        { func: "Market Risk", owner: "Head of CIB Risk", kpi: "Total 1D VaR utilization", target: "< 80%", status: "Amber", cadence: "Daily", trigger: "VaR utilization > 90%" },
+        { func: "Liquidity and Funding Risk", owner: "Treasury Risk", kpi: "LCR", target: ">= 110%", status: "Green", cadence: "Daily", trigger: "LCR < 105%" },
+        { func: "Model Risk and Validation", owner: "Model Risk Management", kpi: "High-priority findings overdue", target: "0", status: "Amber", cadence: "Monthly", trigger: "Any high finding overdue > 30 days" },
+        { func: "Operational and Conduct Risk", owner: "Non-Financial Risk", kpi: "Material control breaks", target: "0", status: "Green", cadence: "Weekly", trigger: "2+ linked breaks in quarter" }
+      ],
+      initiatives: [
+        { id: "INIT-1", name: "Office CRE Remediation Wave 2", owner: "Head of CIB Portfolio Risk", start: "2026-02-15", end: "2026-05-30", phase: "Quick Wins", dependency: "Updated appraisals complete" },
+        { id: "INIT-2", name: "Leveraged Finance Underwriting Reset", owner: "Portfolio Risk - Banking", start: "2026-02-20", end: "2026-06-15", phase: "Phase 1", dependency: "Policy committee approval" },
+        { id: "INIT-3", name: "Counterparty IM Overlay Program", owner: "Head of CIB Risk", start: "2026-02-18", end: "2026-04-30", phase: "Quick Wins", dependency: "Legal CSA amendment sequence" },
+        { id: "INIT-4", name: "Stress Testing Data Lineage Upgrade", owner: "Enterprise Risk Analytics", start: "2026-03-01", end: "2026-08-30", phase: "Phase 1", dependency: "Data engineering resources" },
+        { id: "INIT-5", name: "Cross-Stripe Liquidity Stress Drill", owner: "Treasury Risk", start: "2026-02-25", end: "2026-03-31", phase: "Quick Wins", dependency: "Ops runbook sign-off" },
+        { id: "INIT-6", name: "Risk Appetite Framework Refresh", owner: "Head of CIB Risk", start: "2026-04-05", end: "2026-07-25", phase: "Phase 2", dependency: "Board Risk Committee calendar" }
+      ],
+      sources: [
+        {
+          point: "CIB revenue, loans, deposits, trading assets, NCO, ACL, NPA",
+          value: "Q4 2025 supplement set",
+          asOf: "2025-12-31",
+          confidence: "High",
+          url: "https://www.wellsfargo.com/about/investor-relations/quarterly-earnings/"
+        },
+        {
+          point: "CET1 10.6%, RWA 1,293.4Bn",
+          value: "Standardized capital metrics",
+          asOf: "2025-12-31",
+          confidence: "High",
+          url: "https://www.wellsfargo.com/about/investor-relations/quarterly-earnings/"
+        },
+        {
+          point: "LCR 121%, SCB 2.50%, G-SIB 1.50% context",
+          value: "Regulatory disclosures",
+          asOf: "2025-09-30 to 2025-10-01 effective window",
+          confidence: "High",
+          url: "https://www.wellsfargo.com/about/investor-relations/sec-filings/"
+        },
+        {
+          point: "Fed severe adverse parameters (equities -58%, CRE -39%, unemployment shock)",
+          value: "2026 supervisory scenario",
+          asOf: "2026-02-04",
+          confidence: "High",
+          url: "https://www.federalreserve.gov/newsevents/pressreleases/bcreg20260204a.htm"
+        },
+        {
+          point: "Fed 2025 stress test firm-level results",
+          value: "Wells min CET1 in Fed exercise",
+          asOf: "2025-06-27",
+          confidence: "High",
+          url: "https://www.federalreserve.gov/newsevents/pressreleases/bcreg20250627a.htm"
+        },
+        {
+          point: "Asset cap removal enforcement action",
+          value: "Operational and governance context",
+          asOf: "2025-06-03",
+          confidence: "High",
+          url: "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20250603a.htm"
+        },
+        {
+          point: "SOFR / EFFR / OAS / rates / VIX / WTI",
+          value: "Latest market tape observations",
+          asOf: "2026-02-06 to 2026-02-11",
+          confidence: "High",
+          url: "https://fred.stlouisfed.org"
+        },
+        {
+          point: "Desk-level granular split inside each CIB line",
+          value: "Analyst allocation calibrated to public segment totals",
+          asOf: "2026-02-12 model build",
+          confidence: "Medium",
+          url: "https://www.wellsfargo.com/about/investor-relations/quarterly-earnings/"
+        }
+      ]
+    };
+
+    let state = deepClone(DEFAULT_STATE);
+    let model = null;
+    let undoStack = [];
+    let redoStack = [];
+    let activeTab = "overview";
+    let contextRowId = null;
+    const renderedTabs = new Set();
+    const charts = {};
+
+    function deepClone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function pushUndo() {
+      undoStack.push(deepClone(state));
+      if (undoStack.length > 120) undoStack.shift();
+      redoStack = [];
+    }
+
+    function applyStateMutation(mutator) {
+      pushUndo();
+      mutator(state);
+      refreshAll();
+    }
+
+    function safeNumber(v, fallback = 0) {
+      const num = Number(v);
+      return Number.isFinite(num) ? num : fallback;
+    }
+
+    function formatNum(v, digits = 1) {
+      return Number(v || 0).toLocaleString(undefined, { maximumFractionDigits: digits, minimumFractionDigits: digits });
+    }
+
+    function formatInt(v) {
+      return Number(v || 0).toLocaleString(undefined, { maximumFractionDigits: 0 });
+    }
+
+    function formatMoneyBn(v) {
+      return `$${formatNum(v, 2)}Bn`;
+    }
+
+    function formatMoneyMm(v) {
+      return `$${formatNum(v, 1)}MM`;
+    }
+
+    function fmtPct(v, d = 1) {
+      return `${formatNum(v, d)}%`;
+    }
+
+    function toRiskScore(row) {
+      const varUtil = row.varLimitMm > 0 ? (row.var1dMm / row.varLimitMm) * 100 : 0;
+      return Math.min(100, Math.max(0,
+        row.pdPct * 13 +
+        row.lgdPct * 0.5 +
+        row.criticizedPct * 1.8 +
+        row.nonaccrualPct * 8 +
+        varUtil * 0.25
+      ));
+    }
+
+    function lobColor(score) {
+      if (score >= 80) return "#e74c3c";
+      if (score >= 65) return "#f5a623";
+      if (score >= 50) return "#23b7a4";
+      return "#00c896";
+    }
+
+    function currentScenario() {
+      const key = state.metadata.lastScenarioKey;
+      const scenario = state.scenarios.find((s) => s.key === key) || state.scenarios[0];
+      const custom = state.assumptions;
+      if (key === "custom") {
+        return {
+          ...scenario,
+          pdMult: custom.pdStressMultiplier,
+          lgdAdd: custom.lgdAddPp,
+          marketMult: custom.marketLossMultiplier,
+          ccrMult: custom.ccrShockMultiplier,
+          rwaInfl: custom.rwaInflationPct,
+          fundingBps: custom.fundingSpreadShockBps
+        };
+      }
+      return scenario;
+    }
+
+    function recomputeModel() {
+      const portfolios = state.portfolios;
+      const counterparties = state.counterparties;
+      const scen = currentScenario();
+
+      let totalEadBn = 0;
+      let totalVarMm = 0;
+      let totalVarLimitMm = 0;
+      let totalNcoMm = 0;
+      let totalExpectedLossMm = 0;
+      let totalStressLossMm = 0;
+      let totalRiskWeightedScore = 0;
+
+      const byLob = {};
+
+      portfolios.forEach((row) => {
+        const eadMm = row.eadBn * 1000;
+        const elMm = eadMm * (row.pdPct / 100) * (row.lgdPct / 100);
+        const stressPd = row.pdPct * scen.pdMult;
+        const stressLgd = row.lgdPct + scen.lgdAdd;
+        const stressLossMm = eadMm * (stressPd / 100) * (Math.max(1, stressLgd) / 100);
+        const riskScore = toRiskScore(row);
+
+        row._elMm = elMm;
+        row._stressLossMm = stressLossMm;
+        row._riskScore = riskScore;
+
+        totalEadBn += row.eadBn;
+        totalVarMm += row.var1dMm;
+        totalVarLimitMm += row.varLimitMm;
+        totalNcoMm += row.ncoAnnualMm;
+        totalExpectedLossMm += elMm;
+        totalStressLossMm += stressLossMm;
+        totalRiskWeightedScore += riskScore * row.eadBn;
+
+        if (!byLob[row.lob]) {
+          byLob[row.lob] = {
+            eadBn: 0,
+            elMm: 0,
+            stressMm: 0,
+            varMm: 0,
+            ncoMm: 0,
+            weightedRisk: 0
+          };
+        }
+        byLob[row.lob].eadBn += row.eadBn;
+        byLob[row.lob].elMm += elMm;
+        byLob[row.lob].stressMm += stressLossMm;
+        byLob[row.lob].varMm += row.var1dMm;
+        byLob[row.lob].ncoMm += row.ncoAnnualMm;
+        byLob[row.lob].weightedRisk += riskScore * row.eadBn;
+      });
+
+      Object.keys(byLob).forEach((lob) => {
+        const item = byLob[lob];
+        item.riskScore = item.eadBn > 0 ? item.weightedRisk / item.eadBn : 0;
+      });
+
+      const cet1CapitalBnStart = state.regulatory.companyCet1RatioPct / 100 * state.regulatory.companyRwaBn;
+      const totalVarShockMm = totalVarMm * scen.marketMult * Math.sqrt(10);
+      const stressedCcrMm = counterparties.reduce((acc, cp) => {
+        const utilization = cp.limitMm > 0 ? (cp.eadMm / cp.limitMm) * 100 : cp.utilizationPct;
+        const breachAddOn = Math.max(0, utilization - 80) * 2.6;
+        const wwrAddOn = cp.wrongWayScore * 18;
+        return acc + (cp.pfe95Mm * 0.025 * scen.ccrMult + breachAddOn + wwrAddOn);
+      }, 0);
+      const fundingDragMm = totalEadBn * 1000 * (scen.fundingBps / 10000) * 0.18;
+
+      const creditLossBn = totalStressLossMm / 1000;
+      const marketLossBn = totalVarShockMm / 1000;
+      const ccrLossBn = stressedCcrMm / 1000;
+      const fundingLossBn = fundingDragMm / 1000;
+      const totalPreTaxBn = creditLossBn + marketLossBn + ccrLossBn + fundingLossBn;
+      const afterTaxBn = totalPreTaxBn * (1 - state.assumptions.taxRatePct / 100);
+
+      const stressedRwaBn = state.regulatory.companyRwaBn * (1 + scen.rwaInfl / 100);
+      const stressedCet1CapitalBn = Math.max(0, cet1CapitalBnStart - afterTaxBn);
+      const stressedCet1Pct = stressedRwaBn > 0 ? stressedCet1CapitalBn / stressedRwaBn * 100 : 0;
+      const requiredPlusBuffer = state.regulatory.requiredCet1MinPct + state.regulatory.managementBufferBps / 100;
+      const cet1HeadroomBps = (stressedCet1Pct - requiredPlusBuffer) * 100;
+
+      const cibFTE = Math.round(state.metadata.enterpriseFTE * state.metadata.cibSharePct / 100);
+      const fteScale = state.metadata.enterpriseFTE / DEFAULT_STATE.metadata.enterpriseFTE;
+      const avgRiskScore = totalEadBn > 0 ? totalRiskWeightedScore / totalEadBn : 0;
+      const varUtilPct = totalVarLimitMm > 0 ? totalVarMm / totalVarLimitMm * 100 : 0;
+
+      const topElRows = [...portfolios].sort((a, b) => b._elMm - a._elMm).slice(0, 8);
+      const topRiskRows = [...portfolios].sort((a, b) => b._riskScore - a._riskScore).slice(0, 8);
+      const topWatchCounterparties = [...counterparties]
+        .sort((a, b) => (b.utilizationPct + b.wrongWayScore * 4) - (a.utilizationPct + a.wrongWayScore * 4))
+        .slice(0, 8);
+
+      return {
+        scen,
+        byLob,
+        totalEadBn,
+        totalVarMm,
+        totalVarLimitMm,
+        totalNcoMm,
+        totalExpectedLossMm,
+        totalStressLossMm,
+        totalVarShockMm,
+        stressedCcrMm,
+        fundingDragMm,
+        creditLossBn,
+        marketLossBn,
+        ccrLossBn,
+        fundingLossBn,
+        totalPreTaxBn,
+        afterTaxBn,
+        stressedCet1Pct,
+        cet1HeadroomBps,
+        requiredPlusBuffer,
+        stressedRwaBn,
+        cet1CapitalBnStart,
+        stressedCet1CapitalBn,
+        cibFTE,
+        fteScale,
+        avgRiskScore,
+        varUtilPct,
+        topElRows,
+        topRiskRows,
+        topWatchCounterparties
+      };
+    }
+
+    function statusFromValue(current, amber, red, direction = "high") {
+      if (direction === "low") {
+        if (current <= red) return "Red";
+        if (current <= amber) return "Amber";
+        return "Green";
+      }
+      if (current >= red) return "Red";
+      if (current >= amber) return "Amber";
+      return "Green";
+    }
+
+    function statusClass(status) {
+      if (status === "Green") return "good";
+      if (status === "Amber") return "warn";
+      return "bad";
+    }
+
+    function renderKpis() {
+      const ncoRatioPct = model.totalNcoMm / (state.cibPublics.avgLoansBn * 1000) * 100;
+      const aclCoveragePct = state.cibPublics.aclMm / (state.cibPublics.loansBn * 1000) * 100;
+      const npaCoverage = state.cibPublics.aclMm / Math.max(1, state.cibPublics.npaMm);
+
+      const cards = [
+        { name: "CIB Loans", value: formatMoneyBn(model.totalEadBn), delta: `Public anchor ${formatMoneyBn(state.cibPublics.loansBn)}`, cls: "" },
+        { name: "Expected Loss (Annual)", value: formatMoneyMm(model.totalExpectedLossMm), delta: `Stress: ${formatMoneyMm(model.totalStressLossMm)}`, cls: "warn" },
+        { name: "NCO Ratio", value: fmtPct(ncoRatioPct, 2), delta: `NCO ${formatMoneyMm(model.totalNcoMm)}`, cls: ncoRatioPct > 0.18 ? "bad" : "good" },
+        { name: "1D VaR Utilization", value: fmtPct(model.varUtilPct, 1), delta: `${formatMoneyMm(model.totalVarMm)} / ${formatMoneyMm(model.totalVarLimitMm)}`, cls: model.varUtilPct > 85 ? "bad" : model.varUtilPct > 75 ? "warn" : "good" },
+        { name: "Stressed CET1", value: fmtPct(model.stressedCet1Pct, 2), delta: `Headroom ${formatNum(model.cet1HeadroomBps, 0)} bp`, cls: model.cet1HeadroomBps < 0 ? "bad" : model.cet1HeadroomBps < 75 ? "warn" : "good" },
+        { name: "RWA (Stressed)", value: formatMoneyBn(model.stressedRwaBn), delta: `Base ${formatMoneyBn(state.regulatory.companyRwaBn)}`, cls: "" },
+        { name: "CIB FTE (Scaled)", value: formatInt(model.cibFTE), delta: `Enterprise ${formatInt(state.metadata.enterpriseFTE)}`, cls: "" },
+        { name: "ACL / NPA", value: `${formatNum(npaCoverage, 2)}x`, delta: `ACL coverage ${fmtPct(aclCoveragePct, 2)}`, cls: npaCoverage < 1 ? "bad" : npaCoverage < 1.2 ? "warn" : "good" }
+      ];
+
+      document.getElementById("kpiGrid").innerHTML = cards.map((card) => `
+        <div class="kpi">
+          <div class="name">${card.name}</div>
+          <div class="value">${card.value}</div>
+          <div class="delta ${card.cls || ""}">${card.delta}</div>
+        </div>
+      `).join("");
+
+      document.getElementById("globalAsOf").textContent = `Data snapshot: ${state.metadata.dataSnapshotDate}`;
+      document.getElementById("overviewScaleTag").textContent = `Scale factor ${formatNum(model.fteScale, 2)}x`;
+    }
+
+    function renderNav() {
+      document.querySelectorAll("#navTabs button").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.tab === activeTab);
+      });
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.classList.toggle("active", tab.id === `tab-${activeTab}`);
+      });
+    }
+
+    function renderScenarioSelect() {
+      const select = document.getElementById("scenarioSelect");
+      select.innerHTML = state.scenarios.map((s) => `<option value="${s.key}">${s.name}</option>`).join("");
+      select.value = state.metadata.lastScenarioKey;
+      document.getElementById("scenarioNameLabel").textContent = currentScenario().name;
+    }
+
+    function renderControlValues() {
+      const meta = state.metadata;
+      const a = state.assumptions;
+
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+
+      const setInput = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val;
+      };
+
+      setInput("enterpriseFte", meta.enterpriseFTE);
+      setInput("cibSharePct", meta.cibSharePct);
+      setInput("pdMultiplier", a.pdStressMultiplier);
+      setInput("lgdAdd", a.lgdAddPp);
+      setInput("varMult", a.marketLossMultiplier);
+      setInput("rwaInflation", a.rwaInflationPct);
+      setInput("discountRate", a.discountRatePct);
+      document.getElementById("autoScale").checked = !!meta.autoScale;
+
+      setVal("enterpriseFteVal", formatInt(meta.enterpriseFTE));
+      setVal("cibShareVal", `${formatNum(meta.cibSharePct, 1)}%`);
+      setVal("pdMultiplierVal", `${formatNum(a.pdStressMultiplier, 2)}x`);
+      setVal("lgdAddVal", `${formatNum(a.lgdAddPp, 0)} pp`);
+      setVal("varMultVal", `${formatNum(a.marketLossMultiplier, 2)}x`);
+      setVal("rwaInflationVal", `${formatNum(a.rwaInflationPct, 0)}%`);
+      setVal("discountRateVal", `${formatNum(a.discountRatePct, 1)}%`);
+    }
+
+    function renderTreemap() {
+      const labels = [state.metadata.institutionName];
+      const parents = [""];
+      const values = [0];
+      const colors = ["#2b3a51"];
+      let rootTotal = 0;
+
+      Object.entries(model.byLob).forEach(([lob, agg]) => {
+        labels.push(lob);
+        parents.push(state.metadata.institutionName);
+        values.push(agg.eadBn);
+        colors.push(lobColor(agg.riskScore));
+        rootTotal += agg.eadBn;
+
+        state.portfolios.filter((r) => r.lob === lob).forEach((row) => {
+          labels.push(row.desk);
+          parents.push(lob);
+          values.push(row.eadBn);
+          colors.push(lobColor(row._riskScore));
+        });
+      });
+
+      values[0] = rootTotal;
+
+      Plotly.react("treemapPlot", [
+        {
+          type: "treemap",
+          labels,
+          parents,
+          values,
+          marker: { colors },
+          textinfo: "label+value",
+          branchvalues: "total",
+          hovertemplate: "<b>%{label}</b><br>Exposure: %{value:.2f}Bn<extra></extra>"
+        }
+      ], {
+        margin: { t: 10, r: 10, b: 10, l: 10 },
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        font: { color: "#e0e8f0", family: "DM Sans" }
+      }, { displayModeBar: false, responsive: true });
+    }
+
+    function renderMarketTape() {
+      const tbody = document.querySelector("#marketTapeTable tbody");
+      tbody.innerHTML = state.marketTape.map((m) => {
+        const cls = m.signal === "neutral" ? "good" : m.signal === "watch" ? "warn" : "bad";
+        return `
+          <tr>
+            <td>${m.label}</td>
+            <td class="mono">${formatNum(m.value, 2)} ${m.unit}</td>
+            <td class="mono">${m.asOf}</td>
+            <td><span class="pill ${cls}">${m.signal.toUpperCase()}</span></td>
+            <td>${m.source}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderPriorityActions() {
+      const list = document.getElementById("priorityActions");
+      const ranked = [...state.portfolios]
+        .sort((a, b) => (b._riskScore + b.var1dMm / 2) - (a._riskScore + a.var1dMm / 2))
+        .slice(0, 6);
+      list.innerHTML = ranked.map((row, i) => `
+        <li>
+          <div class="ttl">${i + 1}. ${row.desk} <span class="pill ${row.priority === "P1" ? "bad" : row.priority === "P2" ? "warn" : "good"}">${row.priority}</span></div>
+          <div>${row.action}</div>
+          <div class="mono" style="margin-top:4px;color:#9fb0c4;">EL ${formatMoneyMm(row._elMm)} | Risk ${formatNum(row._riskScore, 1)} | Owner ${row.owner}</div>
+        </li>
+      `).join("");
+    }
+
+    function renderRevLossChart() {
+      const ctx = document.getElementById("revLossChart");
+      const labels = ["Quarterly Revenue", "Quarterly Net Income", "Expected Annual Loss", "Stress Credit Loss", "Stress Market+CCR"];
+      const values = [
+        state.cibPublics.qtrRevenueBn * 1000,
+        state.cibPublics.qtrNetIncomeBn * 1000,
+        model.totalExpectedLossMm,
+        model.creditLossBn * 1000,
+        (model.marketLossBn + model.ccrLossBn) * 1000
+      ];
+
+      if (charts.revLoss) charts.revLoss.destroy();
+      charts.revLoss = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: ["#55b4ff", "#00c896", "#f5a623", "#e67e22", "#e74c3c"],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${formatMoneyMm(ctx.raw)}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: "#cbd9e8", font: { size: 10 } },
+              grid: { color: "rgba(255,255,255,0.07)" }
+            },
+            y: {
+              ticks: { color: "#cbd9e8", callback: (v) => `$${v}MM` },
+              grid: { color: "rgba(255,255,255,0.07)" }
+            }
+          }
+        }
+      });
+    }
+
+    function renderRiskPosture() {
+      const items = [
+        { label: "Weighted risk score", value: formatNum(model.avgRiskScore, 1), status: model.avgRiskScore > 70 ? "bad" : model.avgRiskScore > 58 ? "warn" : "good" },
+        { label: "CIB NCO ($MM)", value: formatNum(model.totalNcoMm, 1), status: model.totalNcoMm > 520 ? "bad" : model.totalNcoMm > 420 ? "warn" : "good" },
+        { label: "Stress pre-tax loss", value: formatMoneyBn(model.totalPreTaxBn), status: model.totalPreTaxBn > 18 ? "bad" : model.totalPreTaxBn > 12 ? "warn" : "good" },
+        { label: "Stressed CET1 headroom", value: `${formatNum(model.cet1HeadroomBps, 0)} bp`, status: model.cet1HeadroomBps < 0 ? "bad" : model.cet1HeadroomBps < 75 ? "warn" : "good" },
+        { label: "Top counterparty utilization", value: fmtPct(Math.max(...state.counterparties.map((c) => c.utilizationPct)), 1), status: Math.max(...state.counterparties.map((c) => c.utilizationPct)) > 95 ? "bad" : "warn" },
+        { label: "Scenario posture", value: model.scen.name, status: "" }
+      ];
+
+      const container = document.getElementById("riskPostureList");
+      container.innerHTML = items.map((m) => `
+        <div class="metric-row">
+          <div class="label">${m.label}</div>
+          <div class="val">${m.value} ${m.status ? `<span class="pill ${m.status}">${m.status.toUpperCase()}</span>` : ""}</div>
+        </div>
+      `).join("");
+    }
+
+    function portfolioFilters() {
+      return {
+        search: document.getElementById("portfolioSearch").value.trim().toLowerCase(),
+        lob: document.getElementById("portfolioLobFilter").value,
+        priority: document.getElementById("portfolioPriorityFilter").value,
+        risk: document.getElementById("portfolioRiskFilter").value
+      };
+    }
+
+    function riskBucket(score) {
+      if (score >= 80) return "critical";
+      if (score >= 65) return "high";
+      if (score >= 50) return "moderate";
+      return "low";
+    }
+
+    function filteredPortfolios() {
+      const f = portfolioFilters();
+      return state.portfolios.filter((row) => {
+        const matchesSearch = !f.search || [row.desk, row.owner, row.action, row.lob].join(" ").toLowerCase().includes(f.search);
+        const matchesLob = f.lob === "all" || row.lob === f.lob;
+        const matchesPriority = f.priority === "all" || row.priority === f.priority;
+        const matchesRisk = f.risk === "all" || riskBucket(row._riskScore) === f.risk;
+        return matchesSearch && matchesLob && matchesPriority && matchesRisk;
+      });
+    }
+
+    function renderPortfolioFilters() {
+      const lobSelect = document.getElementById("portfolioLobFilter");
+      const current = lobSelect.value || "all";
+      const lobs = [...new Set(state.portfolios.map((p) => p.lob))];
+      lobSelect.innerHTML = `<option value="all">All LOBs</option>${lobs.map((l) => `<option value="${l}">${l}</option>`).join("")}`;
+      if (lobs.includes(current) || current === "all") lobSelect.value = current;
+    }
+
+    function inputCell(rowId, field, type = "number", min = null, max = null, step = null) {
+      const row = state.portfolios.find((r) => r.id === rowId);
+      const value = row[field];
+      const attrs = [
+        `data-rowid="${rowId}"`,
+        `data-field="${field}"`,
+        `type="${type}"`
+      ];
+      if (min !== null) attrs.push(`min="${min}"`);
+      if (max !== null) attrs.push(`max="${max}"`);
+      if (step !== null) attrs.push(`step="${step}"`);
+      const val = type === "number" ? safeNumber(value).toString() : String(value ?? "");
+      return `<input ${attrs.join(" ")} value="${val.replace(/"/g, "&quot;")}" />`;
+    }
+
+    function selectCell(rowId, field, opts) {
+      const row = state.portfolios.find((r) => r.id === rowId);
+      return `
+        <select data-rowid="${rowId}" data-field="${field}">
+          ${opts.map((o) => `<option value="${o}" ${row[field] === o ? "selected" : ""}>${o}</option>`).join("")}
+        </select>
+      `;
+    }
+
+    function renderPortfolioTable() {
+      const rows = filteredPortfolios();
+      const tbody = document.querySelector("#portfolioTable tbody");
+      tbody.innerHTML = rows.map((r) => `
+        <tr data-rowid="${r.id}">
+          <td>${selectCell(r.id, "lob", ["Banking", "Commercial Real Estate", "Markets"])}</td>
+          <td>${inputCell(r.id, "desk", "text")}</td>
+          <td>${inputCell(r.id, "eadBn", "number", 0, 200, 0.1)}</td>
+          <td>${inputCell(r.id, "pdPct", "number", 0, 20, 0.05)}</td>
+          <td>${inputCell(r.id, "lgdPct", "number", 0, 100, 0.1)}</td>
+          <td>${inputCell(r.id, "criticizedPct", "number", 0, 100, 0.1)}</td>
+          <td>${inputCell(r.id, "nonaccrualPct", "number", 0, 50, 0.1)}</td>
+          <td>${inputCell(r.id, "var1dMm", "number", 0, 300, 0.1)}</td>
+          <td>${inputCell(r.id, "varLimitMm", "number", 1, 400, 0.1)}</td>
+          <td>${inputCell(r.id, "ncoAnnualMm", "number", 0, 500, 0.1)}</td>
+          <td>${inputCell(r.id, "rwaDensityPct", "number", 0, 200, 0.1)}</td>
+          <td>${selectCell(r.id, "priority", ["P1", "P2", "P3"])}</td>
+          <td>${inputCell(r.id, "owner", "text")}</td>
+          <td>${inputCell(r.id, "action", "text")}</td>
+          <td class="mono">${formatNum(r._elMm, 1)}</td>
+          <td><span class="pill ${r._riskScore >= 80 ? "bad" : r._riskScore >= 65 ? "warn" : "good"}">${formatNum(r._riskScore, 1)}</span></td>
+        </tr>
+      `).join("");
+
+      document.getElementById("portfolioRowCount").textContent = `${rows.length} desks shown`;
+    }
+
+    function renderPortfolioCharts() {
+      const rows = filteredPortfolios();
+      const x = rows.map((r) => r.pdPct);
+      const y = rows.map((r) => r.lgdPct);
+      const sizes = rows.map((r) => Math.max(10, r.eadBn * 1.6));
+      const colors = rows.map((r) => lobColor(r._riskScore));
+
+      Plotly.react("creditHeatPlot", [{
+        type: "scatter",
+        mode: "markers",
+        x,
+        y,
+        text: rows.map((r) => `${r.desk}<br>Criticized ${fmtPct(r.criticizedPct, 1)}<br>Nonaccrual ${fmtPct(r.nonaccrualPct, 1)}`),
+        marker: { size: sizes, color: colors, opacity: 0.85, line: { color: "#0b1320", width: 1 } },
+        hovertemplate: "%{text}<br>PD %{x:.2f}% | LGD %{y:.1f}%<extra></extra>"
+      }], {
+        margin: { l: 45, r: 12, t: 10, b: 40 },
+        xaxis: { title: "PD %", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
+        yaxis: { title: "LGD %", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        font: { color: "#dbe7f3", family: "DM Sans" }
+      }, { displayModeBar: false, responsive: true });
+
+      const top = [...rows].sort((a, b) => b._elMm - a._elMm).slice(0, 10).reverse();
+      Plotly.react("concentrationPlot", [{
+        type: "bar",
+        orientation: "h",
+        y: top.map((r) => r.desk),
+        x: top.map((r) => r._elMm),
+        marker: { color: top.map((r) => lobColor(r._riskScore)) },
+        hovertemplate: "%{y}<br>Expected loss: %{x:.1f}MM<extra></extra>"
+      }], {
+        margin: { l: 190, r: 16, t: 10, b: 30 },
+        xaxis: { title: "Expected Loss ($MM)", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
+        yaxis: { color: "#dbe7f3" },
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        font: { color: "#dbe7f3", family: "DM Sans" }
+      }, { displayModeBar: false, responsive: true });
+    }
+
+    function buildLimitRows() {
+      const office = state.portfolios.find((p) => p.id === "CRE-OFF") || { eadBn: 0, nonaccrualPct: 0 };
+      const cet1CapitalBn = model.cet1CapitalBnStart;
+      const top10ExposureBn = [...state.portfolios].sort((a, b) => b.eadBn - a.eadBn).slice(0, 10).reduce((acc, p) => acc + p.eadBn, 0);
+      const topCounterpartyUtil = Math.max(...state.counterparties.map((c) => c.utilizationPct));
+      const avgWrongWay = state.counterparties.reduce((acc, c) => acc + c.wrongWayScore, 0) / state.counterparties.length;
+
+      return [
+        {
+          metric: "Total 1D VaR Utilization",
+          current: model.varUtilPct,
+          amber: 80,
+          red: 95,
+          owner: "Head of CIB Risk",
+          commentary: "Keep aggregated utilization below 80% outside event windows."
+        },
+        {
+          metric: "Top-10 Portfolio EAD / CET1 Capital",
+          current: top10ExposureBn / Math.max(1, cet1CapitalBn) * 100,
+          amber: 145,
+          red: 170,
+          owner: "Head of CIB Portfolio Risk",
+          commentary: "Concentration trigger for portfolio de-risking sequence."
+        },
+        {
+          metric: "Office CRE EAD / CET1 Capital",
+          current: office.eadBn / Math.max(1, cet1CapitalBn) * 100,
+          amber: 20,
+          red: 25,
+          owner: "Portfolio Risk - CRE",
+          commentary: "Escalate remediation if above 25% equivalent concentration."
+        },
+        {
+          metric: "Office CRE Nonaccrual Ratio",
+          current: office.nonaccrualPct,
+          amber: 2.5,
+          red: 3.2,
+          owner: "Portfolio Risk - CRE",
+          commentary: "Track migration speed in refinance-heavy assets."
+        },
+        {
+          metric: "Top Counterparty Utilization",
+          current: topCounterpartyUtil,
+          amber: 90,
+          red: 97,
+          owner: "Counterparty Credit Risk",
+          commentary: "Mechanical IM and tenor actions above 95%."
+        },
+        {
+          metric: "Average Wrong-Way Score",
+          current: avgWrongWay,
+          amber: 6.5,
+          red: 7.5,
+          owner: "Counterparty Credit Risk",
+          commentary: "WWR overlay required where score breaches threshold."
+        },
+        {
+          metric: "LCR",
+          current: state.regulatory.lcrPct,
+          amber: 110,
+          red: 105,
+          direction: "low",
+          owner: "Treasury Risk",
+          commentary: "Publicly disclosed ratio, monitored daily internally."
+        }
+      ];
+    }
+
+    function renderLimitTable() {
+      const rows = buildLimitRows();
+      const tbody = document.querySelector("#limitTable tbody");
+      tbody.innerHTML = rows.map((r) => {
+        const status = statusFromValue(r.current, r.amber, r.red, r.direction || "high");
+        return `
+          <tr>
+            <td>${r.metric}</td>
+            <td class="mono">${formatNum(r.current, 1)}</td>
+            <td class="mono">${formatNum(r.amber, 1)}</td>
+            <td class="mono">${formatNum(r.red, 1)}</td>
+            <td><span class="pill ${statusClass(status)}">${status}</span></td>
+            <td>${r.owner}</td>
+            <td>${r.commentary}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderCounterpartyBubble() {
+      const cps = state.counterparties;
+      Plotly.react("counterpartyBubble", [{
+        type: "scatter",
+        mode: "markers+text",
+        x: cps.map((c) => c.utilizationPct),
+        y: cps.map((c) => c.wrongWayScore),
+        text: cps.map((c) => c.name),
+        textposition: "top center",
+        marker: {
+          size: cps.map((c) => Math.max(14, c.eadMm / 90)),
+          color: cps.map((c) => c.watch ? "#e74c3c" : "#55b4ff"),
+          opacity: 0.8,
+          line: { color: "rgba(255,255,255,0.4)", width: 1 }
+        },
+        hovertemplate: "%{text}<br>Util %{x:.1f}%<br>WWR %{y:.1f}<br>EAD %{marker.size:.1f} scaled<extra></extra>"
+      }], {
+        margin: { l: 50, r: 10, t: 10, b: 40 },
+        xaxis: { title: "Utilization %", gridcolor: "rgba(255,255,255,0.08)", color: "#dbe7f3" },
+        yaxis: { title: "Wrong-Way Risk Score", gridcolor: "rgba(255,255,255,0.08)", color: "#dbe7f3" },
+        shapes: [
+          { type: "line", x0: 90, x1: 90, y0: 0, y1: 10, line: { color: "#f5a623", dash: "dot" } },
+          { type: "line", x0: 97, x1: 97, y0: 0, y1: 10, line: { color: "#e74c3c", dash: "dot" } },
+          { type: "line", x0: 0, x1: 110, y0: 7.5, y1: 7.5, line: { color: "#e74c3c", dash: "dot" } }
+        ],
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        font: { color: "#dbe7f3", family: "DM Sans" }
+      }, { displayModeBar: false, responsive: true });
+    }
+
+    function renderCounterpartyTable() {
+      const tbody = document.querySelector("#counterpartyTable tbody");
+      const rows = [...state.counterparties].sort((a, b) => b.utilizationPct - a.utilizationPct);
+      tbody.innerHTML = rows.map((cp) => {
+        const status = cp.utilizationPct >= 97 || cp.wrongWayScore >= 8.5 ? "Red" : cp.utilizationPct >= 90 || cp.wrongWayScore >= 7 ? "Amber" : "Green";
+        return `
+          <tr>
+            <td>${cp.name}</td>
+            <td>${cp.type}</td>
+            <td>${cp.rating}</td>
+            <td class="mono">${formatNum(cp.eadMm, 0)}</td>
+            <td class="mono">${formatNum(cp.pfe95Mm, 0)}</td>
+            <td class="mono">${formatNum(cp.utilizationPct, 1)}%</td>
+            <td class="mono">${formatNum(cp.wrongWayScore, 1)}</td>
+            <td>${cp.collateralQuality}/5</td>
+            <td><span class="pill ${statusClass(status)}">${cp.watch ? "WATCH" : status}</span></td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderVarTrendChart() {
+      const ctx = document.getElementById("varTrendChart");
+      const baseUtil = model.varUtilPct;
+      const labels = ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8"];
+      const scen = model.scen;
+      const varPath = labels.map((_, i) => baseUtil * (1 + (scen.marketMult - 1) * (0.12 + i * 0.06)));
+      const svarPath = labels.map((_, i) => Math.min(130, baseUtil * 1.2 * (1 + (scen.marketMult - 1) * (0.18 + i * 0.07))));
+
+      if (charts.varTrend) charts.varTrend.destroy();
+      charts.varTrend = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            { label: "VaR utilization", data: varPath, borderColor: "#55b4ff", backgroundColor: "rgba(85,180,255,0.1)", tension: 0.25 },
+            { label: "sVaR utilization", data: svarPath, borderColor: "#f5a623", backgroundColor: "rgba(245,166,35,0.1)", tension: 0.25 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: "#dbe7f3" } } },
+          scales: {
+            x: { ticks: { color: "#dbe7f3" }, grid: { color: "rgba(255,255,255,0.08)" } },
+            y: {
+              ticks: { color: "#dbe7f3", callback: (v) => `${v}%` },
+              grid: { color: "rgba(255,255,255,0.08)" }
+            }
+          }
+        }
+      });
+    }
+
+    function buildCapitalTrajectory() {
+      const quarters = Array.from({ length: 12 }, (_, i) => `Q${i + 1}`);
+      const scen = model.scen;
+      const startCet1 = state.regulatory.companyCet1RatioPct;
+      const targetCet1 = model.stressedCet1Pct;
+      const path = quarters.map((_, i) => {
+        const t = i / (quarters.length - 1);
+        const frontLoad = Math.pow(t, 0.72);
+        return startCet1 - (startCet1 - targetCet1) * frontLoad;
+      });
+
+      const cumulativeLoss = quarters.map((_, i) => {
+        const t = (i + 1) / quarters.length;
+        return model.totalPreTaxBn * Math.pow(t, 0.78);
+      });
+
+      return { quarters, path, cumulativeLoss, scen };
+    }
+
+    function renderCapitalTrajectory() {
+      const d = buildCapitalTrajectory();
+      Plotly.react("capitalTrajectoryPlot", [
+        {
+          type: "scatter",
+          mode: "lines+markers",
+          x: d.quarters,
+          y: d.path,
+          name: "Projected CET1",
+          line: { color: "#55b4ff", width: 3 }
+        },
+        {
+          type: "scatter",
+          mode: "lines",
+          x: d.quarters,
+          y: d.quarters.map(() => state.regulatory.requiredCet1MinPct + state.regulatory.managementBufferBps / 100),
+          name: "Requirement + Mgmt Buffer",
+          line: { color: "#f5a623", dash: "dot", width: 2 }
+        }
+      ], {
+        margin: { l: 50, r: 12, t: 10, b: 34 },
+        xaxis: { color: "#dbe7f3" },
+        yaxis: { title: "CET1 %", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        font: { color: "#dbe7f3", family: "DM Sans" },
+        legend: { orientation: "h", y: 1.1 }
+      }, { displayModeBar: false, responsive: true });
+    }
+
+    function renderStressWaterfall() {
+      const vals = [
+        model.creditLossBn,
+        model.marketLossBn,
+        model.ccrLossBn,
+        model.fundingLossBn,
+        -model.totalPreTaxBn
+      ];
+      Plotly.react("stressWaterfallPlot", [{
+        type: "waterfall",
+        x: ["Credit", "Market", "Counterparty", "Funding", "Net pre-tax impact"],
+        y: vals,
+        measure: ["relative", "relative", "relative", "relative", "total"],
+        increasing: { marker: { color: "#e74c3c" } },
+        decreasing: { marker: { color: "#00c896" } },
+        totals: { marker: { color: "#55b4ff" } },
+        textposition: "outside",
+        hovertemplate: "%{x}: %{y:.2f}Bn<extra></extra>"
+      }], {
+        margin: { l: 20, r: 20, t: 20, b: 60 },
+        yaxis: { title: "$Bn", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
+        xaxis: { color: "#dbe7f3" },
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        font: { color: "#dbe7f3", family: "DM Sans" }
+      }, { displayModeBar: false, responsive: true });
+    }
+
+    function runScenarioCalc(s) {
+      const creditLossBn = model.totalStressLossMm / 1000 * (s.pdMult / model.scen.pdMult) * ((100 + s.lgdAdd) / (100 + model.scen.lgdAdd));
+      const marketLossBn = model.totalVarShockMm / 1000 * (s.marketMult / model.scen.marketMult);
+      const ccrLossBn = model.stressedCcrMm / 1000 * (s.ccrMult / model.scen.ccrMult);
+      const fundingLossBn = model.fundingDragMm / 1000 * (s.fundingBps / Math.max(1, model.scen.fundingBps));
+      const total = creditLossBn + marketLossBn + ccrLossBn + fundingLossBn;
+      const afterTax = total * (1 - state.assumptions.taxRatePct / 100);
+      const startCap = model.cet1CapitalBnStart;
+      const rwa = state.regulatory.companyRwaBn * (1 + s.rwaInfl / 100);
+      const stressedCet1 = Math.max(0, startCap - afterTax) / rwa * 100;
+      const headroom = (stressedCet1 - state.regulatory.requiredCet1MinPct) * 100;
+      return { creditLossBn, marketLossBn, ccrLossBn, fundingLossBn, total, stressedCet1, headroom };
+    }
+
+    function renderScenarioTable() {
+      const tbody = document.querySelector("#scenarioTable tbody");
+      tbody.innerHTML = state.scenarios.map((s) => {
+        const r = runScenarioCalc(s.key === "custom" ? currentScenario() : s);
+        const call = r.headroom < 0 ? "Capital action likely required" : r.headroom < 120 ? "Buffer compression" : "Manageable";
+        const status = r.headroom < 0 ? "Red" : r.headroom < 120 ? "Amber" : "Green";
+        return `
+          <tr>
+            <td>${s.name}</td>
+            <td class="mono">${formatNum(r.creditLossBn, 2)}</td>
+            <td class="mono">${formatNum(r.marketLossBn + r.ccrLossBn, 2)}</td>
+            <td class="mono">${formatNum(r.total, 2)}</td>
+            <td class="mono">${formatNum(r.stressedCet1, 2)}%</td>
+            <td class="mono">${formatNum((r.stressedCet1 - state.regulatory.requiredCet1MinPct) * 100, 0)}</td>
+            <td><span class="pill ${statusClass(status)}">${call}</span></td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function boxMuller() {
+      let u = 0, v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+
+    function runMonteCarlo() {
+      const runs = state.assumptions.monteCarloRuns;
+      const scen = currentScenario();
+      const outcomes = [];
+
+      for (let i = 0; i < runs; i += 1) {
+        const pdM = Math.max(0.6, scen.pdMult * (1 + boxMuller() * 0.12));
+        const lgdA = Math.max(0, scen.lgdAdd * (1 + boxMuller() * 0.15));
+        const mktM = Math.max(0.8, scen.marketMult * (1 + boxMuller() * 0.14));
+        const ccrM = Math.max(0.7, scen.ccrMult * (1 + boxMuller() * 0.15));
+        const rwaI = Math.max(0, scen.rwaInfl * (1 + boxMuller() * 0.11));
+        const fndB = Math.max(0, scen.fundingBps * (1 + boxMuller() * 0.13));
+
+        const temp = runScenarioCalc({ ...scen, pdMult: pdM, lgdAdd: lgdA, marketMult: mktM, ccrMult: ccrM, rwaInfl: rwaI, fundingBps: fndB });
+        outcomes.push(temp.total);
+      }
+
+      outcomes.sort((a, b) => a - b);
+      const p10 = outcomes[Math.floor(0.1 * outcomes.length)];
+      const p50 = outcomes[Math.floor(0.5 * outcomes.length)];
+      const p90 = outcomes[Math.floor(0.9 * outcomes.length)];
+
+      Plotly.react("monteCarloPlot", [{
+        type: "histogram",
+        x: outcomes,
+        nbinsx: 35,
+        marker: { color: "rgba(85,180,255,0.75)" },
+        hovertemplate: "Loss bucket: %{x:.2f}Bn<br>Count: %{y}<extra></extra>"
+      }], {
+        margin: { l: 45, r: 10, t: 10, b: 35 },
+        xaxis: { title: "Pre-tax loss ($Bn)", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
+        yaxis: { title: "Frequency", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        font: { color: "#dbe7f3", family: "DM Sans" },
+        shapes: [
+          { type: "line", x0: p10, x1: p10, y0: 0, y1: 1, yref: "paper", line: { color: "#f5a623", dash: "dot" } },
+          { type: "line", x0: p50, x1: p50, y0: 0, y1: 1, yref: "paper", line: { color: "#55b4ff", dash: "dot" } },
+          { type: "line", x0: p90, x1: p90, y0: 0, y1: 1, yref: "paper", line: { color: "#e74c3c", dash: "dot" } }
+        ]
+      }, { displayModeBar: false, responsive: true });
+
+      document.getElementById("monteCarloSummary").innerHTML = `
+        <strong>Distribution range:</strong> P10 <span class="mono">${formatMoneyBn(p10)}</span>,
+        P50 <span class="mono">${formatMoneyBn(p50)}</span>,
+        P90 <span class="mono">${formatMoneyBn(p90)}</span> pre-tax loss.
+        80% central band: <span class="mono">${formatMoneyBn(p10)} to ${formatMoneyBn(p90)}</span>.
+      `;
+    }
+
+    function renderFunctionMap() {
+      const tbody = document.querySelector("#functionMapTable tbody");
+      tbody.innerHTML = state.functionMap.map((f) => `
+        <tr>
+          <td>${f.func}</td>
+          <td>${f.owner}</td>
+          <td>${f.kpi}</td>
+          <td>${f.target}</td>
+          <td><span class="pill ${statusClass(f.status)}">${f.status}</span></td>
+          <td>${f.cadence}</td>
+          <td>${f.trigger}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderGantt() {
+      const data = state.initiatives.map((i) => ({
+        Task: i.name,
+        Start: i.start,
+        Finish: i.end,
+        Resource: i.phase,
+        Owner: i.owner,
+        Dependency: i.dependency
+      }));
+
+      const phases = [...new Set(data.map((d) => d.Resource))];
+      const colors = {
+        "Quick Wins": "#00c896",
+        "Phase 1": "#55b4ff",
+        "Phase 2": "#f5a623",
+        "Phase 3": "#e74c3c"
+      };
+
+      const traces = phases.map((phase) => {
+        const rows = data.filter((d) => d.Resource === phase);
+        return {
+          type: "bar",
+          orientation: "h",
+          name: phase,
+          y: rows.map((r) => r.Task),
+          x: rows.map((r) => (new Date(r.Finish) - new Date(r.Start))),
+          base: rows.map((r) => r.Start),
+          marker: { color: colors[phase] || "#55b4ff" },
+          customdata: rows.map((r) => {
+            const dur = Math.round((new Date(r.Finish) - new Date(r.Start)) / (1000 * 60 * 60 * 24));
+            return [r.Owner, r.Dependency, dur];
+          }),
+          hovertemplate: "%{y}<br>Owner: %{customdata[0]}<br>Dependency: %{customdata[1]}<br>Duration: %{customdata[2]} days<extra></extra>"
+        };
+      });
+
+      Plotly.react("ganttPlot", traces, {
+        barmode: "stack",
+        margin: { l: 220, r: 16, t: 16, b: 36 },
+        xaxis: { type: "date", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
+        yaxis: { color: "#dbe7f3", autorange: "reversed" },
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        font: { color: "#dbe7f3", family: "DM Sans" },
+        legend: { orientation: "h", y: 1.15 }
+      }, { displayModeBar: false, responsive: true });
+    }
+
+    function buildNarrative() {
+      const topRisk = model.topRiskRows.slice(0, 3).map((r) => `${r.desk} (${formatNum(r._riskScore, 1)})`).join(", ");
+      const topEl = model.topElRows.slice(0, 3).map((r) => `${r.desk} ${formatMoneyMm(r._elMm)}`).join("; ");
+      const watchNames = model.topWatchCounterparties.slice(0, 4).map((c) => c.name).join(", ");
+      const scen = model.scen;
+
+      return [
+        `Situation (${TODAY}): CIB exposure is ${formatMoneyBn(model.totalEadBn)} with quarterly revenue ${formatMoneyBn(state.cibPublics.qtrRevenueBn)} and quarterly net income ${formatMoneyBn(state.cibPublics.qtrNetIncomeBn)}. Current 1D VaR utilization is ${fmtPct(model.varUtilPct, 1)} and weighted portfolio risk score is ${formatNum(model.avgRiskScore, 1)}.`,
+        `Risk signal: Highest desk-level risk concentrations are ${topRisk}. Top expected-loss contributors are ${topEl}. Counterparty watchlist concentration is highest in ${watchNames}.`,
+        `Scenario (${scen.name}): Modeled pre-tax loss is ${formatMoneyBn(model.totalPreTaxBn)} with stressed CET1 at ${fmtPct(model.stressedCet1Pct, 2)} versus internal requirement-plus-buffer of ${fmtPct(model.requiredPlusBuffer, 2)}. Headroom is ${formatNum(model.cet1HeadroomBps, 0)} bp.`,
+        `Recommendation: Execute a 90-day package led by Head of CIB Risk and Head of CIB Portfolio Risk: (1) Office CRE remediation acceleration, (2) leveraged/sponsor underwriting reset, (3) mechanical IM overlays for top counterparty concentrations, (4) cross-stripe liquidity + collateral drill, (5) risk appetite framework refresh for board sign-off.`,
+        `Financial impact view: Expected annual credit loss is ${formatMoneyMm(model.totalExpectedLossMm)}; severe-stress credit loss is ${formatMoneyBn(model.creditLossBn)} with additional market+CCR impact of ${formatMoneyBn(model.marketLossBn + model.ccrLossBn)}.`,
+        `Governance: Maintain formal challenge documentation, model limitations disclosure, and threshold-based escalation triggers for any utilization above amber in VaR, concentration, or counterparty metrics.`
+      ].join("\n\n");
+    }
+
+    function renderBoardNarrative() {
+      document.getElementById("boardNarrative").value = buildNarrative();
+      const qa = [
+        {
+          q: "How close are we to capital pressure under severe adverse?",
+          a: `Modeled stressed CET1 is ${fmtPct(model.stressedCet1Pct, 2)} with ${formatNum(model.cet1HeadroomBps, 0)} bp headroom vs requirement + management buffer.`
+        },
+        {
+          q: "Where is the largest incremental downside risk?",
+          a: `${model.topRiskRows[0].desk} and ${model.topRiskRows[1].desk} are currently the largest risk-intensity contributors with elevated criticized/nonaccrual and utilization metrics.`
+        },
+        {
+          q: "What should we do in the next 30 days?",
+          a: "Prioritize Office CRE remediation, tighten leveraged finance underwriting, and apply automatic IM/limit actions to top watchlist counterparties above 95% utilization."
+        },
+        {
+          q: "How reliable are these numbers?",
+          a: "Segment totals are anchored to public disclosures with high confidence; desk-level splits are calibrated allocation models and should be replaced by internal system-of-record feeds for final decisions."
+        },
+        {
+          q: "What is the regulator-facing message?",
+          a: "We are maintaining buffers, running severe scenarios aligned to Fed parameters, and executing pre-defined, threshold-triggered actions with documented governance."
+        }
+      ];
+      document.getElementById("qaList").innerHTML = qa.map((item) => `
+        <li>
+          <div class="ttl">Q: ${item.q}</div>
+          <div>A: ${item.a}</div>
+        </li>
+      `).join("");
+    }
+
+    function renderSourceTable() {
+      const tbody = document.querySelector("#sourceTable tbody");
+      tbody.innerHTML = state.sources.map((s) => {
+        const cls = s.confidence === "High" ? "good" : s.confidence === "Medium" ? "warn" : "bad";
+        return `
+          <tr>
+            <td>${s.point}</td>
+            <td>${s.value}</td>
+            <td class="mono">${s.asOf}</td>
+            <td><span class="pill ${cls}">${s.confidence}</span></td>
+            <td><a href="${s.url}" target="_blank" rel="noopener">${s.url}</a></td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderOverviewTab() {
+      renderTreemap();
+      renderMarketTape();
+      renderPriorityActions();
+      renderRevLossChart();
+      renderRiskPosture();
+    }
+
+    function renderPortfolioTab() {
+      renderPortfolioFilters();
+      renderPortfolioTable();
+      renderPortfolioCharts();
+    }
+
+    function renderMarketTab() {
+      renderCounterpartyBubble();
+      renderLimitTable();
+      renderCounterpartyTable();
+      renderVarTrendChart();
+    }
+
+    function renderStressTab() {
+      renderCapitalTrajectory();
+      renderStressWaterfall();
+      renderScenarioTable();
+      runMonteCarlo();
+    }
+
+    function renderFunctionsTab() {
+      renderFunctionMap();
+      renderGantt();
+    }
+
+    function renderBoardTab() {
+      renderBoardNarrative();
+      renderSourceTable();
+    }
+
+    function renderActiveTab(force = false) {
+      if (!force && renderedTabs.has(activeTab)) return;
+      if (activeTab === "overview") renderOverviewTab();
+      if (activeTab === "portfolio") renderPortfolioTab();
+      if (activeTab === "market") renderMarketTab();
+      if (activeTab === "stress") renderStressTab();
+      if (activeTab === "functions") renderFunctionsTab();
+      if (activeTab === "board") renderBoardTab();
+      renderedTabs.add(activeTab);
+    }
+
+    function refreshAll(forceTabRender = true) {
+      model = recomputeModel();
+      renderKpis();
+      renderControlValues();
+      renderScenarioSelect();
+      if (forceTabRender) {
+        renderedTabs.delete(activeTab);
+      }
+      renderActiveTab(true);
+    }
+
+    function bindNav() {
+      document.getElementById("navTabs").addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-tab]");
+        if (!btn) return;
+        activeTab = btn.dataset.tab;
+        renderNav();
+        renderActiveTab();
+      });
+    }
+
+    function bindControls() {
+      document.getElementById("scenarioSelect").addEventListener("change", (e) => {
+        applyStateMutation((draft) => {
+          draft.metadata.lastScenarioKey = e.target.value;
+          const fromTemplate = draft.scenarios.find((s) => s.key === e.target.value);
+          if (fromTemplate && fromTemplate.key !== "custom") {
+            draft.assumptions.pdStressMultiplier = fromTemplate.pdMult;
+            draft.assumptions.lgdAddPp = fromTemplate.lgdAdd;
+            draft.assumptions.marketLossMultiplier = fromTemplate.marketMult;
+            draft.assumptions.ccrShockMultiplier = fromTemplate.ccrMult;
+            draft.assumptions.rwaInflationPct = fromTemplate.rwaInfl;
+            draft.assumptions.fundingSpreadShockBps = fromTemplate.fundingBps;
+          }
+        });
+      });
+      document.getElementById("enterpriseFte").addEventListener("input", (e) => {
+        const val = Number(e.target.value);
+        applyStateMutation((draft) => {
+          const old = draft.metadata.enterpriseFTE;
+          if (draft.metadata.autoScale && old > 0) {
+            const ratio = val / old;
+            draft.portfolios.forEach((p) => {
+              p.eadBn *= ratio;
+              p.ncoAnnualMm *= ratio;
+              p.var1dMm *= Math.sqrt(ratio);
+              p.varLimitMm *= Math.sqrt(ratio);
+            });
+            draft.counterparties.forEach((c) => {
+              c.eadMm *= ratio;
+              c.pfe95Mm *= ratio;
+              c.limitMm *= ratio;
+              c.utilizationPct = c.limitMm > 0 ? (c.eadMm / c.limitMm) * 100 : c.utilizationPct;
+            });
+            draft.cibPublics.loansBn *= ratio;
+            draft.cibPublics.avgLoansBn *= ratio;
+            draft.cibPublics.depositsBn *= ratio;
+            draft.cibPublics.tradingAssetsBn *= ratio;
+          }
+          draft.metadata.enterpriseFTE = val;
+        });
+      });
+
+      document.getElementById("cibSharePct").addEventListener("input", (e) => {
+        const val = Number(e.target.value);
+        applyStateMutation((draft) => {
+          draft.metadata.cibSharePct = val;
+        });
+      });
+
+      document.getElementById("pdMultiplier").addEventListener("input", (e) => {
+        const val = Number(e.target.value);
+        applyStateMutation((draft) => {
+          draft.assumptions.pdStressMultiplier = val;
+          draft.metadata.lastScenarioKey = "custom";
+        });
+      });
+
+      document.getElementById("lgdAdd").addEventListener("input", (e) => {
+        const val = Number(e.target.value);
+        applyStateMutation((draft) => {
+          draft.assumptions.lgdAddPp = val;
+          draft.metadata.lastScenarioKey = "custom";
+        });
+      });
+
+      document.getElementById("varMult").addEventListener("input", (e) => {
+        const val = Number(e.target.value);
+        applyStateMutation((draft) => {
+          draft.assumptions.marketLossMultiplier = val;
+          draft.metadata.lastScenarioKey = "custom";
+        });
+      });
+
+      document.getElementById("rwaInflation").addEventListener("input", (e) => {
+        const val = Number(e.target.value);
+        applyStateMutation((draft) => {
+          draft.assumptions.rwaInflationPct = val;
+          draft.metadata.lastScenarioKey = "custom";
+        });
+      });
+
+      document.getElementById("discountRate").addEventListener("input", (e) => {
+        const val = Number(e.target.value);
+        applyStateMutation((draft) => {
+          draft.assumptions.discountRatePct = val;
+        });
+      });
+
+      document.getElementById("autoScale").addEventListener("change", (e) => {
+        applyStateMutation((draft) => {
+          draft.metadata.autoScale = e.target.checked;
+        });
+      });
+    }
+
+    function bindPortfolioTable() {
+      document.querySelector("#portfolioTable tbody").addEventListener("change", (e) => {
+        const target = e.target;
+        if (!(target instanceof HTMLInputElement) && !(target instanceof HTMLSelectElement)) return;
+        const rowId = target.dataset.rowid;
+        const field = target.dataset.field;
+        if (!rowId || !field) return;
+
+        applyStateMutation((draft) => {
+          const row = draft.portfolios.find((r) => r.id === rowId);
+          if (!row) return;
+          if (target.type === "number") {
+            row[field] = safeNumber(target.value, row[field]);
+          } else {
+            row[field] = target.value;
+          }
+        });
+      });
+
+      document.getElementById("portfolioSearch").addEventListener("input", () => {
+        renderedTabs.delete("portfolio");
+        if (activeTab === "portfolio") renderPortfolioTab();
+      });
+      document.getElementById("portfolioLobFilter").addEventListener("change", () => {
+        renderedTabs.delete("portfolio");
+        if (activeTab === "portfolio") renderPortfolioTab();
+      });
+      document.getElementById("portfolioPriorityFilter").addEventListener("change", () => {
+        renderedTabs.delete("portfolio");
+        if (activeTab === "portfolio") renderPortfolioTab();
+      });
+      document.getElementById("portfolioRiskFilter").addEventListener("change", () => {
+        renderedTabs.delete("portfolio");
+        if (activeTab === "portfolio") renderPortfolioTab();
+      });
+
+      document.getElementById("addPortfolioRowBtn").addEventListener("click", () => {
+        applyStateMutation((draft) => {
+          const id = `NEW-${Date.now()}`;
+          draft.portfolios.push({
+            id,
+            lob: "Banking",
+            desk: "New Desk",
+            eadBn: 1.0,
+            pdPct: 1.0,
+            lgdPct: 35,
+            criticizedPct: 4,
+            nonaccrualPct: 0.3,
+            var1dMm: 3,
+            varLimitMm: 8,
+            ncoAnnualMm: 2,
+            rwaDensityPct: 50,
+            owner: "Portfolio Risk",
+            priority: "P2",
+            action: "Define risk action",
+            flagged: false
+          });
+        });
+      });
+    }
+
+    function bindContextMenu() {
+      const menu = document.getElementById("contextMenu");
+
+      document.querySelector("#portfolioTable tbody").addEventListener("contextmenu", (e) => {
+        const tr = e.target.closest("tr[data-rowid]");
+        if (!tr) return;
+        e.preventDefault();
+        contextRowId = tr.dataset.rowid;
+        menu.style.display = "block";
+        menu.style.left = `${e.clientX}px`;
+        menu.style.top = `${e.clientY}px`;
+      });
+
+      document.addEventListener("click", () => {
+        menu.style.display = "none";
+      });
+
+      menu.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-action]");
+        if (!btn || !contextRowId) return;
+        const action = btn.dataset.action;
+
+        applyStateMutation((draft) => {
+          const row = draft.portfolios.find((r) => r.id === contextRowId);
+          if (!row) return;
+
+          if (action === "p1") row.priority = "P1";
+          if (action === "p2") row.priority = "P2";
+          if (action === "p3") row.priority = "P3";
+          if (action === "watch") row.flagged = !row.flagged;
+          if (action === "duplicate") {
+            const clone = deepClone(row);
+            clone.id = `${row.id}-COPY-${Date.now().toString().slice(-4)}`;
+            clone.desk = `${row.desk} (Copy)`;
+            draft.portfolios.push(clone);
+          }
+          if (action === "delete") {
+            const idx = draft.portfolios.findIndex((r) => r.id === contextRowId);
+            if (idx >= 0 && draft.portfolios.length > 1) draft.portfolios.splice(idx, 1);
+          }
+        });
+      });
+    }
+
+    function saveLocal() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function loadLocal() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      try {
+        state = JSON.parse(raw);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function bindPersistenceButtons() {
+      document.getElementById("saveStateBtn").addEventListener("click", () => {
+        saveLocal();
+        alert("Dashboard state saved to localStorage.");
+      });
+
+      document.getElementById("loadStateBtn").addEventListener("click", () => {
+        if (loadLocal()) {
+          undoStack = [];
+          redoStack = [];
+          renderedTabs.clear();
+          refreshAll();
+          alert("Saved state loaded.");
+        } else {
+          alert("No valid saved state found.");
+        }
+      });
+
+      document.getElementById("resetBtn").addEventListener("click", () => {
+        if (!confirm("Reset dashboard to baseline defaults?")) return;
+        state = deepClone(DEFAULT_STATE);
+        undoStack = [];
+        redoStack = [];
+        renderedTabs.clear();
+        refreshAll();
+      });
+
+      document.getElementById("undoBtn").addEventListener("click", () => {
+        if (!undoStack.length) return;
+        redoStack.push(deepClone(state));
+        state = undoStack.pop();
+        renderedTabs.clear();
+        refreshAll();
+      });
+
+      document.getElementById("redoBtn").addEventListener("click", () => {
+        if (!redoStack.length) return;
+        undoStack.push(deepClone(state));
+        state = redoStack.pop();
+        renderedTabs.clear();
+        refreshAll();
+      });
+    }
+
+    function bindKeyboardShortcuts() {
+      document.addEventListener("keydown", (e) => {
+        const isCtrl = e.ctrlKey || e.metaKey;
+        if (!isCtrl) return;
+
+        if (e.key.toLowerCase() === "z") {
+          e.preventDefault();
+          document.getElementById("undoBtn").click();
+        }
+
+        if (e.key.toLowerCase() === "y") {
+          e.preventDefault();
+          document.getElementById("redoBtn").click();
+        }
+
+        if (e.key === "Escape") {
+          document.getElementById("contextMenu").style.display = "none";
+        }
+      });
+    }
+
+    function bindImportExport() {
+      const fileInput = document.getElementById("csvFileInput");
+      document.getElementById("importPortfolioBtn").addEventListener("click", () => fileInput.click());
+
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        Papa.parse(file, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          complete: (result) => {
+            const rows = result.data;
+            if (!rows.length) {
+              alert("CSV parsed but no rows found.");
+              return;
+            }
+
+            const mapped = rows.map((r, idx) => ({
+              id: r.id || `IMP-${Date.now()}-${idx}`,
+              lob: r.lob || r.LOB || "Banking",
+              desk: r.desk || r.Desk || r["Role"] || `Desk ${idx + 1}`,
+              eadBn: safeNumber(r.eadBn ?? r.EAD_Bn ?? r.EAD ?? 0),
+              pdPct: safeNumber(r.pdPct ?? r.PD ?? 1),
+              lgdPct: safeNumber(r.lgdPct ?? r.LGD ?? 35),
+              criticizedPct: safeNumber(r.criticizedPct ?? r.CriticizedPct ?? 5),
+              nonaccrualPct: safeNumber(r.nonaccrualPct ?? r.NonaccrualPct ?? 0.3),
+              var1dMm: safeNumber(r.var1dMm ?? r.VaR1dMm ?? 5),
+              varLimitMm: Math.max(1, safeNumber(r.varLimitMm ?? r.VaRLimitMm ?? 10)),
+              ncoAnnualMm: safeNumber(r.ncoAnnualMm ?? r.NCOAnnualMm ?? 2),
+              rwaDensityPct: safeNumber(r.rwaDensityPct ?? r.RWADensityPct ?? 55),
+              owner: r.owner || r.Owner || "Portfolio Risk",
+              priority: r.priority || r.Priority || "P2",
+              action: r.action || r.Action || "Set action",
+              flagged: Boolean(r.flagged || r.Flagged)
+            }));
+
+            applyStateMutation((draft) => {
+              draft.portfolios = mapped;
+            });
+
+            alert(`Imported ${mapped.length} portfolio rows.`);
+          }
+        });
+      });
+
+      document.getElementById("exportPortfolioBtn").addEventListener("click", () => {
+        const csv = Papa.unparse(state.portfolios);
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `cib_portfolio_export_${TODAY}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    async function exportPng() {
+      const tab = document.querySelector(`#tab-${activeTab}`);
+      const canvas = await html2canvas(tab, { scale: 2, backgroundColor: "#0a1628" });
+      const a = document.createElement("a");
+      a.href = canvas.toDataURL("image/png");
+      a.download = `cib-risk-${activeTab}-${TODAY}.png`;
+      a.click();
+    }
+
+    async function exportPdf() {
+      const { jsPDF } = window.jspdf;
+      const tab = document.querySelector(`#tab-${activeTab}`);
+      const canvas = await html2canvas(tab, { scale: 2, backgroundColor: "#0a1628" });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("l", "mm", "a4");
+      const w = pdf.internal.pageSize.getWidth();
+      const h = pdf.internal.pageSize.getHeight();
+      pdf.addImage(imgData, "PNG", 6, 6, w - 12, h - 12);
+      pdf.save(`cib-risk-${activeTab}-${TODAY}.pdf`);
+    }
+
+    function bindExportButtons() {
+      document.getElementById("exportPngBtn").addEventListener("click", () => {
+        exportPng().catch(() => alert("PNG export failed."));
+      });
+      document.getElementById("exportPdfBtn").addEventListener("click", () => {
+        exportPdf().catch(() => alert("PDF export failed."));
+      });
+      document.getElementById("printBtn").addEventListener("click", () => window.print());
+    }
+
+    function bindBoardButtons() {
+      document.getElementById("regenNarrativeBtn").addEventListener("click", () => {
+        document.getElementById("boardNarrative").value = buildNarrative();
+      });
+      document.getElementById("copyNarrativeBtn").addEventListener("click", async () => {
+        const text = document.getElementById("boardNarrative").value;
+        try {
+          await navigator.clipboard.writeText(text);
+          alert("Narrative copied.");
+        } catch {
+          alert("Clipboard copy failed.");
+        }
+      });
+      document.getElementById("downloadBriefBtn").addEventListener("click", () => {
+        const text = document.getElementById("boardNarrative").value;
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `cib-risk-board-brief-${TODAY}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    function bindTabInvalidators() {
+      ["portfolioSearch", "portfolioLobFilter", "portfolioPriorityFilter", "portfolioRiskFilter"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener("input", () => {
+          renderedTabs.delete("portfolio");
+          if (activeTab === "portfolio") renderPortfolioTab();
+        });
+      });
+    }
+
+    function boot() {
+      model = recomputeModel();
+      renderNav();
+      renderScenarioSelect();
+      renderControlValues();
+      renderKpis();
+      renderActiveTab(true);
+
+      bindNav();
+      bindControls();
+      bindPortfolioTable();
+      bindContextMenu();
+      bindPersistenceButtons();
+      bindKeyboardShortcuts();
+      bindImportExport();
+      bindExportButtons();
+      bindBoardButtons();
+      bindTabInvalidators();
+
+      window.addEventListener("resize", () => {
+        if (activeTab === "overview") {
+          Plotly.Plots.resize("treemapPlot");
+        }
+      });
+    }
+
+    boot();
+  </script>
+</body>
+</html>
