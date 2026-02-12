@@ -50,12 +50,16 @@
       color: var(--text);
       font-family: var(--body);
       min-height: 100%;
+      height: 100%;
+      overflow: hidden;
     }
 
     .app {
       display: grid;
       grid-template-columns: 310px 1fr;
       min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
     }
 
     .sidebar {
@@ -243,7 +247,10 @@
 
     .main {
       padding: 16px 18px 24px;
+      height: 100vh;
+      overflow-y: auto;
       overflow-x: hidden;
+      scroll-behavior: smooth;
     }
 
     .topbar {
@@ -370,11 +377,40 @@
 
     .plot {
       width: 100%;
-      min-height: 320px;
+      min-height: 300px;
+      height: min(46vh, 430px);
+      max-height: 460px;
+      overflow: hidden;
     }
 
     .plot.small {
-      min-height: 260px;
+      min-height: 250px;
+      height: min(38vh, 335px);
+      max-height: 360px;
+    }
+
+    .exec-guide {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: linear-gradient(90deg, rgba(85, 180, 255, 0.15), rgba(0, 200, 150, 0.1));
+      padding: 9px 12px;
+      margin-bottom: 10px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .exec-guide .title {
+      font-size: 12px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #d7e9fb;
+      font-weight: 700;
+    }
+
+    .exec-guide .flow {
+      font-size: 12px;
+      color: #c9dcf0;
+      line-height: 1.35;
     }
 
     .metric-list {
@@ -629,6 +665,46 @@
         grid-template-columns: 1fr;
       }
     }
+
+    @media print {
+      html,
+      body {
+        height: auto !important;
+        overflow: visible !important;
+        background: #ffffff !important;
+        color: #111111 !important;
+      }
+
+      .app {
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+
+      .sidebar {
+        display: none !important;
+      }
+
+      .main {
+        height: auto !important;
+        overflow: visible !important;
+        padding: 0 !important;
+      }
+
+      .topbar,
+      .exec-guide {
+        position: static !important;
+        border: 1px solid #d0d0d0 !important;
+        background: #ffffff !important;
+        color: #111111 !important;
+      }
+
+      .section {
+        box-shadow: none !important;
+        background: #ffffff !important;
+        color: #111111 !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -719,6 +795,11 @@
       <header class="topbar">
         <div class="kpi-grid" id="kpiGrid"></div>
       </header>
+
+      <div class="exec-guide">
+        <div class="title">Executive Quick Path</div>
+        <div class="flow">1) Select scenario and tune assumptions on the left. 2) Review portfolio and counterparty concentrations. 3) Validate capital trajectory and Monte Carlo band. 4) Generate board narrative and export package.</div>
+      </div>
 
       <section class="tab active" id="tab-overview">
         <div class="section">
@@ -1500,6 +1581,58 @@
       return "bad";
     }
 
+    const PLOT_CFG = { displayModeBar: false, responsive: true, scrollZoom: false };
+
+    function chartHeight(size = "default", rowCount = 0) {
+      const vh = Math.max(740, window.innerHeight || 900);
+      if (size === "small") {
+        return Math.round(Math.max(250, Math.min(350, vh * 0.34)));
+      }
+      if (size === "large") {
+        const rowDriven = rowCount > 0 ? Math.min(680, 160 + rowCount * 34) : 0;
+        return Math.round(Math.max(320, Math.min(640, rowDriven || vh * 0.5)));
+      }
+      return Math.round(Math.max(300, Math.min(450, vh * 0.42)));
+    }
+
+    function withPlotLayout(layout, size = "default", rowCount = 0) {
+      return {
+        ...layout,
+        autosize: true,
+        height: chartHeight(size, rowCount)
+      };
+    }
+
+    function safePlotResize(id) {
+      try {
+        const el = document.getElementById(id);
+        if (el && window.Plotly) Plotly.Plots.resize(el);
+      } catch {
+        // Keep dashboard stable even if one chart resize fails.
+      }
+    }
+
+    function resizeActivePlots() {
+      if (activeTab === "overview") {
+        safePlotResize("treemapPlot");
+      }
+      if (activeTab === "portfolio") {
+        safePlotResize("creditHeatPlot");
+        safePlotResize("concentrationPlot");
+      }
+      if (activeTab === "market") {
+        safePlotResize("counterpartyBubble");
+      }
+      if (activeTab === "stress") {
+        safePlotResize("capitalTrajectoryPlot");
+        safePlotResize("stressWaterfallPlot");
+        safePlotResize("monteCarloPlot");
+      }
+      if (activeTab === "functions") {
+        safePlotResize("ganttPlot");
+      }
+    }
+
     function renderKpis() {
       const ncoRatioPct = model.totalNcoMm / (state.cibPublics.avgLoansBn * 1000) * 100;
       const aclCoveragePct = state.cibPublics.aclMm / (state.cibPublics.loansBn * 1000) * 100;
@@ -1611,12 +1744,12 @@
           branchvalues: "total",
           hovertemplate: "<b>%{label}</b><br>Exposure: %{value:.2f}Bn<extra></extra>"
         }
-      ], {
+      ], withPlotLayout({
         margin: { t: 10, r: 10, b: 10, l: 10 },
         paper_bgcolor: "rgba(0,0,0,0)",
         plot_bgcolor: "rgba(0,0,0,0)",
         font: { color: "#e0e8f0", family: "DM Sans" }
-      }, { displayModeBar: false, responsive: true });
+      }, "large", labels.length), PLOT_CFG);
     }
 
     function renderMarketTape() {
@@ -1816,14 +1949,14 @@
         text: rows.map((r) => `${r.desk}<br>Criticized ${fmtPct(r.criticizedPct, 1)}<br>Nonaccrual ${fmtPct(r.nonaccrualPct, 1)}`),
         marker: { size: sizes, color: colors, opacity: 0.85, line: { color: "#0b1320", width: 1 } },
         hovertemplate: "%{text}<br>PD %{x:.2f}% | LGD %{y:.1f}%<extra></extra>"
-      }], {
+      }], withPlotLayout({
         margin: { l: 45, r: 12, t: 10, b: 40 },
         xaxis: { title: "PD %", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
         yaxis: { title: "LGD %", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
         paper_bgcolor: "rgba(0,0,0,0)",
         plot_bgcolor: "rgba(0,0,0,0)",
         font: { color: "#dbe7f3", family: "DM Sans" }
-      }, { displayModeBar: false, responsive: true });
+      }, "small"), PLOT_CFG);
 
       const top = [...rows].sort((a, b) => b._elMm - a._elMm).slice(0, 10).reverse();
       Plotly.react("concentrationPlot", [{
@@ -1833,14 +1966,14 @@
         x: top.map((r) => r._elMm),
         marker: { color: top.map((r) => lobColor(r._riskScore)) },
         hovertemplate: "%{y}<br>Expected loss: %{x:.1f}MM<extra></extra>"
-      }], {
+      }], withPlotLayout({
         margin: { l: 190, r: 16, t: 10, b: 30 },
         xaxis: { title: "Expected Loss ($MM)", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
         yaxis: { color: "#dbe7f3" },
         paper_bgcolor: "rgba(0,0,0,0)",
         plot_bgcolor: "rgba(0,0,0,0)",
         font: { color: "#dbe7f3", family: "DM Sans" }
-      }, { displayModeBar: false, responsive: true });
+      }, "small"), PLOT_CFG);
     }
 
     function buildLimitRows() {
@@ -1946,7 +2079,7 @@
           line: { color: "rgba(255,255,255,0.4)", width: 1 }
         },
         hovertemplate: "%{text}<br>Util %{x:.1f}%<br>WWR %{y:.1f}<br>EAD %{marker.size:.1f} scaled<extra></extra>"
-      }], {
+      }], withPlotLayout({
         margin: { l: 50, r: 10, t: 10, b: 40 },
         xaxis: { title: "Utilization %", gridcolor: "rgba(255,255,255,0.08)", color: "#dbe7f3" },
         yaxis: { title: "Wrong-Way Risk Score", gridcolor: "rgba(255,255,255,0.08)", color: "#dbe7f3" },
@@ -1958,7 +2091,7 @@
         paper_bgcolor: "rgba(0,0,0,0)",
         plot_bgcolor: "rgba(0,0,0,0)",
         font: { color: "#dbe7f3", family: "DM Sans" }
-      }, { displayModeBar: false, responsive: true });
+      }, "default"), PLOT_CFG);
     }
 
     function renderCounterpartyTable() {
@@ -2053,7 +2186,7 @@
           name: "Requirement + Mgmt Buffer",
           line: { color: "#f5a623", dash: "dot", width: 2 }
         }
-      ], {
+      ], withPlotLayout({
         margin: { l: 50, r: 12, t: 10, b: 34 },
         xaxis: { color: "#dbe7f3" },
         yaxis: { title: "CET1 %", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
@@ -2061,7 +2194,7 @@
         plot_bgcolor: "rgba(0,0,0,0)",
         font: { color: "#dbe7f3", family: "DM Sans" },
         legend: { orientation: "h", y: 1.1 }
-      }, { displayModeBar: false, responsive: true });
+      }, "small"), PLOT_CFG);
     }
 
     function renderStressWaterfall() {
@@ -2082,14 +2215,14 @@
         totals: { marker: { color: "#55b4ff" } },
         textposition: "outside",
         hovertemplate: "%{x}: %{y:.2f}Bn<extra></extra>"
-      }], {
+      }], withPlotLayout({
         margin: { l: 20, r: 20, t: 20, b: 60 },
         yaxis: { title: "$Bn", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
         xaxis: { color: "#dbe7f3" },
         paper_bgcolor: "rgba(0,0,0,0)",
         plot_bgcolor: "rgba(0,0,0,0)",
         font: { color: "#dbe7f3", family: "DM Sans" }
-      }, { displayModeBar: false, responsive: true });
+      }, "small"), PLOT_CFG);
     }
 
     function runScenarioCalc(s) {
@@ -2161,7 +2294,7 @@
         nbinsx: 35,
         marker: { color: "rgba(85,180,255,0.75)" },
         hovertemplate: "Loss bucket: %{x:.2f}Bn<br>Count: %{y}<extra></extra>"
-      }], {
+      }], withPlotLayout({
         margin: { l: 45, r: 10, t: 10, b: 35 },
         xaxis: { title: "Pre-tax loss ($Bn)", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
         yaxis: { title: "Frequency", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
@@ -2173,7 +2306,7 @@
           { type: "line", x0: p50, x1: p50, y0: 0, y1: 1, yref: "paper", line: { color: "#55b4ff", dash: "dot" } },
           { type: "line", x0: p90, x1: p90, y0: 0, y1: 1, yref: "paper", line: { color: "#e74c3c", dash: "dot" } }
         ]
-      }, { displayModeBar: false, responsive: true });
+      }, "small"), PLOT_CFG);
 
       document.getElementById("monteCarloSummary").innerHTML = `
         <strong>Distribution range:</strong> P10 <span class="mono">${formatMoneyBn(p10)}</span>,
@@ -2234,7 +2367,7 @@
         };
       });
 
-      Plotly.react("ganttPlot", traces, {
+      Plotly.react("ganttPlot", traces, withPlotLayout({
         barmode: "stack",
         margin: { l: 220, r: 16, t: 16, b: 36 },
         xaxis: { type: "date", color: "#dbe7f3", gridcolor: "rgba(255,255,255,0.08)" },
@@ -2243,7 +2376,7 @@
         plot_bgcolor: "rgba(0,0,0,0)",
         font: { color: "#dbe7f3", family: "DM Sans" },
         legend: { orientation: "h", y: 1.15 }
-      }, { displayModeBar: false, responsive: true });
+      }, "large", traces.reduce((acc, t) => acc + (t.y ? t.y.length : 0), 0)), PLOT_CFG);
     }
 
     function buildNarrative() {
@@ -2368,6 +2501,7 @@
         renderedTabs.delete(activeTab);
       }
       renderActiveTab(true);
+      requestAnimationFrame(() => resizeActivePlots());
     }
 
     function bindNav() {
@@ -2377,6 +2511,9 @@
         activeTab = btn.dataset.tab;
         renderNav();
         renderActiveTab();
+        const mainEl = document.getElementById("mainContent");
+        if (mainEl) mainEl.scrollTop = 0;
+        requestAnimationFrame(() => resizeActivePlots());
       });
     }
 
@@ -2805,9 +2942,7 @@
       bindTabInvalidators();
 
       window.addEventListener("resize", () => {
-        if (activeTab === "overview") {
-          Plotly.Plots.resize("treemapPlot");
-        }
+        resizeActivePlots();
       });
     }
 
