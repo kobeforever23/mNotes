@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Workforce Dashboard v1 | Displacement & Optimization Command Center</title>
+  <title>AI Workforce Dashboard v12 | Displacement & Optimization Command Center</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
@@ -1122,7 +1122,7 @@
   <div class="app" id="appShell">
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <h1>AI Workforce Dashboard v1</h1>
+        <h1>AI Workforce Dashboard v12</h1>
         <small id="orgLabel">No Organization Loaded</small>
       </div>
 
@@ -1654,8 +1654,9 @@
     (function () {
       "use strict";
 
-      const STORAGE_KEY = "ai_workforce_dashboard_v1_2026_02";
+      const STORAGE_KEY = "ai_workforce_dashboard_v12_2026_02";
       const LEGACY_STORAGE_KEYS = [
+        "ai_workforce_dashboard_v1_2026_02",
         "ai_workforce_dashboard_fresh_start_v2026_02",
         "ai_workforce_dashboard_v2026_02"
       ];
@@ -3057,6 +3058,10 @@
       }
 
       function importCsv() {
+        if (!window.Papa || typeof window.Papa.parse !== "function") {
+          showToast("CSV parser is unavailable. Use manual entry or connect to network.");
+          return;
+        }
         const fileInput = $("csvUpload");
         const file = fileInput.files && fileInput.files[0];
         if (!file) {
@@ -3090,6 +3095,10 @@
         const fileName = String(file.name || "").toLowerCase();
 
         if (fileName.endsWith(".csv")) {
+          if (!window.Papa || typeof window.Papa.parse !== "function") {
+            showToast("CSV parser is unavailable. Use JSON or manual entry.");
+            return;
+          }
           Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
@@ -3100,6 +3109,10 @@
         }
 
         if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
+          if (!window.XLSX) {
+            showToast("XLSX parser is unavailable. Use CSV/JSON or manual entry.");
+            return;
+          }
           const reader = new FileReader();
           reader.onload = (e) => {
             try {
@@ -3411,9 +3424,10 @@
           coloraxis: { cmin: 0, cmax: 100 }
         };
 
-        Plotly.react("orgTreemap", [trace], layout, PLOT_CONFIG);
+        plotReactSafe("orgTreemap", [trace], layout, PLOT_CONFIG);
 
         const treemapDiv = $("orgTreemap");
+        if (!treemapDiv || typeof treemapDiv.on !== "function") return;
         treemapDiv.on("plotly_click", (event) => {
           const id = event.points?.[0]?.id;
           if (!id) return;
@@ -3734,9 +3748,10 @@
         };
 
         const layout = baseLayout("Financial Waterfall", { yaxis: { tickprefix: "$" } }, "default");
-        Plotly.react("waterfallChart", [trace], layout, PLOT_CONFIG);
+        plotReactSafe("waterfallChart", [trace], layout, PLOT_CONFIG);
 
         const waterfallDiv = $("waterfallChart");
+        if (!waterfallDiv || typeof waterfallDiv.on !== "function") return;
         waterfallDiv.on("plotly_click", (evt) => {
           const label = evt.points?.[0]?.x;
           if (!label) return;
@@ -3835,7 +3850,7 @@
             : []
         }, "default");
 
-        Plotly.react("roiTimelineChart", baseTrace, layout, PLOT_CONFIG);
+        plotReactSafe("roiTimelineChart", baseTrace, layout, PLOT_CONFIG);
 
         const body = $("roiYearTableBody");
         body.innerHTML = yearly.map((row) => `<tr>
@@ -3871,7 +3886,7 @@
           margin: { l: 180, r: 20, t: 20, b: 36 }
         }, "rows", deps.length);
 
-        Plotly.react("deptRoiChart", [trace], layout, PLOT_CONFIG);
+        plotReactSafe("deptRoiChart", [trace], layout, PLOT_CONFIG);
 
         $("deptRoiTableBody").innerHTML = deps.map((d) => `<tr>
           <td>${escapeHtml(d.department)}</td>
@@ -3908,7 +3923,7 @@
           margin: { l: 190, r: 20, t: 24, b: 32 }
         }, "rows", sens.length);
 
-        Plotly.react("sensitivityChart", [trace1, trace2], layout, PLOT_CONFIG);
+        plotReactSafe("sensitivityChart", [trace1, trace2], layout, PLOT_CONFIG);
       }
 
       function renderActions() {
@@ -4303,7 +4318,7 @@
           margin: { l: 44, r: 48, t: 26, b: 56 }
         }, "default");
 
-        Plotly.react("scenarioTrajectoryChart", trace, layout, PLOT_CONFIG);
+        plotReactSafe("scenarioTrajectoryChart", trace, layout, PLOT_CONFIG);
       }
 
       function renderScenarioComparisons() {
@@ -4343,7 +4358,7 @@
           }
         ];
 
-        Plotly.react("scenarioComparisonBars", bars, baseLayout("Scenario Net Savings Comparison", { barmode: "group", yaxis: { tickprefix: "$" } }, "small"), PLOT_CONFIG);
+        plotReactSafe("scenarioComparisonBars", bars, baseLayout("Scenario Net Savings Comparison", { barmode: "group", yaxis: { tickprefix: "$" } }, "small"), PLOT_CONFIG);
 
         const tbody = $("scenarioDecisionTable");
         tbody.innerHTML = selected.map((s) => `<tr>
@@ -4396,7 +4411,7 @@
           }
         };
 
-        Plotly.react("scenarioRiskRadar", [trace], layout, PLOT_CONFIG);
+        plotReactSafe("scenarioRiskRadar", [trace], layout, PLOT_CONFIG);
       }
 
       function renderMonteCarlo() {
@@ -4408,7 +4423,7 @@
           nbinsx: 40
         };
 
-        Plotly.react("monteCarloChart", [trace], baseLayout("Net Savings Distribution", { xaxis: { tickprefix: "$" } }, "small"), PLOT_CONFIG);
+        plotReactSafe("monteCarloChart", [trace], baseLayout("Net Savings Distribution", { xaxis: { tickprefix: "$" } }, "small"), PLOT_CONFIG);
         $("monteCarloSummary").textContent = `P10: ${currencyFmt.format(mc.p10)} | P50: ${currencyFmt.format(mc.p50)} | P90: ${currencyFmt.format(mc.p90)}. There is a 90% probability net impact is between ${currencyFmt.format(mc.p10)} and ${currencyFmt.format(mc.p90)}.`;
       }
 
@@ -4486,7 +4501,7 @@
           polar: { radialaxis: { visible: true, range: [0, 100], gridcolor: "#3b4f66" }, bgcolor: "rgba(0,0,0,0)" }
         };
 
-        Plotly.react("readinessRadar", [traceA, traceB], layout, PLOT_CONFIG);
+        plotReactSafe("readinessRadar", [traceA, traceB], layout, PLOT_CONFIG);
 
         $("readinessBadge").className = `score-badge ${band.cls}`;
         $("readinessBadge").textContent = `Readiness Score: ${percentFmt.format(score.overall)} | ${band.label}`;
@@ -4652,7 +4667,7 @@
           ]
         });
 
-        Plotly.react("positioningChart", [peerTrace, yourTrace], layout, PLOT_CONFIG);
+        plotReactSafe("positioningChart", [peerTrace, yourTrace], layout, PLOT_CONFIG);
       }
 
       function percentileRank(value, arr) {
@@ -4829,6 +4844,10 @@
       }
 
       async function exportCurrentTabPng() {
+        if (!window.html2canvas) {
+          showToast("PNG export library unavailable in this environment.");
+          return;
+        }
         const tab = document.querySelector(`.tab.active`);
         const canvas = await html2canvas(tab, { scale: 2, backgroundColor: "#0a1628" });
         const link = document.createElement("a");
@@ -4839,6 +4858,10 @@
       }
 
       async function exportCurrentTabPdf() {
+        if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
+          showToast("PDF export library unavailable in this environment.");
+          return;
+        }
         const tab = document.querySelector(`.tab.active`);
         const canvas = await html2canvas(tab, { scale: 2, backgroundColor: "#0a1628" });
         const imgData = canvas.toDataURL("image/png");
@@ -4855,6 +4878,10 @@
       }
 
       function exportRolesCsv() {
+        if (!window.Papa || typeof window.Papa.unparse !== "function") {
+          showToast("CSV export library unavailable in this environment.");
+          return;
+        }
         const rows = flattenRoles().map((r) => ({
           roleTitle: r.title,
           department: r.department,
@@ -4880,6 +4907,10 @@
       }
 
       function exportExcelWorkbook() {
+        if (!window.XLSX) {
+          showToast("Excel export library unavailable in this environment.");
+          return;
+        }
         const wb = XLSX.utils.book_new();
 
         const rolesSheet = XLSX.utils.json_to_sheet(flattenRoles().map((r) => ({
@@ -4962,6 +4993,20 @@
         };
       }
 
+      function plotReactSafe(targetId, traces, layout, config = PLOT_CONFIG) {
+        const el = $(targetId);
+        if (!el) return;
+        if (!window.Plotly || typeof window.Plotly.react !== "function") {
+          el.innerHTML = `<div class="hint" style="padding:10px;">Interactive chart unavailable (Plotly not loaded). Core tables, wizard, and calculations remain active.</div>`;
+          return;
+        }
+        try {
+          window.Plotly.react(targetId, traces, layout, config);
+        } catch {
+          el.innerHTML = `<div class="hint" style="padding:10px;">Chart render failed in this environment. Core tables, wizard, and calculations remain active.</div>`;
+        }
+      }
+
       function safePlotResize(id) {
         try {
           const el = $(id);
@@ -4996,7 +5041,11 @@
 
         $("saveConfigBtn").addEventListener("click", storageSave);
         $("openWizardBtn").addEventListener("click", () => {
-          openOnboardingWizard(true);
+          if (typeof window.openOnboardingWizard === "function") {
+            window.openOnboardingWizard(true);
+          } else {
+            showToast("Wizard is initializing. Try again.");
+          }
         });
         $("loadConfigBtn").addEventListener("click", storageLoad);
         $("resetConfigBtn").addEventListener("click", resetToTemplate);
@@ -5335,8 +5384,12 @@
       initDefaults();
       migrateLegacyStorageIfNeeded();
       bindEvents();
-      initialRender();
       setupOnboarding();
+      try {
+        initialRender();
+      } catch (err) {
+        showToast("Loaded in safe mode. Some visual libraries were unavailable.");
+      }
     })();
   </script>
 </body>
