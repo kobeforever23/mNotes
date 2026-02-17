@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BAU Stress Testing Scenario Inventory</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e17;color:#e2e8f0;font-family:'DM Sans',system-ui,sans-serif}
+.mono{font-family:'JetBrains Mono',monospace}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#0a0e17}
+::-webkit-scrollbar-thumb{background:#1e293b;border-radius:3px}
+.card{background:#151b2b;border:1px solid #1e293b;border-radius:8px}
+.fade{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.chip{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500;cursor:pointer;border:1px solid #1e293b;background:#151b2b;color:#6b7280;transition:all .15s}
+.chip.on{border-color:#3b82f6;background:rgba(59,130,246,.15);color:#60a5fa}
+.chip:hover{border-color:#4b5563}
+table{border-collapse:collapse;width:100%}
+th{padding:6px 10px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#6b7280;cursor:pointer;white-space:nowrap;user-select:none;font-weight:600}
+th:hover{color:#9ca3af}
+td{padding:6px 10px}
+tr.row{border-top:1px solid #1e293b;cursor:pointer;transition:background .15s}
+tr.row:hover{background:#131a2a}
+tr.row.exp{background:#1a2236}
+.tag{padding:2px 6px;border-radius:4px;font-size:10px;display:inline-block}
+.ac-tag{font-size:8px;background:#1e293b;color:#6b7280;padding:1px 4px;border-radius:3px;display:inline-block;margin:1px}
+.tab{padding:8px 16px;font-size:12px;font-weight:500;border:none;background:none;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent}
+.tab.on{color:#60a5fa;border-bottom-color:#3b82f6}
+.kpi{padding:10px 12px}
+.kpi-val{font-size:22px;font-weight:700}
+.shock-cell{background:#151b2b;border:1px solid #1e293b;border-radius:4px;padding:4px 6px;text-align:center}
+.corr-bar{height:6px;border-radius:9999px;transition:width .3s}
+.bar-bg{background:#1e293b;border-radius:9999px;height:6px;flex:1;overflow:hidden}
+input{background:transparent;border:none;outline:none;color:#e2e8f0;font-size:13px;font-family:inherit}
+input::placeholder{color:#4b5563}
+.hm-cell{text-align:center;padding:6px 8px;font-weight:600}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const D=[
+["HIST-001","Black Monday 1987","Historical Replay","Equity Crash","S&P 500 fell 22.6% in a single trading day — the largest one-day percentage decline in history. Program trading and portfolio insurance amplified selling. Flight to quality drove UST rally while equity vol term structure inverted.","Instantaneous","Extreme","Daily","Equities,Rates,Vol","Active","2025-02-10","Market Risk - Equities","FRTB,Internal","Annual","Approved by CRO",[-22.6,-11.4,-12,-14.9,-10.8,-8,-5,-18.5,150,-40,-45,-50,-35,-25,30,120,80,2.5,-1.5,-3,-1,0.5,-5,-4.5,3.5,2,-6,-2,0,0,50,20,15,10],[-0.7,0.6,-0.3,0.2,-0.9,1.2],"COVID-19 Crash|Volmageddon"],
+["HIST-002","1994 Bond Massacre","Historical Replay","Rates Shock","Unexpected Fed tightening cycle caught bond markets off-guard. UST 10Y yields rose 250bp over 12 months. Mortgage convexity selling amplified the move, leading to Orange County bankruptcy and massive fixed-income losses globally.","Extended (3-12m)","Severe","Weekly","Rates,Credit,Structured Products","Active","2025-02-07","Market Risk - Rates","FRTB,Internal","Annual","Approved by CRO",[-8.9,-3.5,-7,-12,-6,-15,-5,-10,25,200,230,250,180,250,40,100,150,3,-4,2,-3,1,-5,-4,-8,-10,-3,-2,0,50,20,80,30,20],[0.5,0.4,0.7,0.2,-0.5,0.8],"Taper Tantrum|2022 Rate Shock"],
+["HIST-003","Asian Financial Crisis 1997","Historical Replay","FX Crisis","Thai baht devaluation triggered contagion across Asian economies. THB, IDR, KRW devalued 30-80%. Asian equity indices fell 40-60%. Contagion spread to EM credit, commodities collapsed, flight to quality benefited USTs.","Extended (3-12m)","Severe","Weekly","Equities,FX,Credit,Commodities","Active","2025-02-07","Market Risk - EM","FRTB,Internal","Annual","Approved by CRO",[-7,-5,-8,-25,-5,-50,-20,-10,35,-30,-25,-30,-20,-15,25,80,350,5,-3,-10,-2,2,-20,-18,5,-5,-25,-10,0,0,30,10,15,20],[-0.5,0.7,0.6,0.5,-0.7,1.4],"LTCM/Russian Default|Simultaneous EM Debt Crisis"],
+["HIST-004","LTCM / Russian Default Aug 1998","Historical Replay","Credit Blowout","Russian ruble devaluation and GKO default triggered global flight from risk. LTCM's massive leveraged convergence trades unraveled. HY OAS blew out +450bp, equity fell 19%, swap spreads inverted as basis trades imploded.","Medium (1-3m)","Extreme","Daily","Equities,Rates,Credit,FX,Vol","Active","2025-02-10","Market Risk - Credit","FRTB,Basel III,Internal","Annual","Approved by CRO",[-19.3,-15,-22,-10,-13,-35,-10,-25,48,-80,-75,-80,-60,-50,80,450,600,4,-2,-8,-1.5,1,-30,-28,5,0,-15,-8,0,100,120,40,50,60],[-0.8,0.85,0.4,0.3,-0.9,1.8],"GFC/Lehman Collapse|COVID-19 Crash"],
+["HIST-005","Dot-Com Crash 2000-2002","Historical Replay","Equity Crash","NASDAQ fell 78% peak-to-trough as the technology bubble burst. Extreme P/E compression in growth/tech sectors. S&P 500 declined 49%. IG credit spreads widened 150bp. Fed eased 550bp over the cycle.","Full Cycle (9Q)","Extreme","Weekly","Equities,Credit,Rates","Active","2025-02-07","Market Risk - Equities","CCAR,FRTB,Internal","Annual","Approved by CRO",[-49,-78,-45,-40,-38,-30,-20,-42,45,-200,-180,-150,-100,-300,150,500,300,8,-10,-5,-3,0,-30,-28,10,5,-20,-15,0,-100,40,50,30,40],[-0.6,0.7,0.3,0.4,-0.8,1.0],"AI Bubble Burst"],
+["HIST-006","9/11 Attacks Sep 2001","Historical Replay","Geopolitical","Terrorist attacks on World Trade Center and Pentagon. Markets closed for 4 days. S&P fell 12% in the first week of reopening. Airline and insurance sectors devastated. Gold surged 6%, VIX spiked to 45.","Short-term (1-5d)","Severe","Daily","Equities,Vol,Commodities,Rates","Active","2025-02-10","Market Risk - Multi-Asset","Internal","Annual","Approved by CRO",[-12,-16,-14,-6,-11,-8,-3,-15,45,-60,-50,-40,-25,-50,40,150,100,1.5,-1,-2,-1.5,0.5,8,7,6,4,-5,10,0,20,40,25,20,15],[-0.7,0.6,-0.2,-0.3,-0.85,1.1],"Oct 7 / Middle East Escalation"],
+["HIST-007","GM/Ford Downgrade May 2005","Historical Replay","Credit Blowout","GM and Ford downgraded from IG to HY — the largest fallen angel events in history. Triggered a correlation trading crisis as CDO tranches experienced massive dislocations. Credit index basis blew out.","Medium (1-3m)","Moderate","Monthly","Credit,Structured Products","Active","2025-01-15","Market Risk - Credit","Internal","Annual","Approved by MRC",[-3,-2,-4,-2,-3,-2,-1,-4,18,-10,-8,-5,-3,-5,30,120,40,0.5,-0.3,0.5,-0.2,0,2,1.5,1,0.5,0,0,0,5,10,15,25,40],[-0.2,0.8,0.1,0.1,-0.4,0.6],""],
+["HIST-008","Quant Quake Aug 2007","Historical Replay","Liquidity Freeze","Systematic equity L/S strategies lost 30%+ in days as factor crowding unwound simultaneously. Low-volatility anomaly failed. Stat arb P&L devastated by correlated deleveraging across quant funds.","Short-term (1-5d)","Moderate","Weekly","Equities,Vol","Active","2025-02-07","Market Risk - Equities","Internal","Annual","Approved by MRC",[-3.5,-4,-3,-2.5,-2.8,-2,-1.5,-5,30,-15,-10,-8,-5,-10,15,50,25,-0.5,0.3,-1,0.5,0,-2,-1.5,2,1,-3,0,0,30,25,5,5,8],[-0.3,0.3,0.1,0.1,-0.7,0.9],""],
+["HIST-009","GFC / Lehman Collapse Sep-Nov 2008","Historical Replay","Credit Blowout","Lehman Brothers bankruptcy triggered global financial crisis. S&P fell 46%, VIX hit 80+. LIBOR-OIS spread blew out 350bp, credit markets froze. ABS/MBS marks devastated. Money market fund broke the buck.","Medium (1-3m)","Extreme","Daily","Equities,Rates,Credit,FX,Vol,Structured Products","Active","2025-02-10","Enterprise Risk","CCAR,FRTB,Basel III,Internal","Annual","Approved by Board",[-46,-42,-44,-42,-33,-54,-60,-40,80,-180,-150,-130,-80,-200,400,1200,800,12,-10,-15,-25,0.5,-70,-68,5,-25,-55,-40,0,200,350,250,400,350],[-0.6,0.95,0.5,0.7,-0.95,1.9],"COVID-19 Crash|LTCM/Russian Default"],
+["HIST-010","European Sovereign Debt Crisis 2010-2012","Historical Replay","Sovereign","Greek 10Y yields surged to 35%. PIIGS sovereign spreads blew out massively. EUR fell 20%. European bank CDS exceeded 500bp. ECB LTRO operations and Draghi's 'whatever it takes' eventually stabilized markets.","Extended (3-12m)","Severe","Weekly","Rates,Credit,FX,Equities","Active","2025-02-07","Market Risk - Rates","FRTB,Internal","Annual","Approved by CRO",[-10,-8,-30,-12,-15,-18,-8,-12,40,-50,-40,-35,-20,-30,60,250,200,8,-20,5,-5,1,-10,-8,15,20,-10,-5,0,40,60,20,25,30],[-0.4,0.8,0.6,0.3,-0.7,1.3],"Eurozone Breakup"],
+["HIST-011","US Debt Downgrade Aug 2011","Historical Replay","Sovereign","S&P downgraded US sovereign to AA+. Equities fell 17%, VIX spiked above 48. Paradoxically, USTs rallied as flight-to-quality overwhelmed credit concerns. Gold surged to $1,900/oz.","Short-term (1-5d)","Severe","Daily","Equities,Rates,Vol,Commodities","Active","2025-02-10","Market Risk - Multi-Asset","Internal","Annual","Approved by CRO",[-17,-14,-20,-12,-13,-15,-8,-20,48,-60,-50,-40,-30,-30,45,180,120,-3,2,-5,1,-0.5,-8,-7,12,8,-10,-3,0,15,35,15,20,25],[-0.8,0.7,-0.3,0.2,-0.85,1.1],"US Sovereign Downgrade to A"],
+["HIST-012","Taper Tantrum May-Jun 2013","Historical Replay","Rates Shock","Bernanke signaled potential tapering of QE. UST 10Y yields surged 130bp in two months. EM currencies fell 10-20% as capital fled. EM local debt sold off sharply. Gold declined 25%.","Medium (1-3m)","Moderate","Weekly","Rates,FX,Commodities,Equities","Active","2025-02-07","Market Risk - Rates","Internal","Annual","Approved by MRC",[-5,-4,-6,-10,-5,-12,-8,-6,22,50,100,130,80,30,20,80,150,4,-3,5,-2,1.5,-3,-2,-25,-30,-8,-5,0,10,15,40,15,10],[0.4,0.3,0.7,0.2,-0.5,0.7],"1994 Bond Massacre|2022 Rate Shock"],
+["HIST-013","China Devaluation Aug 2015","Historical Replay","FX Crisis","PBoC surprised markets with a 4% CNY devaluation. S&P fell 11%, VIX spiked to 53, triggering VIX ETP stress. EM FX contagion spread broadly. Commodity complex collapsed on China demand fears.","Short-term (1-5d)","Severe","Daily","Equities,FX,Vol,Commodities","Active","2025-02-10","Market Risk - EM","Internal","Annual","Approved by CRO",[-11,-10,-12,-8,-9,-18,-25,-13,53,-20,-18,-15,-10,-10,25,100,180,3,-2,-3,-1.5,-4,-15,-14,3,0,-12,-5,-10,5,15,8,10,12],[-0.5,0.6,0.5,0.6,-0.85,1.2],"CNY/EM Selloff Jan 2016|Yen Carry Unwind"],
+["HIST-014","CNY/EM Selloff Jan 2016","Historical Replay","FX Crisis","China circuit breakers triggered multiple times. S&P fell 10%, oil crashed to $26/bbl. HY energy spreads hit 1600bp. Global risk-off driven by China hard-landing fears and commodity demand collapse.","Short-term (1-5d)","Severe","Daily","Equities,FX,Commodities,Credit","Active","2025-02-10","Market Risk - EM","Internal","Annual","Approved by CRO",[-10,-8.5,-11,-10,-8,-15,-20,-12,32,-25,-20,-18,-12,-15,30,200,220,2,-1,-4,-1.5,-3,-25,-23,5,2,-10,-12,-15,5,20,10,12,15],[-0.6,0.7,0.4,0.7,-0.8,1.1],"China Devaluation Aug 2015"],
+["HIST-015","Volmageddon Feb 2018","Historical Replay","Vol Explosion","VIX surged from 11 to 50 in a single day. XIV and SVXY inverse vol ETPs were destroyed. S&P fell 10% in two weeks. Vol-targeting strategies and risk parity funds forced massive equity selling.","Instantaneous","Extreme","Daily","Equities,Vol","Active","2025-02-10","Market Risk - Vol","FRTB,Internal","Annual","Approved by CRO",[-10,-9.5,-8,-7,-6.5,-6,-5,-11,50,-15,-12,-10,-8,-8,20,60,50,0.5,-0.3,-1.5,-0.2,0.3,-3,-2.5,2,1,-4,0,-8,10,12,5,5,8],[-0.4,0.4,0.1,0.2,-0.95,1.0],"Black Monday 1987"],
+["HIST-016","Q4 2018 Selloff","Historical Replay","Equity Crash","S&P fell 20% in three months driven by Fed hawkish pivot and QT concerns. Credit spreads blew out 150bp. Leveraged loan market experienced severe stress. Liquidity withdrawal amplified the selloff.","Medium (1-3m)","Severe","Weekly","Equities,Credit,Rates","Active","2025-02-07","Market Risk - Multi-Asset","Internal","Annual","Approved by CRO",[-20,-22,-15,-18,-12,-10,-15,-22,36,-30,-35,-40,-30,-10,60,150,100,1,-0.5,-3,-1,1,-35,-32,5,2,-12,-8,-45,10,20,15,20,25],[-0.5,0.7,0.2,0.4,-0.8,1.0],"COVID-19 Crash"],
+["HIST-017","Repo Crisis Sep 2019","Historical Replay","Liquidity Freeze","Overnight repo rate spiked to 10% as reserve scarcity hit the banking system. Fed launched emergency repo operations. Money market stress spread briefly. Highlighted structural fragility in funding markets post-QT.","Instantaneous","Moderate","Daily","Rates","Active","2025-02-10","Market Risk - Treasury/Funding","Basel III,Internal","Annual","Approved by MRC",[-2,-1.5,-1,-0.5,-0.8,-1.5,-0.5,-2.5,18,10,5,3,2,300,5,15,10,0.3,-0.2,0.3,-0.1,0.1,0,0,0.5,0,0,0,-2,800,80,3,2,3],[0.1,0.2,0.1,0,-0.3,0.5],"Cyber Attack on Financial Infra"],
+["HIST-018","COVID-19 Crash Feb-Mar 2020","Historical Replay","Contagion","S&P fell 34% in 23 trading days — the fastest bear market in history. VIX hit 82. UST experienced flash crash before rallying. Oil futures went negative (-$37). Credit froze: IG +300bp, HY +700bp. Correlation spiked to 1.0.","Short-term (1-5d)","Extreme","Daily","Equities,Rates,Credit,FX,Commodities,Vol,Structured Products","Active","2025-02-10","Enterprise Risk","CCAR,FRTB,Basel III,Internal","Annual","Approved by Board",[-34,-30,-35,-28,-30,-32,-12,-40,82,-120,-100,-80,-50,-150,300,700,500,8,-4,-5,-12,2,-65,-60,8,-15,-25,-20,-40,100,140,120,200,180],[0.3,0.95,0.6,0.8,-0.95,1.9],"GFC/Lehman Collapse|Pandemic 2.0"],
+["HIST-019","Archegos Collapse Mar 2021","Historical Replay","Liquidity Freeze","Archegos Capital's $30B+ concentrated positions in media/TMT stocks were force-liquidated. CS lost $5.5B, Nomura $3B in prime brokerage losses. Single-stock concentration risk crystallized.","Short-term (1-5d)","Moderate","Weekly","Equities,Credit","Active","2025-02-07","Market Risk - Equities","Internal","Annual","Approved by MRC",[-2,-3,-1.5,-1,-1,-1,-2,-3,22,0,0,2,3,0,5,20,10,0.2,-0.1,0.3,0,0.1,1,0.8,-0.5,-1,0.5,0,5,0,5,2,3,5],[0.1,0.3,0,0,-0.5,0.4],""],
+["HIST-020","2022 Rate Shock","Historical Replay","Rates Shock","Fed hiked 425bp in one year. UST 10Y surged from 1.5% to 4.2%, MOVE index hit 160+. 60/40 worst year in 100yrs as stock-bond corr flipped positive. GBP crash, UK gilt crisis, LDI blowup, crypto collapse.","Extended (3-12m)","Extreme","Daily","Equities,Rates,Credit,FX,Vol,Crypto,Structured Products","Active","2025-02-10","Enterprise Risk","CCAR,FRTB,Basel III,BoE PRA,Internal","Annual","Approved by Board",[-25,-33,-15,-12,-8,-22,-20,-22,35,370,300,270,200,425,60,200,180,15,-12,22,-18,10,-5,-3,-3,-12,-15,50,-65,50,30,80,120,100],[0.7,0.6,0.8,0.2,-0.6,1.3],"1994 Bond Massacre|Taper Tantrum"],
+["HIST-021","SVB / Regional Bank Crisis Mar 2023","Historical Replay","Credit Blowout","SVB collapsed from HTM portfolio losses and deposit flight. KRE regional bank index fell 35%. Contagion spread to Credit Suisse, forcing UBS merger. BTFP emergency facility launched.","Short-term (1-5d)","Severe","Daily","Equities,Credit,Rates","Active","2025-02-10","Market Risk - Credit","Basel III,Internal","Annual","Approved by CRO",[-8,-5,-6,-3,-4,-5,-2,-15,30,-80,-50,-40,-20,-30,30,100,60,-1.5,1.5,-4,1,-0.5,-8,-7,8,5,-5,-3,15,40,45,20,30,25],[-0.7,0.7,-0.3,0.2,-0.75,1.2],"GFC/Lehman Collapse"],
+["HIST-022","Oct 7 / Middle East Escalation 2023","Historical Replay","Geopolitical","Hamas attack on Israel triggered Middle East escalation fears. Oil surged 8%, gold rallied 10%. EM risk-off. Defense sector rallied. Shipping and insurance repriced on Hormuz concerns.","Short-term (1-5d)","Moderate","Daily","Commodities,Equities,FX","Active","2025-02-10","Market Risk - Multi-Asset","Internal","Semi-Annual","Approved by MRC",[-3,-2.5,-4,-2,-2.5,-5,-1.5,-4,22,-15,-12,-10,-8,-5,10,30,50,1,-1,-0.5,-0.8,0.3,8,10,10,6,-2,12,-3,0,5,3,5,5],[-0.3,0.3,-0.2,-0.4,-0.6,0.6],"Iran-Israel Direct Conflict"],
+["HIST-023","Yen Carry Unwind Aug 2024","Historical Replay","FX Crisis","BOJ surprise rate hike triggered massive yen carry trade unwind. USDJPY fell 12% in weeks, Nikkei crashed 12% in a single day. Global equity selloff as carry-funded positions liquidated.","Short-term (1-5d)","Severe","Daily","Equities,FX,Vol","Active","2025-02-10","Market Risk - FX","FRTB,Internal","Semi-Annual","Approved by CRO",[-6,-7,-5.5,-12,-3.5,-8,-4,-8,38,-30,-25,-20,-15,-10,15,50,80,-5,4,-12,2,-1.5,-5,-4,3,1.5,-6,-2,-12,5,10,5,8,10],[-0.5,0.5,0.7,0.3,-0.85,1.1],"Asian Financial Crisis 1997"],
+["HIST-024","DeepSeek AI Shock Jan 2025","Historical Replay","Equity Crash","DeepSeek's open-source AI model triggered $600B NVIDIA market cap loss (-17% single day). Mag7 rotation accelerated as AI capex narrative questioned. SOX index fell 10%.","Instantaneous","Severe","Daily","Equities,Vol","Active","2025-02-10","Market Risk - Equities","Internal","Quarterly","Approved by CRO",[-3.5,-6,-2,-3,-1,-2,3,-1,22,-8,-5,-5,-3,0,5,15,10,-0.5,0.3,-0.5,0.2,-0.8,-2,-1.5,1.5,0.5,-1,-1,-5,0,3,2,2,3],[-0.3,0.2,0.1,0.1,-0.7,0.5],"AI Bubble Burst|Dot-Com Crash"],
+["HIST-025","Liberation Day Tariff Shock Apr 2025","Historical Replay","Geopolitical","Trump announced 10%+ universal tariffs. S&P fell 10% in 2 days. USD hit weakest in 52 weeks as stagflation repriced. Bond-equity correlation broke down as both sold off simultaneously.","Short-term (1-5d)","Severe","Daily","Equities,FX,Rates,Commodities","Active","2025-04-05","Market Risk - Multi-Asset","Internal","Quarterly","Approved by CRO",[-10,-12,-8,-7,-5,-10,-6,-12,40,20,15,25,30,10,30,80,120,-6,5,-4,3,2,-5,-4,8,5,-8,-3,-8,10,15,10,15,12],[0.5,0.6,-0.4,0.3,-0.8,1.1],"Tariff Escalation / Full Trade War"],
+["HYPO-001","China-Taiwan Kinetic Conflict","Hypothetical","Geopolitical","Taiwan Strait blockade/invasion severs semiconductor supply chain. TSMC production halted. SOX collapses 50%. CNH devalues 25%. Oil surges $40/bbl. Massive de-globalization repricing.","Medium (1-3m)","Tail","Monthly","Equities,FX,Commodities,Rates,Credit,Vol","Active","2025-02-01","Enterprise Risk","CCAR,FRTB,Internal","Semi-Annual","Approved by Board",[-30,-45,-25,-35,-20,-40,-45,-28,75,-80,-60,-50,-30,-50,150,500,600,5,-3,-10,-2,-25,50,55,20,15,-20,30,-30,50,80,40,60,80],[-0.6,0.9,0.5,-0.3,-0.95,1.8],"GFC/Lehman Collapse|COVID-19 Crash"],
+["HYPO-002","Iran-Israel Direct Conflict / Hormuz Closure","Hypothetical","Geopolitical","Direct military conflict with Strait of Hormuz closure disrupting 20% of global oil transit. Oil to $150+. Global shipping insurance spikes. Stagflationary impulse.","Medium (1-3m)","Extreme","Monthly","Commodities,Equities,FX,Rates,Credit","Active","2025-02-01","Market Risk - Commodities","FRTB,Internal","Semi-Annual","Approved by CRO",[-15,-12,-18,-14,-10,-22,-10,-18,55,-30,-15,10,25,-10,80,250,350,3,-3,-5,-2,2,60,65,18,12,-10,40,-15,20,40,15,25,30],[0.2,0.7,-0.3,-0.5,-0.85,1.4],"Oct 7 / Middle East Escalation"],
+["HYPO-003","AI Bubble Burst","Hypothetical","Equity Crash","Mag7 declines 40% as AI revenue expectations disappoint. AI capex written down. Data center REITs -30%. SOX -45%. Massive growth-to-value rotation. Tech credit blows out. PE markdowns.","Medium (1-3m)","Extreme","Weekly","Equities,Credit,CRE,Vol,Private Equity","Active","2025-02-07","Market Risk - Equities","FRTB,Internal","Quarterly","Approved by CRO",[-28,-45,-15,-20,-10,-15,-12,-15,55,-40,-30,-25,-15,-20,80,300,150,-2,1.5,-3,1,-0.5,-10,-8,8,3,-15,-20,-30,15,25,10,35,30],[-0.5,0.8,-0.2,0.3,-0.9,1.2],"Dot-Com Crash 2000-2002|DeepSeek AI Shock"],
+["HYPO-004","US Sovereign Downgrade to A / Fiscal Crisis","Hypothetical","Sovereign","US downgraded to A amid fiscal deterioration. UST 10Y +200bp. USD -15%. Gold +30%. US CDS >100bp. Credit contagion. Money market and repo dislocations.","Medium (1-3m)","Tail","Monthly","Rates,FX,Credit,Equities,Commodities","Active","2025-02-01","Enterprise Risk","CCAR,Basel III,Internal","Semi-Annual","Approved by Board",[-22,-20,-12,-10,-8,-18,-8,-25,55,150,180,200,180,80,120,400,300,-15,12,-10,8,-5,-5,-3,30,25,-8,-2,10,200,150,60,80,70],[0.8,0.8,0.7,-0.3,-0.85,1.7],"US Debt Downgrade Aug 2011"],
+["HYPO-005","Global Stagflation","Hypothetical","Stagflation","Simultaneous growth collapse (-2% GDP) and inflation surge (+8% CPI). Fed paralyzed. UST bear steepener +150bp long end. Equities -30%. Credit blows out. Commodity supercycle. 60/40 correlation +0.8.","Extended (3-12m)","Extreme","Weekly","Equities,Rates,Credit,Commodities,FX","Active","2025-02-07","Enterprise Risk","CCAR,FRTB,Internal","Semi-Annual","Approved by Board",[-30,-28,-25,-20,-22,-28,-18,-32,55,80,100,150,120,50,100,350,400,-5,3,-3,2,3,30,35,25,20,10,25,-25,40,50,50,60,55],[0.8,0.8,0.3,-0.4,-0.7,1.5],"2022 Rate Shock|Liberation Day Tariff Shock"],
+["HYPO-006","Eurozone Breakup / Sovereign Contagion","Hypothetical","Sovereign","Italian BTP-Bund spread to 600bp+. EUR collapses 20%. European bank CDS >500bp. TARGET2 imbalance crisis. ECB credibility questioned.","Extended (3-12m)","Tail","Monthly","Rates,FX,Credit,Equities","Active","2025-02-01","Market Risk - Rates","FRTB,BoE PRA,Internal","Semi-Annual","Approved by CRO",[-15,-12,-40,-12,-18,-20,-8,-18,50,-60,-50,-40,-25,-30,100,350,300,8,-20,-5,-8,2,-10,-8,15,10,-12,-5,-10,30,50,15,30,35],[-0.3,0.85,0.7,0.3,-0.8,1.6],"European Sovereign Debt Crisis"],
+["HYPO-007","Pandemic 2.0 (Novel Pathogen)","Hypothetical","Contagion","COVID replay with faster, more lethal variant. Global lockdowns resume. S&P -35%. Supply chain freezes. EM debt crisis as fiscal/monetary space exhausted. Less policy ammunition.","Short-term (1-5d)","Extreme","Monthly","Equities,Rates,Credit,FX,Commodities,Vol","Active","2025-02-01","Enterprise Risk","CCAR,FRTB,Internal","Annual","Approved by Board",[-35,-32,-33,-30,-28,-38,-20,-40,85,-100,-80,-60,-40,-80,280,650,550,6,-4,-8,-10,3,-55,-50,12,-10,-30,-15,-45,80,120,80,120,100],[0.2,0.95,0.5,0.7,-0.95,1.9],"COVID-19 Crash Feb-Mar 2020"],
+["HYPO-008","Cyber Attack on Financial Infrastructure","Hypothetical","Liquidity Freeze","SWIFT/FedWire disruption from state-sponsored cyber attack. Settlement failures cascade. Liquidity freezes. Bank stocks -20%, fintech -30%.","Short-term (1-5d)","Tail","Quarterly","Equities,Credit,Rates","Active","2025-01-15","Enterprise Risk","Basel III,Internal","Annual","Approved by Board",[-15,-18,-14,-12,-13,-10,-8,-18,60,-50,-40,-30,-20,200,80,250,150,3,-2,-3,-1.5,1,5,4,12,8,-5,3,-20,500,200,30,40,50],[-0.4,0.7,0.2,0.1,-0.85,1.7],"Repo Crisis Sep 2019"],
+["HYPO-009","Simultaneous EM Debt Crisis","Hypothetical","Contagion","China property hard landing + Turkey/Argentina/Egypt default cascade. EM FX -30%, EM credit OAS +800bp. Commodity demand collapses. Contagion to European banks.","Extended (3-12m)","Extreme","Monthly","Credit,FX,Equities,Commodities","Active","2025-02-01","Market Risk - EM","CCAR,FRTB,Internal","Semi-Annual","Approved by CRO",[-15,-12,-20,-10,-12,-45,-35,-18,45,-50,-40,-35,-20,-25,60,250,800,10,-8,-3,-5,-15,-25,-22,10,5,-30,-10,-25,30,50,15,25,30],[-0.4,0.85,0.7,0.6,-0.8,1.6],"Asian Financial Crisis|LTCM/Russian Default"],
+["HYPO-010","US Commercial Real Estate Collapse","Hypothetical","Credit Blowout","CRE prices -40%. CMBS defaults spike. Regional bank failures. Office vacancy >25%. REIT index -50%. Construction collapse. Credit tightening feedback loop.","Extended (3-12m)","Extreme","Monthly","CRE,Credit,Equities,Structured Products","Active","2025-02-01","Market Risk - Credit","CCAR,FRTB,Internal","Quarterly","Approved by CRO",[-18,-12,-10,-8,-8,-12,-15,-25,40,-40,-30,-20,-10,-30,80,300,150,2,-1,-2,-1,1,-10,-8,5,2,-15,-5,-10,30,40,60,350,80],[-0.4,0.85,0.2,0.3,-0.7,1.3],"SVB / Regional Bank Crisis|GFC"],
+["HYPO-011","Japanese Bond Market Crisis (JGB Tantrum)","Hypothetical","Rates Shock","BOJ loses yield curve control. JGB 10Y to 3%+. JPY strengthens 20% as carry unwinds globally. Global rates contagion. Life insurance/pension MTM devastation.","Medium (1-3m)","Extreme","Monthly","Rates,FX,Equities,Vol","Active","2025-02-01","Market Risk - Rates","FRTB,Internal","Semi-Annual","Approved by CRO",[-12,-10,-10,-25,-8,-15,-8,-14,45,30,50,80,60,20,40,120,150,-8,5,-20,3,-3,-5,-4,8,5,-8,-3,-15,30,25,30,25,20],[0.6,0.5,0.8,0.2,-0.8,1.4],"Yen Carry Unwind|2022 Rate Shock"],
+["HYPO-012","Crypto Systemic Event","Hypothetical","Contagion","Tether/USDT de-pegs triggering BTC -60%. Crypto exchange failures cascade. DeFi liquidations amplify. Spillover to fintech equities. Regulatory crackdown.","Short-term (1-5d)","Severe","Weekly","Crypto,Equities,Vol","Active","2025-02-07","Market Risk - Digital Assets","Internal","Quarterly","Approved by MRC",[-5,-8,-3,-2,-2,-4,-2,-6,30,-10,-8,-5,-3,-5,15,50,30,1,-0.5,-1,-0.3,0.5,-3,-2,5,3,-3,0,-60,10,15,5,8,10],[-0.2,0.3,0.1,0.1,-0.6,0.8],"2022 Rate Shock"],
+["HYPO-013","Tariff Escalation / Full Trade War","Hypothetical","Geopolitical","US-China tariffs to 60%+. EU retaliatory tariffs. Global trade -15%. Supply chain reshoring cost surge. Inflation +3%. EM devastated.","Extended (3-12m)","Severe","Weekly","Equities,FX,Commodities,Rates,Credit","Active","2025-02-07","Market Risk - Multi-Asset","CCAR,FRTB,Internal","Quarterly","Approved by CRO",[-25,-22,-20,-18,-15,-30,-25,-28,42,30,20,40,50,20,60,200,300,-8,5,-5,3,8,-15,-12,15,10,-20,-5,-15,15,25,15,25,20],[0.4,0.7,0.5,0.4,-0.75,1.3],"Liberation Day Tariff Shock"],
+["SENS-001","Parallel Rate Shift +100bp","Sensitivity","Rates Shock","All tenors of the US Treasury curve shift up 100bp simultaneously. Tests portfolio duration and DV01 exposure. Standard sensitivity for daily risk reporting.","Instantaneous","Moderate","Daily","Rates","Active","2025-02-14","Market Risk - Rates","FRTB,Basel III,Internal","Annual","Approved by MRC",[-3,-4,-2.5,-2,-2,-3,-2,-3.5,18,100,100,100,100,100,10,30,20,2,-1.5,1.5,-1,0.5,-2,-1.5,-3,-2,-1.5,0,-3,10,5,35,15,10],[0.3,0.3,0.6,0.1,-0.4,0.3],""],
+["SENS-002","Parallel Rate Shift -100bp","Sensitivity","Rates Shock","All tenors shift down 100bp simultaneously. Tests portfolio response to dovish pivot or flight-to-quality rally. Evaluates convexity and prepayment risk.","Instantaneous","Moderate","Daily","Rates","Active","2025-02-14","Market Risk - Rates","FRTB,Basel III,Internal","Annual","Approved by MRC",[3,4,2.5,2,2,3,1.5,3.5,-3,-100,-100,-100,-100,-100,-5,-15,-10,-1.5,1,-1.5,0.8,-0.5,1,0.8,4,3,1,0,3,-10,-3,-20,-8,-5],[-0.4,-0.2,0.5,0.1,0.2,0.2],""],
+["SENS-003","Bull Steepener","Sensitivity","Rates Shock","Short end -75bp, long end +50bp. Growth-scare steepening where Fed cuts but inflation expectations stay elevated. Tests curve and butterfly risk.","Instantaneous","Moderate","Daily","Rates","Active","2025-02-14","Market Risk - Rates","FRTB,Internal","Annual","Approved by MRC",[-2,-3,-2,-1.5,-1.5,-3,-1,-2.5,20,-75,-30,20,50,-75,15,40,30,-2,1.5,-2,1,-0.5,-1,-0.5,5,3,-2,0,0,-20,5,15,10,8],[0.1,0.3,0.4,0.1,-0.3,0.3],""],
+["SENS-004","Bear Flattener","Sensitivity","Rates Shock","Short end +100bp, long end +25bp. Classic Fed-tightening flattener. Tests duration mismatch. Further curve inversion.","Instantaneous","Moderate","Daily","Rates","Active","2025-02-14","Market Risk - Rates","FRTB,Internal","Annual","Approved by MRC",[-4,-5,-3,-2.5,-2.5,-4,-2,-5,22,100,70,40,25,100,15,45,35,3,-2,2,-1.5,1,-3,-2.5,-4,-3,-2,0,-5,15,8,30,12,10],[0.5,0.4,0.7,0.1,-0.5,0.4],""],
+["SENS-005","Equity Shock -10%","Sensitivity","Equity Crash","Broad equity indices decline 10%, beta-adjusted across sectors and regions. Standard notch test. VIX rises to ~28.","Instantaneous","Moderate","Daily","Equities,Vol","Active","2025-02-14","Market Risk - Equities","FRTB,Internal","Annual","Approved by MRC",[-10,-12,-10,-9,-8,-12,-10,-13,28,-15,-12,-10,-8,-5,15,50,40,1,-0.5,-1.5,-0.5,0.5,-5,-4,2,0,-5,-2,-12,5,8,5,10,12],[-0.4,0.6,0.2,0.4,-0.8,0.7],""],
+["SENS-006","Equity Shock -25%","Sensitivity","Equity Crash","Severe equity decline of 25% with VIX spike to 45. Major risk-off. Credit spreads widen materially. UST flight to quality.","Short-term (1-5d)","Severe","Daily","Equities,Vol,Credit,Rates","Active","2025-02-14","Market Risk - Equities","FRTB,CCAR,Internal","Annual","Approved by CRO",[-25,-30,-25,-22,-20,-28,-22,-30,45,-50,-40,-35,-25,-30,60,200,180,3,-2,-4,-2,2,-15,-12,8,3,-15,-5,-25,20,30,15,30,35],[-0.6,0.8,0.3,0.5,-0.9,1.3],""],
+["SENS-007","Credit Spread Widening +200bp","Sensitivity","Credit Blowout","IG +100bp, HY +300bp, EM +400bp. Tests credit portfolio sensitivity to major spread shock.","Short-term (1-5d)","Severe","Daily","Credit,Equities","Active","2025-02-14","Market Risk - Credit","FRTB,Internal","Annual","Approved by MRC",[-12,-10,-11,-8,-9,-15,-8,-15,35,-30,-25,-20,-15,-15,100,300,400,2,-1.5,-2,-1,1,-8,-6,5,2,-8,-3,-15,25,35,30,60,50],[-0.5,0.9,0.3,0.4,-0.7,1.1],""],
+["SENS-008","USD Strengthening +10%","Sensitivity","FX Crisis","DXY +10%. EM FX weakens materially. Commodities decline on stronger dollar. Tests FX translation risk.","Medium (1-3m)","Moderate","Daily","FX,Commodities,Equities","Active","2025-02-14","Market Risk - FX","FRTB,Internal","Annual","Approved by MRC",[-3,-2,-5,-4,-3,-12,-6,-4,20,10,8,5,3,5,10,30,80,10,-8,6,-7,5,-8,-7,-5,-8,-10,-3,-5,0,5,5,8,5],[0.2,0.3,0.8,0.5,-0.4,0.5],""],
+["SENS-009","USD Weakening -10%","Sensitivity","FX Crisis","DXY -10%. Gold rallies. EM currencies strengthen. Tests reverse FX translation risk.","Medium (1-3m)","Moderate","Daily","FX,Commodities","Active","2025-02-14","Market Risk - FX","FRTB,Internal","Annual","Approved by MRC",[2,1,3,2,2,8,4,3,-2,-5,-3,-2,-1,-3,-5,-15,-40,-10,8,-6,7,-5,6,5,10,12,8,2,5,0,-3,-3,-5,-3],[-0.2,-0.2,0.8,0.5,0.2,0.3],""],
+["SENS-010","Oil Spike +50%","Sensitivity","Commodity Spike","Brent to $120+. Airline/transport stress. Energy credit rallies. Inflationary impulse.","Medium (1-3m)","Moderate","Daily","Commodities,Equities,Credit","Active","2025-02-14","Market Risk - Commodities","Internal","Annual","Approved by MRC",[-5,-3,-6,-5,-2,-4,-3,-6,25,15,10,15,10,10,15,-20,40,1,-1.5,0.5,-1,0.5,50,50,5,3,5,20,-3,0,5,5,8,5],[0.3,0.2,-0.2,-0.3,-0.5,0.5],""],
+["SENS-011","Oil Collapse -50%","Sensitivity","Commodity Spike","Brent to $35. Energy HY defaults spike. Petro-state fiscal crisis. Deflationary impulse.","Medium (1-3m)","Moderate","Daily","Commodities,Credit,FX","Active","2025-02-14","Market Risk - Commodities","Internal","Annual","Approved by MRC",[-3,2,-4,1,-5,-10,-2,-5,25,-20,-15,-15,-10,-10,20,150,120,3,-2,1,-1.5,1,-50,-50,-3,-5,-15,-30,0,0,10,3,10,8],[-0.3,0.5,0.4,0.3,-0.5,0.7],""],
+["SENS-012","VIX Spike to 60","Sensitivity","Vol Explosion","VIX spikes to 60 with vol surface repricing. Gamma squeeze. Structured product hedging stress.","Instantaneous","Severe","Daily","Vol,Equities,Structured Products","Active","2025-02-14","Market Risk - Vol","FRTB,Internal","Annual","Approved by MRC",[-18,-20,-16,-14,-12,-18,-12,-22,60,-40,-35,-30,-20,-20,50,180,150,2,-1.5,-3,-1,1.5,-10,-8,6,2,-10,-3,-20,15,25,15,25,30],[-0.5,0.7,0.3,0.5,-0.95,1.2],"Volmageddon Feb 2018"],
+["SENS-013","Correlation Spike to 0.95","Sensitivity","Correlation Break","Cross-asset correlations spike to 0.95. Complete diversification failure. All risk assets move together. VaR models break down.","Instantaneous","Severe","Daily","Equities,Credit,FX,Commodities,Vol","Active","2025-02-14","Enterprise Risk","FRTB,Internal","Annual","Approved by CRO",[-15,-15,-15,-15,-15,-15,-15,-15,50,30,25,20,15,20,80,250,200,0,0,0,0,0,-15,-15,-5,-8,-15,-10,-20,30,40,20,30,35],[0.95,0.95,0.95,0.95,-0.95,2.0],"COVID-19 Crash"],
+["SENS-014","Inflation Breakeven +150bp","Sensitivity","Rates Shock","TIPS breakevens surge 150bp. Inflation expectations re-anchor higher. Real rates compress. Equity P/E de-rates.","Medium (1-3m)","Moderate","Daily","Rates,Equities,Commodities","Active","2025-02-14","Market Risk - Rates","FRTB,Internal","Annual","Approved by MRC",[-8,-10,-6,-5,-4,-7,-4,-9,25,50,60,80,60,30,20,60,50,-2,1,-1,0.5,0,12,10,8,10,5,8,-5,5,8,25,15,12],[0.6,0.4,0.3,-0.3,-0.5,0.6],"Global Stagflation"],
+["REG-001","Fed CCAR 2025 Severely Adverse","Regulatory","Stagflation","Unemployment peaks at 10%, GDP -6.5% trough. Equity -33%. House prices -33%, CRE -30%. BBB spread to 580bp. 3M Treasury to 0.1%, 10Y to 1.5%. VIX ~70. 9-quarter horizon.","Full Cycle (9Q)","Severe","Annual","Equities,Rates,Credit,CRE,Vol,Structured Products","Active","2025-01-31","Enterprise Risk - CCAR","CCAR","Annual","Approved by Board",[-33,-35,-28,-25,-22,-30,-20,-38,70,-200,-180,-150,-100,-300,280,580,450,-5,4,-5,2,3,-30,-28,15,8,-25,-15,-40,-200,80,100,200,150],[-0.3,0.85,0.3,0.5,-0.85,1.5],"GFC/Lehman Collapse"],
+["REG-002","Fed CCAR 2026 Proposed Severely Adverse","Regulatory","Stagflation","Severe global recession, abrupt risk appetite decline. CRE -40%. BBB spread +440bp to 570bp. Impaired market functioning. 3M Treasury to 0.1%. 9-quarter horizon.","Full Cycle (9Q)","Severe","Annual","Equities,Rates,Credit,CRE,Vol,Structured Products","Under Review","2025-01-15","Enterprise Risk - CCAR","CCAR","Annual","Under Review",[-35,-38,-30,-28,-25,-35,-25,-40,68,-220,-200,-170,-120,-320,300,570,480,-4,3,-6,2,4,-35,-32,18,10,-28,-18,-45,-200,90,110,250,170],[-0.3,0.9,0.3,0.5,-0.85,1.6],"GFC/Lehman Collapse|COVID-19 Crash"],
+["REG-003","Fed Exploratory: 5 Hedge Fund Failures","Regulatory","Liquidity Freeze","Simultaneous default of 5 large hedge funds. Counterparty losses cascade through prime brokerage. Margin call avalanche. Market making withdrawal.","Short-term (1-5d)","Extreme","Annual","Equities,Credit,Vol,Rates","Active","2025-01-31","Enterprise Risk - CCAR","CCAR","Annual","Approved by Board",[-20,-22,-18,-15,-14,-20,-10,-25,65,-50,-40,-30,-20,150,80,300,250,3,-2,-4,-1.5,1.5,-10,-8,8,3,-10,-5,-25,300,120,25,40,60],[-0.3,0.85,0.3,0.3,-0.9,1.8],"Archegos Collapse|LTCM/Russian Default"],
+["REG-004","BoE ACS 2025 Traded Risk","Regulatory","Geopolitical","Global trade fragmentation, sovereign debt pressures, geopolitical escalation. 2-5 day extreme moves. Rising rate expectations. Equity decline. Mixed commodities.","Short-term (1-5d)","Severe","Annual","Equities,Rates,Credit,FX,Commodities","Active","2025-01-31","Enterprise Risk - Regulatory","BoE PRA","Annual","Approved by Board",[-15,-14,-18,-12,-20,-18,-10,-17,50,40,35,50,40,30,70,220,250,2,-3,2,-8,3,15,18,5,2,-8,20,-15,30,40,20,35,30],[0.4,0.7,0.5,-0.2,-0.8,1.3],"Liberation Day Tariff Shock"],
+["REV-001","Capital Breach Scenario","Reverse Stress","Contagion","Reverse-engineered scenario identifying shocks that breach minimum CET1 (4.5%). Works backward from solvency constraint to identify critical concentrations.","Medium (1-3m)","Tail","Quarterly","Equities,Rates,Credit,FX,Commodities,Vol,CRE,Structured Products","Active","2025-01-31","Enterprise Risk","Basel III,Internal","Quarterly","Approved by Board",[-45,-50,-40,-35,-32,-50,-40,-48,85,100,80,100,80,80,300,900,800,-10,8,-12,5,-10,-40,-38,20,10,-35,-20,-70,300,200,150,400,350],[0.7,0.95,0.6,0.7,-0.95,2.0],"GFC/Lehman Collapse|COVID-19 Crash"],
+["REV-002","Liquidity Exhaust Scenario","Reverse Stress","Liquidity Freeze","Identifies conditions exhausting liquidity buffer within 30 days. Deposit flight + margin call cascade + collateral haircut increases. Tests survival horizon.","Medium (1-3m)","Tail","Quarterly","Rates,Credit,Equities","Active","2025-01-31","Treasury / ALM","Basel III,Internal","Quarterly","Approved by Board",[-25,-22,-20,-18,-18,-25,-15,-28,60,50,40,30,20,250,150,500,400,5,-3,-2,-4,3,-15,-12,10,5,-10,-5,-35,600,250,60,100,120],[0.5,0.9,0.4,0.4,-0.85,1.9],"Repo Crisis|GFC/Lehman Collapse"],
+["REV-003","P&L Stop-Loss Trigger","Reverse Stress","Contagion","Identifies scenario hitting firm-wide daily loss limit. Focuses on largest concentrations and market moves crystallizing maximum single-day losses.","Instantaneous","Extreme","Quarterly","Equities,Rates,Credit,FX,Vol","Active","2025-01-31","Enterprise Risk","Internal","Quarterly","Approved by CRO",[-15,-20,-14,-12,-10,-18,-12,-18,55,60,50,80,60,50,100,350,300,-8,6,-10,4,-5,25,28,15,10,-12,15,-30,100,80,25,50,60],[0.6,0.9,0.5,0.3,-0.9,1.8],"Black Monday 1987|COVID-19 Crash"]
+];
+
+// Shock keys in order matching array positions
+const SK=["spx","ndx","sx5e","nky","ukx","em","csi","rty","vix","t2","t5","t10","t30","sofr","ig","hy","ems","dxy","eur","jpy","gbp","cnh","wti","brt","gld","slv","hg","ng","btc","repo","ted","mbs","cmbs","clo"];
+const CK=["sb","ec","fr","ce","vs","cn"];
+
+// Parse into objects
+const S=D.map(d=>{
+  const sh={};SK.forEach((k,i)=>sh[k]=d[15][i]);
+  const cor={};CK.forEach((k,i)=>cor[k]=d[16][i]);
+  return{id:d[0],n:d[1],cat:d[2],sub:d[3],nar:d[4],hz:d[5],sev:d[6],freq:d[7],ac:d[8].split(','),st:d[9],lr:d[10],own:d[11],reg:d[12].split(','),rev:d[13],appr:d[14],sh,cor,ha:d[17]?d[17].split('|'):[]};
+});
+
+// Constants
+const CATS=["Historical Replay","Hypothetical","Sensitivity","Regulatory","Reverse Stress"];
+const SEVS=["Moderate","Severe","Extreme","Tail"];
+const HZNS=["Instantaneous","Short-term (1-5d)","Medium (1-3m)","Extended (3-12m)","Full Cycle (9Q)"];
+const ACS=["Equities","Rates","Credit","FX","Commodities","Vol","Crypto","CRE","Structured Products","Private Equity"];
+const STS=["Active","Under Review","Retired"];
+const SevC={Moderate:"#3b82f6",Severe:"#f59e0b",Extreme:"#ef4444",Tail:"#8b5cf6"};
+const CatC={"Historical Replay":"#3b82f6",Hypothetical:"#8b5cf6",Sensitivity:"#22c55e",Regulatory:"#f59e0b","Reverse Stress":"#ef4444"};
+const StC={Active:"#22c55e","Under Review":"#f59e0b",Retired:"#6b7280"};
+const SHL={spx:"S&P 500",ndx:"NASDAQ",sx5e:"EuroStoxx50",nky:"Nikkei225",ukx:"FTSE100",em:"MSCI EM",csi:"CSI 300",rty:"Russell2k",vix:"VIX",t2:"UST 2Y",t5:"UST 5Y",t10:"UST 10Y",t30:"UST 30Y",sofr:"SOFR",ig:"CDX.IG",hy:"CDX.HY",ems:"CDX.EM",dxy:"DXY",eur:"EURUSD",jpy:"USDJPY",gbp:"GBPUSD",cnh:"USDCNH",wti:"WTI",brt:"Brent",gld:"Gold",slv:"Silver",hg:"Copper",ng:"NatGas",btc:"Bitcoin",repo:"Repo",ted:"TED",mbs:"MBS",cmbs:"CMBS",clo:"CLO"};
+const SHG={"Equity Indices":["spx","ndx","sx5e","nky","ukx","em","csi","rty"],"Equity Vol":["vix"],"US Rates (bp)":["t2","t5","t10","t30","sofr"],"Credit Spreads (bp)":["ig","hy","ems"],"FX (%)":["dxy","eur","jpy","gbp","cnh"],"Commodities (%)":["wti","brt","gld","slv","hg","ng"],"Crypto/Funding":["btc","repo","ted"],"Structured (bp)":["mbs","cmbs","clo"]};
+const CL={sb:"Stock-Bond",ec:"Equity-Credit",fr:"FX-Rates",ce:"Commodity-Equity",vs:"Vol-Spot",cn:"Contagion Mult."};
+const bpK=new Set(["t2","t5","t10","t30","sofr","ig","hy","ems","repo","ted","mbs","cmbs","clo"]);
+
+function sColor(v,k){if(k==='vix')return v>=50?'#ef4444':v>=30?'#f59e0b':'#3b82f6';if(bpK.has(k))return v>0?'#ef4444':v<0?'#22c55e':'#4b5563';return v<0?'#ef4444':v>0?'#22c55e':'#4b5563';}
+function fSh(v,k){if(k==='vix')return String(v);if(bpK.has(k))return(v>0?'+':'')+v+'bp';return(v>0?'+':'')+v+'%';}
+function h(tag,attrs,...ch){const el=document.createElement(tag);if(attrs)Object.entries(attrs).forEach(([k,v])=>{if(k==='style'&&typeof v==='object')Object.assign(el.style,v);else if(k.startsWith('on'))el[k.toLowerCase()]=v;else el.setAttribute(k,v);});ch.flat(9).forEach(c=>{if(c==null)return;el.appendChild(typeof c==='string'?document.createTextNode(c):c);});return el;}
+
+// State
+let state={search:'',selCat:[],selSev:[],selHz:[],selAc:[],selSt:[],expId:null,sCol:'id',sDir:'asc',tab:'table'};
+function tog(arr,v){const i=arr.indexOf(v);if(i>=0)arr.splice(i,1);else arr.push(v);}
+
+function getFiltered(){
+  let d=S;
+  if(state.search){const q=state.search.toLowerCase();d=d.filter(r=>r.n.toLowerCase().includes(q)||r.nar.toLowerCase().includes(q)||r.id.toLowerCase().includes(q));}
+  if(state.selCat.length)d=d.filter(r=>state.selCat.includes(r.cat));
+  if(state.selSev.length)d=d.filter(r=>state.selSev.includes(r.sev));
+  if(state.selHz.length)d=d.filter(r=>state.selHz.includes(r.hz));
+  if(state.selAc.length)d=d.filter(r=>r.ac.some(a=>state.selAc.includes(a)));
+  if(state.selSt.length)d=d.filter(r=>state.selSt.includes(r.st));
+  const sk=state.sCol;
+  return[...d].sort((a,b)=>{let va=a[sk]||'',vb=b[sk]||'';if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}return state.sDir==='asc'?(va<vb?-1:va>vb?1:0):(va>vb?-1:va<vb?1:0);});
+}
+
+function doSort(col){if(state.sCol===col)state.sDir=state.sDir==='asc'?'desc':'asc';else{state.sCol=col;state.sDir='asc';}render();}
+
+function buildDetail(s){
+  const rows=Object.entries(SHG).map(([grp,keys])=>
+    h('div',{style:{marginBottom:'10px'}},
+      h('div',{style:{fontSize:'9px',color:'#6b7280',textTransform:'uppercase',letterSpacing:'1.5px',marginBottom:'4px',fontWeight:'600'}},grp),
+      h('div',{style:{display:'grid',gridTemplateColumns:'repeat('+Math.min(keys.length,8)+',1fr)',gap:'3px'}},
+        ...keys.map(k=>h('div',{class:'shock-cell'},
+          h('div',{class:'mono',style:{fontSize:'9px',color:'#6b7280',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},SHL[k]),
+          h('div',{class:'mono',style:{fontSize:'11px',fontWeight:'700',color:sColor(s.sh[k],k)}},fSh(s.sh[k],k))
+        ))
+      )
+    )
+  );
+  const corrs=Object.entries(CL).map(([k,label])=>{
+    const v=s.cor[k];const w=Math.abs(v)*(k==='cn'?50:100);
+    const c=k==='cn'?(v>1.5?'#ef4444':v>1?'#f59e0b':'#22c55e'):(v>0.5?'#ef4444':v>0?'#f59e0b':v>-0.3?'#6b7280':'#22c55e');
+    return h('div',{style:{display:'flex',alignItems:'center',gap:'8px',fontSize:'11px',marginBottom:'3px'}},
+      h('span',{style:{color:'#9ca3af',width:'100px',flexShrink:'0'}},label),
+      h('div',{class:'bar-bg'},h('div',{class:'corr-bar',style:{width:Math.min(w,100)+'%',backgroundColor:c}})),
+      h('span',{class:'mono',style:{width:'45px',textAlign:'right',color:c}},v.toFixed(2))
+    );
+  });
+  const meta=[['Last Run',s.lr],['Owner',s.own],['Regulatory',s.reg.join(', ')],['Review',s.rev],['Approval',s.appr],['Frequency',s.freq]].map(([l,v])=>
+    h('div',{style:{display:'flex',justifyContent:'space-between',fontSize:'11px',marginBottom:'4px'}},h('span',{style:{color:'#6b7280'}},l),h('span',{style:{color:'#d1d5db'}},v))
+  );
+  return h('div',{class:'fade',style:{background:'#0d1220',border:'1px solid #1e293b',borderRadius:'8px',padding:'16px',marginTop:'8px'}},
+    h('div',{style:{display:'grid',gridTemplateColumns:'2fr 1fr',gap:'16px'}},
+      h('div',null,h('h4',{style:{fontSize:'13px',fontWeight:'600',color:'#3b82f6',marginBottom:'8px'}},'Risk Factor Shock Grid'),...rows),
+      h('div',{style:{display:'flex',flexDirection:'column',gap:'16px'}},
+        h('div',null,h('h4',{style:{fontSize:'13px',fontWeight:'600',color:'#3b82f6',marginBottom:'8px'}},'Correlation Assumptions'),...corrs),
+        h('div',null,h('h4',{style:{fontSize:'13px',fontWeight:'600',color:'#3b82f6',marginBottom:'8px'}},'Scenario Metadata'),...meta),
+        s.ha.length>0?h('div',null,h('h4',{style:{fontSize:'13px',fontWeight:'600',color:'#3b82f6',marginBottom:'8px'}},'Historical Analogues'),h('div',{style:{display:'flex',flexWrap:'wrap',gap:'4px'}},...s.ha.map(a=>h('span',{style:{fontSize:'9px',background:'#1e293b',color:'#9ca3af',padding:'2px 8px',borderRadius:'4px'}},a)))):null
+      )
+    )
+  );
+}
+
+function buildSVGBar(data,w,ht,color){
+  const mx=Math.max(...data.map(d=>d.v),1);const bw=Math.max(2,(w-data.length*2)/data.length);
+  const ns='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(ns,'svg');svg.setAttribute('width',w);svg.setAttribute('height',ht);svg.setAttribute('viewBox','0 0 '+w+' '+ht);
+  data.forEach((d,i)=>{
+    const bh=d.v/mx*(ht-20);const x=i*(bw+2);
+    const r=document.createElementNS(ns,'rect');r.setAttribute('x',x);r.setAttribute('y',ht-bh-15);r.setAttribute('width',bw);r.setAttribute('height',bh);r.setAttribute('fill',typeof color==='function'?color(d):color);r.setAttribute('rx','2');
+    const t=document.createElementNS(ns,'text');t.setAttribute('x',x+bw/2);t.setAttribute('y',ht-2);t.setAttribute('text-anchor','middle');t.setAttribute('fill','#6b7280');t.setAttribute('font-size','8');t.textContent=d.l.length>6?d.l.slice(0,5)+'…':d.l;
+    svg.appendChild(r);svg.appendChild(t);
+  });
+  return svg;
+}
+
+function buildHBar(data,w,itemH){
+  const mx=Math.max(...data.map(d=>d.v),1);const ns='http://www.w3.org/2000/svg';const ht=data.length*itemH+10;
+  const svg=document.createElementNS(ns,'svg');svg.setAttribute('width',w);svg.setAttribute('height',ht);
+  data.forEach((d,i)=>{
+    const bw=d.v/mx*(w-120);const y=i*itemH+2;
+    const t=document.createElementNS(ns,'text');t.setAttribute('x','0');t.setAttribute('y',y+itemH/2+3);t.setAttribute('fill','#9ca3af');t.setAttribute('font-size','9');t.setAttribute('font-family','JetBrains Mono,monospace');t.textContent=d.l;
+    const r=document.createElementNS(ns,'rect');r.setAttribute('x','80');r.setAttribute('y',y+2);r.setAttribute('width',Math.max(bw,2));r.setAttribute('height',itemH-6);
+    r.setAttribute('fill',d.v>S.length*0.8?'#22c55e':d.v>S.length*0.4?'#3b82f6':'#ef4444');r.setAttribute('rx','2');
+    const v=document.createElementNS(ns,'text');v.setAttribute('x',82+bw+4);v.setAttribute('y',y+itemH/2+3);v.setAttribute('fill','#9ca3af');v.setAttribute('font-size','9');v.setAttribute('font-family','JetBrains Mono,monospace');v.textContent=d.v;
+    svg.appendChild(t);svg.appendChild(r);svg.appendChild(v);
+  });
+  return svg;
+}
+
+function buildScatter(data,w,ht){
+  const ns='http://www.w3.org/2000/svg';const svg=document.createElementNS(ns,'svg');svg.setAttribute('width',w);svg.setAttribute('height',ht);
+  const pad={l:50,r:20,t:20,b:40};const pw=w-pad.l-pad.r;const ph=ht-pad.t-pad.b;
+  const xMin=Math.min(...data.map(d=>d.x))-5;const xMax=Math.max(...data.map(d=>d.x))+5;
+  const yMin=Math.min(...data.map(d=>d.y))-20;const yMax=Math.max(...data.map(d=>d.y))+20;
+  const sx=v=>(v-xMin)/(xMax-xMin)*pw+pad.l;const sy=v=>ht-pad.b-(v-yMin)/(yMax-yMin)*ph;
+  // Grid
+  const zx=sx(0),zy=sy(0);
+  [zx,zy].forEach(()=>{});
+  const gl=document.createElementNS(ns,'line');gl.setAttribute('x1',pad.l);gl.setAttribute('x2',w-pad.r);gl.setAttribute('y1',zy);gl.setAttribute('y2',zy);gl.setAttribute('stroke','#1e293b');gl.setAttribute('stroke-dasharray','3,3');svg.appendChild(gl);
+  const gl2=document.createElementNS(ns,'line');gl2.setAttribute('x1',zx);gl2.setAttribute('x2',zx);gl2.setAttribute('y1',pad.t);gl2.setAttribute('y2',ht-pad.b);gl2.setAttribute('stroke','#1e293b');gl2.setAttribute('stroke-dasharray','3,3');svg.appendChild(gl2);
+  // Labels
+  const xl=document.createElementNS(ns,'text');xl.setAttribute('x',w/2);xl.setAttribute('y',ht-5);xl.setAttribute('text-anchor','middle');xl.setAttribute('fill','#6b7280');xl.setAttribute('font-size','10');xl.textContent='S&P 500 Shock (%)';svg.appendChild(xl);
+  const yl=document.createElementNS(ns,'text');yl.setAttribute('x',12);yl.setAttribute('y',ht/2);yl.setAttribute('text-anchor','middle');yl.setAttribute('fill','#6b7280');yl.setAttribute('font-size','10');yl.setAttribute('transform','rotate(-90,12,'+ht/2+')');yl.textContent='UST 10Y (bp)';svg.appendChild(yl);
+  // Quadrant labels
+  [[pad.l+5,pad.t+12,'Stagflation','#ef4444'],[pad.l+5,ht-pad.b-5,'Risk-Off','#3b82f6'],[w-pad.r-60,ht-pad.b-5,'Goldilocks','#22c55e'],[w-pad.r-55,pad.t+12,'Reflation','#f59e0b']].forEach(([x,y,t,c])=>{
+    const txt=document.createElementNS(ns,'text');txt.setAttribute('x',x);txt.setAttribute('y',y);txt.setAttribute('fill',c);txt.setAttribute('font-size','9');txt.setAttribute('opacity','0.5');txt.textContent=t;svg.appendChild(txt);
+  });
+  // Dots
+  data.forEach(d=>{
+    const cx=sx(d.x),cy=sy(d.y);
+    const c=document.createElementNS(ns,'circle');c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r','5');c.setAttribute('fill',d.c);c.setAttribute('opacity','0.7');c.setAttribute('stroke',d.c);c.setAttribute('stroke-width','1');
+    const title=document.createElementNS(ns,'title');title.textContent=d.n+'\nEquity: '+d.x+'% | Rates: '+d.y+'bp';c.appendChild(title);
+    svg.appendChild(c);
+  });
+  return svg;
+}
+
+function render(){
+  const app=document.getElementById('app');app.innerHTML='';
+  const filtered=getFiltered();
+  const active=S.filter(x=>x.st==='Active');
+  const catCt={};CATS.forEach(c=>catCt[c]=active.filter(x=>x.cat===c).length);
+  const covAc=new Set(active.flatMap(x=>x.ac));
+  const covScore=Math.round(covAc.size/ACS.length*100);
+  const underRev=S.filter(x=>x.st==='Under Review').length;
+
+  // Header
+  app.appendChild(h('div',{style:{borderBottom:'1px solid #1e293b',background:'#0d1220',padding:'10px 16px',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+    h('div',{style:{display:'flex',alignItems:'center',gap:'12px'}},
+      h('div',{style:{width:'32px',height:'32px',background:'rgba(59,130,246,0.15)',borderRadius:'8px',display:'flex',alignItems:'center',justifyContent:'center',color:'#3b82f6',fontSize:'16px'}},'⚡'),
+      h('div',null,
+        h('h1',{style:{fontSize:'16px',fontWeight:'700',color:'#fff',letterSpacing:'-0.3px'}},'BAU Stress Testing Scenario Inventory'),
+        h('p',{style:{fontSize:'9px',color:'#6b7280',textTransform:'uppercase',letterSpacing:'2px'}},'Market Risk · Enterprise Risk Management'))
+    ),
+    h('div',{style:{display:'flex',alignItems:'center',gap:'12px',fontSize:'10px',color:'#6b7280'}},
+      'Production',h('span',{style:{width:'6px',height:'6px',borderRadius:'50%',background:'#22c55e',display:'inline-block',animation:'pulse 2s infinite'}}),'Sync: '+new Date().toLocaleDateString())
+  ));
+
+  const main=h('div',{style:{maxWidth:'1920px',margin:'0 auto',padding:'16px'}});app.appendChild(main);
+
+  // KPIs
+  const kpis=[['Active',active.length,'#22c55e'],['Historical',catCt['Historical Replay']||0,'#3b82f6'],['Hypothetical',catCt['Hypothetical']||0,'#8b5cf6'],['Sensitivity',catCt['Sensitivity']||0,'#22c55e'],['Regulatory',catCt['Regulatory']||0,'#f59e0b'],['Coverage',covScore+'%',covScore>80?'#22c55e':'#f59e0b'],['Under Review',underRev,underRev>0?'#f59e0b':'#22c55e']];
+  main.appendChild(h('div',{style:{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:'8px',marginBottom:'16px'}},
+    ...kpis.map(([l,v,c])=>h('div',{class:'card kpi'},
+      h('div',{style:{fontSize:'9px',color:'#6b7280',textTransform:'uppercase',letterSpacing:'1px',marginBottom:'4px'}},l),
+      h('div',{class:'mono kpi-val',style:{color:c}},String(v))
+    ))
+  ));
+
+  // Tabs
+  const tabs=h('div',{style:{display:'flex',gap:'4px',borderBottom:'1px solid #1e293b',marginBottom:'16px'}});
+  [['table','Scenario Table'],['analytics','Analytics & Coverage'],['correlation','Correlation Map']].forEach(([k,l])=>{
+    const b=h('button',{class:'tab'+(state.tab===k?' on':''),onClick:()=>{state.tab=k;render();}},l);tabs.appendChild(b);
+  });
+  main.appendChild(tabs);
+
+  if(state.tab==='table'){
+    // Filters
+    const filt=h('div',{class:'card',style:{padding:'12px',marginBottom:'12px'}});
+    const searchRow=h('div',{style:{display:'flex',alignItems:'center',gap:'8px',marginBottom:'8px'}},
+      h('span',{style:{color:'#6b7280'}},'🔍'),
+      h('input',{placeholder:'Search scenarios by name, ID, or narrative...',value:state.search,onInput:function(e){state.search=e.target.value;render();}}),
+      h('span',{class:'mono',style:{fontSize:'10px',color:'#6b7280'}},filtered.length+' / '+S.length)
+    );
+    filt.appendChild(searchRow);
+    const filterRow=h('div',{style:{display:'flex',flexWrap:'wrap',gap:'12px'}});
+    [['Category',CATS,'selCat'],['Severity',SEVS,'selSev'],['Horizon',HZNS,'selHz'],['Asset Class',ACS,'selAc'],['Status',STS,'selSt']].forEach(([label,items,key])=>{
+      const col=h('div',null,h('div',{style:{fontSize:'8px',color:'#4b5563',textTransform:'uppercase',letterSpacing:'1.5px',marginBottom:'3px'}},label),
+        h('div',{style:{display:'flex',flexWrap:'wrap',gap:'3px'}},
+          ...items.map(item=>{
+            const on=state[key].includes(item);
+            return h('span',{class:'chip'+(on?' on':''),onClick:()=>{tog(state[key],item);render();}},label==='Horizon'?item.split(' (')[0]:item);
+          })
+        )
+      );
+      filterRow.appendChild(col);
+    });
+    filt.appendChild(filterRow);main.appendChild(filt);
+
+    // Table
+    const tw=h('div',{class:'card',style:{overflow:'hidden'}});
+    const scroll=h('div',{style:{overflowX:'auto'}});
+    const tbl=h('table',{class:'mono',style:{fontSize:'11px'}});
+    const thead=h('thead',{style:{background:'#0d1220'}});
+    const hr=h('tr',null,h('th',{style:{width:'24px'}}));
+    [['id','ID'],['n','Name'],['cat','Category'],['sub','Sub-Cat'],['hz','Horizon'],['sev','Severity'],['freq','Freq']].forEach(([k,l])=>{
+      hr.appendChild(h('th',{onClick:()=>doSort(k)},l+(state.sCol===k?(state.sDir==='asc'?' ▲':' ▼'):'')));
+    });
+    hr.appendChild(h('th',null,'Assets'));hr.appendChild(h('th',{onClick:()=>doSort('st')},'Status'+(state.sCol==='st'?(state.sDir==='asc'?' ▲':' ▼'):'')));
+    thead.appendChild(hr);tbl.appendChild(thead);
+    const tbody=h('tbody');
+    filtered.forEach(s=>{
+      const isExp=state.expId===s.id;
+      const tr=h('tr',{class:'row'+(isExp?' exp':''),onClick:()=>{state.expId=isExp?null:s.id;render();}},
+        h('td',{style:{color:'#4b5563'}},isExp?'▼':'▶'),
+        h('td',{style:{color:'#60a5fa',fontWeight:'500',whiteSpace:'nowrap'}},s.id),
+        h('td',{style:{color:'#e2e8f0',fontWeight:'500',maxWidth:'280px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},s.n),
+        h('td',{style:{whiteSpace:'nowrap'}},h('span',{class:'tag',style:{background:CatC[s.cat]+'20',color:CatC[s.cat]}},s.cat)),
+        h('td',{style:{color:'#9ca3af',whiteSpace:'nowrap'}},s.sub),
+        h('td',{style:{color:'#9ca3af',fontSize:'10px',whiteSpace:'nowrap'}},s.hz),
+        h('td',{style:{whiteSpace:'nowrap'}},h('span',{class:'tag',style:{background:SevC[s.sev]+'20',color:SevC[s.sev],fontWeight:'700'}},s.sev)),
+        h('td',{style:{color:'#6b7280',fontSize:'10px'}},s.freq),
+        h('td',null,h('div',{style:{display:'flex',flexWrap:'wrap',gap:'2px'}},...s.ac.slice(0,4).map(a=>h('span',{class:'ac-tag'},a)),s.ac.length>4?h('span',{style:{fontSize:'8px',color:'#4b5563'}},'+'+String(s.ac.length-4)):null)),
+        h('td',null,h('span',{style:{fontSize:'10px',color:StC[s.st],display:'flex',alignItems:'center',gap:'4px'}},h('span',{style:{width:'6px',height:'6px',borderRadius:'50%',background:StC[s.st],display:'inline-block'}}),s.st))
+      );
+      tbody.appendChild(tr);
+      if(isExp){
+        const detailTr=h('tr',null,h('td',{colspan:'10',style:{padding:'8px 10px',background:'#0a0e17'}},
+          h('div',{style:{fontSize:'11px',color:'#9ca3af',fontStyle:'italic',marginBottom:'8px'}},s.nar),buildDetail(s)));
+        tbody.appendChild(detailTr);
+      }
+    });
+    tbl.appendChild(tbody);scroll.appendChild(tbl);tw.appendChild(scroll);main.appendChild(tw);
+  }
+
+  if(state.tab==='analytics'){
+    const grid=h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}});
+
+    // Severity Distribution
+    const sevData=SEVS.map(sv=>({l:sv,v:S.filter(x=>x.sev===sv).length}));
+    grid.appendChild(h('div',{class:'card',style:{padding:'16px'}},
+      h('h3',{style:{fontSize:'13px',fontWeight:'600',color:'#d1d5db',marginBottom:'12px'}},'Severity Distribution'),
+      buildSVGBar(sevData,500,180,d=>SevC[d.l])
+    ));
+
+    // Category Distribution
+    const catData=CATS.map(c=>({l:c.split(' ')[0],v:S.filter(x=>x.cat===c).length}));
+    grid.appendChild(h('div',{class:'card',style:{padding:'16px'}},
+      h('h3',{style:{fontSize:'13px',fontWeight:'600',color:'#d1d5db',marginBottom:'12px'}},'Category Distribution'),
+      buildSVGBar(catData,500,180,d=>CatC[CATS.find(c=>c.startsWith(d.l))]||'#3b82f6')
+    ));
+
+    // Risk Factor Frequency
+    const rfFreq=Object.keys(SHL).map(k=>({l:SHL[k],v:S.filter(x=>Math.abs(x.sh[k])>0.5).length})).sort((a,b)=>b.v-a.v);
+    grid.appendChild(h('div',{class:'card',style:{padding:'16px'}},
+      h('h3',{style:{fontSize:'13px',fontWeight:'600',color:'#d1d5db',marginBottom:'12px'}},'Risk Factor Frequency (# scenarios stressing each)'),
+      buildHBar(rfFreq,700,16)
+    ));
+
+    // Coverage Heatmap
+    const covMat=ACS.map(ac=>{const row={a:ac};CATS.forEach(cat=>{row[cat]=S.filter(x=>x.cat===cat&&x.ac.includes(ac)).length;});return row;});
+    const hmTbl=h('table',{style:{width:'100%',fontSize:'10px'}});
+    const hmHead=h('tr',null,h('th',{style:{textAlign:'left'}},'Asset Class'));
+    CATS.forEach(c=>hmHead.appendChild(h('th',{style:{textAlign:'center',color:CatC[c],fontSize:'9px'}},c.split(' ')[0])));
+    hmTbl.appendChild(h('thead',null,hmHead));
+    const hmBody=h('tbody');
+    covMat.forEach(row=>{
+      const tr=h('tr',{style:{borderTop:'1px solid #1e293b'}},h('td',{style:{color:'#9ca3af',padding:'6px 8px',whiteSpace:'nowrap'}},row.a));
+      CATS.forEach(cat=>{
+        const v=row[cat];const mx=Math.max(...covMat.map(r=>r[cat]),1);const int=v/mx;
+        tr.appendChild(h('td',{class:'hm-cell mono',style:{background:v===0?'rgba(239,68,68,0.08)':'rgba(59,130,246,'+(0.08+int*0.4)+')',color:v===0?'#ef4444':'#e2e8f0'}},String(v)));
+      });
+      hmBody.appendChild(tr);
+    });
+    hmTbl.appendChild(hmBody);
+    grid.appendChild(h('div',{class:'card',style:{padding:'16px'}},
+      h('h3',{style:{fontSize:'13px',fontWeight:'600',color:'#d1d5db',marginBottom:'12px'}},'Asset Class Coverage by Category'),
+      h('div',{style:{overflowX:'auto'}},hmTbl),
+      h('div',{style:{marginTop:'8px',fontSize:'9px',color:'#4b5563'}},'Red = coverage gap | Blue intensity = scenario count')
+    ));
+    main.appendChild(grid);
+  }
+
+  if(state.tab==='correlation'){
+    const scatData=S.map(s=>({n:s.n,x:s.sh.spx,y:s.sh.t10,c:CatC[s.cat]}));
+    const panel=h('div',{class:'card',style:{padding:'16px'}},
+      h('h3',{style:{fontSize:'13px',fontWeight:'600',color:'#d1d5db',marginBottom:'4px'}},'Correlation Regime Map'),
+      h('p',{style:{fontSize:'10px',color:'#6b7280',marginBottom:'12px'}},'Each dot = one scenario. X = S&P shock %, Y = UST 10Y bp. Hover for details.'),
+      h('div',{style:{display:'grid',gridTemplateColumns:'3fr 1fr',gap:'16px'}},
+        buildScatter(scatData,900,450),
+        h('div',{style:{display:'flex',flexDirection:'column',gap:'8px'}},
+          h('h4',{style:{color:'#9ca3af',fontWeight:'600',fontSize:'9px',textTransform:'uppercase',letterSpacing:'1.5px'}},'Quadrant Guide'),
+          ...[{t:'Top-Left: Stagflation',c:'#ef4444',d:'Equity ↓ + Rates ↑. Positive stock-bond corr. Worst for 60/40.'},
+             {t:'Bottom-Left: Risk-Off',c:'#3b82f6',d:'Equity ↓ + Rates ↓. Flight to quality. Bond hedge works.'},
+             {t:'Bottom-Right: Goldilocks',c:'#22c55e',d:'Equity ↑ + Rates ↓. Easing + growth.'},
+             {t:'Top-Right: Reflation',c:'#f59e0b',d:'Equity ↑ + Rates ↑. Growth-driven tightening.'}
+          ].map(({t,c,d})=>h('div',{style:{background:'#0d1220',border:'1px solid #1e293b',borderRadius:'4px',padding:'8px'}},
+            h('div',{style:{color:c,fontWeight:'600',fontSize:'11px'}},t),
+            h('div',{style:{color:'#6b7280',fontSize:'10px',marginTop:'2px'}},d))
+          ),
+          h('div',{style:{marginTop:'8px'}},
+            h('h4',{style:{color:'#9ca3af',fontWeight:'600',fontSize:'9px',textTransform:'uppercase',letterSpacing:'1.5px',marginBottom:'6px'}},'Legend'),
+            ...CATS.map(cat=>h('div',{style:{display:'flex',alignItems:'center',gap:'6px',marginBottom:'3px'}},
+              h('span',{style:{width:'10px',height:'10px',borderRadius:'50%',background:CatC[cat],display:'inline-block'}}),
+              h('span',{style:{fontSize:'10px',color:'#9ca3af'}},cat)
+            ))
+          )
+        )
+      )
+    );
+    main.appendChild(panel);
+  }
+
+  // Footer
+  main.appendChild(h('div',{style:{textAlign:'center',fontSize:'10px',color:'#4b5563',padding:'16px 0',borderTop:'1px solid #1e293b',marginTop:'16px'}},'BAU Stress Testing Scenario Inventory · Enterprise Risk Management · Confidential & Proprietary · '+new Date().getFullYear()));
+}
+
+render();
+</script>
+</body>
+</html>
