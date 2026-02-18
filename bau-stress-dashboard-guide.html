@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BAU Stress Testing Dashboard — Companion Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+@page{size:A4;margin:18mm 16mm}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#0a0e17;color:#c9d1d9;line-height:1.7;font-size:13px}
+.page{max-width:960px;margin:0 auto;padding:32px 24px}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* Header */
+.header{border-bottom:2px solid #1e293b;padding-bottom:20px;margin-bottom:28px}
+.header h1{font-size:26px;font-weight:700;color:#fff;letter-spacing:-0.5px;margin-bottom:4px}
+.header .sub{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:3px;margin-bottom:12px}
+.header .meta{display:flex;gap:24px;font-size:11px;color:#4b5563}
+.header .meta span{display:flex;align-items:center;gap:4px}
+.header .meta .dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+
+/* Section */
+.section{margin-bottom:28px}
+.section h2{font-size:16px;font-weight:700;color:#60a5fa;letter-spacing:-0.3px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1e293b;display:flex;align-items:center;gap:8px}
+.section h2 .num{font-size:11px;background:rgba(59,130,246,0.15);color:#3b82f6;width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.section h3{font-size:13px;font-weight:600;color:#d1d5db;margin:14px 0 6px}
+.section p{margin-bottom:8px;color:#9ca3af}
+.section p strong{color:#d1d5db}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;margin:8px 0 16px;font-size:12px}
+th{background:#0d1220;text-align:left;padding:8px 10px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#6b7280;font-weight:600;border-bottom:1px solid #1e293b}
+td{padding:7px 10px;border-bottom:1px solid #1e293b;color:#c9d1d9}
+tr:hover{background:rgba(59,130,246,0.04)}
+
+/* Tags */
+.tag{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;display:inline-block}
+.t-mod{background:rgba(59,130,246,0.12);color:#3b82f6}
+.t-sev{background:rgba(245,158,11,0.12);color:#f59e0b}
+.t-ext{background:rgba(239,68,68,0.12);color:#ef4444}
+.t-tail{background:rgba(139,92,246,0.12);color:#8b5cf6}
+.t-hist{background:rgba(59,130,246,0.12);color:#3b82f6}
+.t-hypo{background:rgba(139,92,246,0.12);color:#8b5cf6}
+.t-sens{background:rgba(34,197,94,0.12);color:#22c55e}
+.t-reg{background:rgba(245,158,11,0.12);color:#f59e0b}
+.t-rev{background:rgba(239,68,68,0.12);color:#ef4444}
+
+/* Cards */
+.card{background:#151b2b;border:1px solid #1e293b;border-radius:8px;padding:14px 16px;margin-bottom:12px}
+.card-title{font-size:11px;font-weight:600;color:#60a5fa;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.card p{font-size:12px;line-height:1.6}
+
+/* Grid */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* Callout */
+.callout{background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:12px 16px;margin:10px 0;font-size:12px;color:#93c5fd}
+.callout-warn{background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.2);color:#fbbf24}
+.callout-red{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.2);color:#fca5a5}
+
+/* List */
+ul{margin:4px 0 12px 18px;color:#9ca3af}
+ul li{margin-bottom:4px}
+ul li strong{color:#d1d5db}
+
+/* Code */
+code{font-family:'JetBrains Mono',monospace;font-size:11px;background:#1e293b;padding:1px 5px;border-radius:3px;color:#e2e8f0}
+
+/* Footer */
+.footer{border-top:1px solid #1e293b;padding-top:16px;margin-top:32px;text-align:center;font-size:10px;color:#4b5563}
+
+/* Print */
+@media print{
+  body{background:#fff;color:#1a1a2e;font-size:11px}
+  .page{padding:0}
+  .header h1{color:#1a1a2e}
+  .section h2{color:#1a4080}
+  .card{background:#f8f9fa;border-color:#dee2e6}
+  table th{background:#f1f3f5}
+  td,th{border-color:#dee2e6}
+  .callout{background:#e8f4fd;border-color:#b6d4fe;color:#1a4080}
+  .callout-warn{background:#fff8e1;border-color:#ffe082;color:#7a5900}
+  .callout-red{background:#fde8e8;border-color:#f5c6c6;color:#7a1010}
+  .tag{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HEADER -->
+<div class="header">
+  <h1>BAU Stress Testing Scenario Inventory</h1>
+  <div class="sub">Companion Guide &amp; Reference Documentation</div>
+  <div class="meta">
+    <span>Enterprise Risk Management</span>
+    <span><span class="dot" style="background:#22c55e"></span> Production</span>
+    <span>Version 1.0</span>
+    <span id="dateStamp"></span>
+  </div>
+</div>
+
+<!-- 1. EXECUTIVE OVERVIEW -->
+<div class="section">
+  <h2><span class="num">1</span> Executive Overview</h2>
+  <p>This dashboard is a <strong>production-grade BAU (Business-as-Usual) Stress Testing Scenario Inventory</strong> of the kind operated by Tier 1 dealer banks and large multi-strategy hedge funds. It centralizes <strong>59 fully-populated scenarios</strong> spanning five category types, four severity tiers, and 34 risk factors, providing an integrated view of the firm's stress-testing programme across market risk, credit risk, treasury/ALM, and enterprise risk.</p>
+  <p>The inventory serves as the <strong>single source of truth</strong> for scenario definitions, shock calibrations, correlation assumptions, and regulatory mappings. It is designed to support daily risk reporting, quarterly CCAR/DFAST submissions, annual BoE ACS compliance, internal model validation, and ad-hoc scenario requests from the CRO or Board.</p>
+
+  <div class="callout">
+    <strong>Dashboard Capabilities:</strong> Interactive filtering by category, severity, horizon, asset class, and status &middot; Full-text search &middot; Sortable columns &middot; Expandable detail panels with 34-factor shock grids &middot; Correlation assumptions &middot; Analytics & coverage views &middot; Correlation regime scatter map
+  </div>
+</div>
+
+<!-- 2. SCENARIO CATEGORIES -->
+<div class="section">
+  <h2><span class="num">2</span> Scenario Categories</h2>
+  <p>Every scenario belongs to one of five categories. Each serves a distinct purpose in the risk framework.</p>
+
+  <table>
+    <thead>
+      <tr><th style="width:150px">Category</th><th style="width:80px">Count</th><th>Purpose &amp; Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="tag t-hist">Historical Replay</span></td>
+        <td class="mono">25</td>
+        <td>Replays actual market events with observed shock magnitudes. Anchored to real data; gives traders and risk managers an intuitive reference point. Examples: Black Monday 1987, GFC 2008, COVID-19 Crash, Yen Carry Unwind Aug 2024, Liberation Day Tariff Shock Apr 2025.</td>
+      </tr>
+      <tr>
+        <td><span class="tag t-hypo">Hypothetical</span></td>
+        <td class="mono">13</td>
+        <td>Forward-looking scenarios that have <em>not</em> occurred but are plausible. Designed to capture emerging risks the historical record may not cover. Examples: China-Taiwan Kinetic Conflict, AI Bubble Burst, Cyber Attack on Financial Infrastructure, US Sovereign Downgrade to A.</td>
+      </tr>
+      <tr>
+        <td><span class="tag t-sens">Sensitivity</span></td>
+        <td class="mono">14</td>
+        <td>Parametric single-factor or multi-factor shocks used for daily risk decomposition and limit monitoring. Not tied to a narrative. Examples: Parallel Rate Shift +100bp, Equity Shock &minus;25%, VIX Spike to 60, Correlation Spike to 0.95.</td>
+      </tr>
+      <tr>
+        <td><span class="tag t-reg">Regulatory</span></td>
+        <td class="mono">4</td>
+        <td>Mandated by regulators for capital adequacy testing. Prescribed shock parameters and horizons. Examples: Fed CCAR 2025 Severely Adverse, Fed CCAR 2026 Proposed, Fed Exploratory (5 Hedge Fund Failures), BoE ACS 2025 Traded Risk.</td>
+      </tr>
+      <tr>
+        <td><span class="tag t-rev">Reverse Stress</span></td>
+        <td class="mono">3</td>
+        <td>Works <em>backward</em> from a failure threshold (e.g., CET1 breach, liquidity exhaust, P&L stop-loss) to identify what market conditions would cause it. Required under Basel III / ICAAP. Examples: Capital Breach Scenario, Liquidity Exhaust Scenario, P&L Stop-Loss Trigger.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 3. SEVERITY TIERS -->
+<div class="section">
+  <h2><span class="num">3</span> Severity Tier Definitions</h2>
+  <p>Severity tiers are calibrated to <strong>return-period equivalents</strong>. This ensures consistent shock magnitude expectations across the scenario library and aligns with industry standard practices used by regulators, internal model validation, and economic capital frameworks.</p>
+
+  <table>
+    <thead>
+      <tr><th style="width:110px">Severity</th><th style="width:120px">Return Period</th><th style="width:140px">Probability</th><th>Practical Interpretation</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="tag t-mod">Moderate</span></td>
+        <td class="mono">1-in-10 year</td>
+        <td class="mono">~10% annual</td>
+        <td>You will likely live through several of these in a career. Think typical corrections: 2015 China deval, Taper Tantrum 2013, Q4 2018 selloff. Used for <strong>sensitivity testing and daily limit monitoring</strong>. Traders should be able to ride through these within normal risk appetite.</td>
+      </tr>
+      <tr>
+        <td><span class="tag t-sev">Severe</span></td>
+        <td class="mono">1-in-25 year</td>
+        <td class="mono">~4% annual</td>
+        <td>CCAR / DFAST "Severely Adverse" calibration level. Once-per-generation event that causes material P&L damage and may trigger risk appetite reviews. Examples: Asian Crisis 1997, European Debt Crisis, SVB Collapse. <strong>Capital planning baseline</strong> — the firm must demonstrate survival.</td>
+      </tr>
+      <tr>
+        <td><span class="tag t-ext">Extreme</span></td>
+        <td class="mono">1-in-100 year</td>
+        <td class="mono">~1% annual</td>
+        <td>GFC/Lehman-class events. Multiple asset classes break simultaneously. Correlation assumptions fail. Market functioning impaired. Examples: Black Monday 1987, GFC 2008, COVID-19 Crash, Dot-Com Crash. Used for <strong>economic capital, recovery planning, and board-level stress reporting</strong>.</td>
+      </tr>
+      <tr>
+        <td><span class="tag t-tail">Tail</span></td>
+        <td class="mono">Beyond historical</td>
+        <td class="mono">&lt;1% annual</td>
+        <td>Scenarios that exceed anything in the observable historical record. These are <em>not</em> calibrated to data — they are designed to break the model. Examples: US Sovereign Downgrade to A, Eurozone Breakup, China-Taiwan Kinetic Conflict, Cyber Attack on SWIFT/FedWire. Used for <strong>reverse stress testing, resolution planning, and identifying single points of failure</strong>.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout-warn callout">
+    <strong>Note on Tail Severity:</strong> These scenarios are intentionally beyond historical calibration. Their purpose is not predictive accuracy but rather <em>identification of concentration vulnerabilities</em> and portfolio breaking points. If a Tail scenario produces a modest P&L impact, it signals either strong resilience or under-calibrated shocks — both worth investigating.
+  </div>
+</div>
+
+<!-- 4. RISK FACTOR SHOCK GRID -->
+<div class="section">
+  <h2><span class="num">4</span> Risk Factor Shock Grid — Convention Guide</h2>
+  <p>Each scenario defines shocks across <strong>34 risk factors</strong> organized into 8 groups. Understanding the sign and unit conventions is critical for correct interpretation.</p>
+
+  <table>
+    <thead>
+      <tr><th>Group</th><th>Factors</th><th>Unit</th><th>Sign Convention</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Equity Indices</strong></td>
+        <td>S&P 500, NASDAQ, EuroStoxx 50, Nikkei 225, FTSE 100, MSCI EM, CSI 300, Russell 2000</td>
+        <td>%</td>
+        <td>Negative = index decline. &minus;25% means the index falls 25% from current level.</td>
+      </tr>
+      <tr>
+        <td><strong>Equity Volatility</strong></td>
+        <td>VIX</td>
+        <td>Absolute level</td>
+        <td>The number shown is the <em>VIX level</em> (not a change). VIX at 80 = extreme implied vol (cf. GFC peak 80, COVID peak 82).</td>
+      </tr>
+      <tr>
+        <td><strong>US Rates</strong></td>
+        <td>UST 2Y, 5Y, 10Y, 30Y, SOFR</td>
+        <td>Basis points (bp)</td>
+        <td>Positive = yields rise (bearish for bonds). +250bp means the yield curve shifts up 250bp. Negative = rally.</td>
+      </tr>
+      <tr>
+        <td><strong>Credit Spreads</strong></td>
+        <td>CDX.IG, CDX.HY, CDX.EM</td>
+        <td>Basis points (bp)</td>
+        <td>Positive = spreads widen (credit deteriorates). +580bp on IG = CCAR-level stress. Negative = spread tightening.</td>
+      </tr>
+      <tr>
+        <td><strong>FX</strong></td>
+        <td>DXY, EURUSD, USDJPY, GBPUSD, USDCNH</td>
+        <td>%</td>
+        <td>DXY positive = USD strengthens. For pairs: positive EURUSD = EUR appreciates. Positive USDJPY = JPY weakens.</td>
+      </tr>
+      <tr>
+        <td><strong>Commodities</strong></td>
+        <td>WTI, Brent, Gold, Silver, Copper, Natural Gas</td>
+        <td>%</td>
+        <td>Negative = price decline. +60% WTI = oil spike (e.g., Hormuz closure scenario).</td>
+      </tr>
+      <tr>
+        <td><strong>Crypto / Funding</strong></td>
+        <td>Bitcoin, Repo Rate, TED Spread</td>
+        <td>% (BTC), bp (Repo/TED)</td>
+        <td>Repo: positive = funding stress (repo rate spikes). TED spread: positive = interbank stress.</td>
+      </tr>
+      <tr>
+        <td><strong>Structured Products</strong></td>
+        <td>MBS, CMBS, CLO</td>
+        <td>Basis points (bp)</td>
+        <td>Positive = spread widening (mark-to-market losses). +400bp CMBS = severe CRE distress scenario.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 5. CORRELATION ASSUMPTIONS -->
+<div class="section">
+  <h2><span class="num">5</span> Correlation Regime Assumptions</h2>
+  <p>Each scenario includes <strong>6 correlation parameters</strong> that define the assumed inter-asset co-movement regime. These are critical because standard VaR/CVaR models use historical correlations that break down in stress.</p>
+
+  <table>
+    <thead>
+      <tr><th style="width:160px">Parameter</th><th style="width:130px">Range</th><th>Interpretation</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Stock-Bond (sb)</strong></td>
+        <td class="mono">&minus;0.8 to +0.95</td>
+        <td>Negative = flight-to-quality (bonds hedge equities). Positive = stagflation/rate-shock regime (both sell off). This single parameter defines whether your 60/40 portfolio works.</td>
+      </tr>
+      <tr>
+        <td><strong>Equity-Credit (ec)</strong></td>
+        <td class="mono">0.2 to 0.95</td>
+        <td>How tightly equity drawdowns and credit spread widening co-move. >0.8 = credit can't diversify equity risk (GFC, COVID). Normal environment ~0.3-0.5.</td>
+      </tr>
+      <tr>
+        <td><strong>FX-Rates (fr)</strong></td>
+        <td class="mono">&minus;0.3 to +0.8</td>
+        <td>Linkage between FX moves and rate moves. High positive = carry-trade regime (rate hike = currency strengthen). Negative = risk-off (currency weakens despite rates rising on fiscal fears).</td>
+      </tr>
+      <tr>
+        <td><strong>Commodity-Equity (ce)</strong></td>
+        <td class="mono">&minus;0.5 to +0.8</td>
+        <td>Positive = growth-linked (demand shock: equities and commodities fall together). Negative = supply shock (oil spikes while equities sell off, stagflation).</td>
+      </tr>
+      <tr>
+        <td><strong>Vol-Spot (vs)</strong></td>
+        <td class="mono">&minus;0.95 to +0.2</td>
+        <td>Almost always negative (VIX goes up when stocks go down). When approaching &minus;0.95, implies extreme gamma selling pressure. Values near 0 signal vol detachment (unusual, often pre-crisis).</td>
+      </tr>
+      <tr>
+        <td><strong>Contagion Multiplier (cn)</strong></td>
+        <td class="mono">0.2 to 2.0</td>
+        <td>Scalar amplifying cross-asset contagion. 1.0 = normal transmission. >1.5 = cascade risk (margin calls triggering forced selling across unrelated assets). GFC/COVID peaked near 1.9.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Correlation Regime Map (Scatter Plot)</h3>
+  <p>The dashboard's <strong>Correlation Map</strong> tab plots every scenario on an S&P 500 vs. UST 10Y grid, creating four quadrants:</p>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title" style="color:#ef4444">Top-Left: Stagflation</div>
+      <p>Equities fall while rates rise. Stock-bond correlation is positive. The 60/40 portfolio fails. This is the worst-case regime for most institutional portfolios. Examples: 2022 Rate Shock, Global Stagflation, Liberation Day Tariff Shock.</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:#3b82f6">Bottom-Left: Risk-Off</div>
+      <p>Equities fall and rates fall (flight to quality). Bonds act as a hedge. The standard diversification assumption holds. Examples: Black Monday 1987, GFC 2008, COVID-19 Crash.</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:#22c55e">Bottom-Right: Goldilocks</div>
+      <p>Equities rise while rates fall. Central bank easing supports both asset classes. Optimal for leveraged portfolios.</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:#f59e0b">Top-Right: Reflation</div>
+      <p>Equities rise with rates. Growth-driven tightening cycle. Equities tolerate higher rates because earnings growth is strong.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 6. SCENARIO HORIZONS -->
+<div class="section">
+  <h2><span class="num">6</span> Scenario Horizons &amp; Timing</h2>
+  <p>The <strong>horizon</strong> defines how quickly the shock materializes, which directly impacts hedging feasibility and liquidity assumptions.</p>
+
+  <table>
+    <thead>
+      <tr><th>Horizon</th><th>Timeframe</th><th>Implication</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Instantaneous</strong></td><td>Same-day</td><td>No hedging possible. Pure mark-to-market. Relevant for flash crashes, VIX spikes, gap risk.</td></tr>
+      <tr><td><strong>Short-term (1-5d)</strong></td><td>1 to 5 trading days</td><td>Limited hedging window. Liquidity may be impaired. Most relevant for trading book risk.</td></tr>
+      <tr><td><strong>Medium (1-3m)</strong></td><td>1 to 3 months</td><td>Portfolio can adjust, but market dislocations persist. Basis risk may dominate. Margin calls compound.</td></tr>
+      <tr><td><strong>Extended (3-12m)</strong></td><td>3 to 12 months</td><td>Secular shift. Business model impact. Revenue compression. Credit migration crystallizes.</td></tr>
+      <tr><td><strong>Full Cycle (9Q)</strong></td><td>~2.25 years</td><td>CCAR supervisory horizon. Complete economic cycle through peak unemployment and recovery. Captures credit losses that only emerge with lag.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 7. REGULATORY MAPPING -->
+<div class="section">
+  <h2><span class="num">7</span> Regulatory Framework Mapping</h2>
+  <p>Scenarios are tagged to one or more regulatory frameworks. This allows quick identification of which scenarios satisfy specific compliance requirements.</p>
+
+  <table>
+    <thead>
+      <tr><th style="width:130px">Framework</th><th style="width:100px">Jurisdiction</th><th>Key Requirements</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>CCAR / DFAST</strong></td>
+        <td>US (Fed)</td>
+        <td>Annual Comprehensive Capital Analysis and Review. 9-quarter horizon. Severely Adverse scenario prescribed by the Fed (unemployment 10%, equity &minus;33%, CRE &minus;30% in 2025; CRE &minus;40% in proposed 2026). Exploratory scenarios added (e.g., 5 hedge fund failures). Results determine capital distributions.</td>
+      </tr>
+      <tr>
+        <td><strong>FRTB</strong></td>
+        <td>Global (Basel)</td>
+        <td>Fundamental Review of the Trading Book. Expected Shortfall replacing VaR. Stressed calibration window. Internal Models Approach (IMA) requires a comprehensive stress testing programme covering the trading book.</td>
+      </tr>
+      <tr>
+        <td><strong>Basel III</strong></td>
+        <td>Global</td>
+        <td>Pillar 2 ICAAP stress testing. Reverse stress testing requirement. Liquidity stress (LCR/NSFR under stress). Capital buffers calibrated to stress results.</td>
+      </tr>
+      <tr>
+        <td><strong>BoE PRA</strong></td>
+        <td>UK</td>
+        <td>Annual Cyclical Scenario (ACS). Biennial Exploratory Scenario (BES). 2025 ACS focuses on global trade fragmentation and geopolitical escalation with 2-5 day extreme moves.</td>
+      </tr>
+      <tr>
+        <td><strong>Internal</strong></td>
+        <td>Firm-level</td>
+        <td>Scenarios developed by the firm's risk management for internal capital adequacy, limit setting, risk appetite monitoring, and ad-hoc analysis. All 59 scenarios carry an Internal tag.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>CCAR 2025 vs 2026:</strong> The dashboard includes both the current CCAR 2025 parameters (CRE &minus;30%, BBB spread 580bp) and the proposed 2026 parameters (CRE &minus;40%, BBB spread 570bp). The 2026 scenario is tagged <span class="tag" style="background:rgba(245,158,11,0.12);color:#f59e0b">Under Review</span> until finalized by the Federal Reserve.
+  </div>
+</div>
+
+<!-- 8. USING THE DASHBOARD -->
+<div class="section">
+  <h2><span class="num">8</span> Dashboard Navigation Guide</h2>
+
+  <h3>Scenario Table (Main View)</h3>
+  <ul>
+    <li><strong>Search:</strong> Free-text search filters by scenario name, ID, or narrative content.</li>
+    <li><strong>Filter chips:</strong> Click category, severity, horizon, asset class, or status chips to narrow results. Multiple selections within a filter group use OR logic; across groups, AND logic.</li>
+    <li><strong>Sort:</strong> Click any column header to sort ascending/descending.</li>
+    <li><strong>Expand:</strong> Click any row to reveal the full detail panel with the 34-factor shock grid, correlation assumptions, metadata, and historical analogues.</li>
+    <li><strong>KPI bar:</strong> Top-line metrics update in real-time based on active filters: total active scenarios, category counts, asset class coverage score, and count under review.</li>
+  </ul>
+
+  <h3>Analytics &amp; Coverage Tab</h3>
+  <ul>
+    <li><strong>Severity distribution:</strong> Bar chart showing count of scenarios per severity tier.</li>
+    <li><strong>Category distribution:</strong> Bar chart showing count per category type.</li>
+    <li><strong>Risk factor frequency:</strong> Horizontal bar chart ranking which risk factors are most commonly stressed across all 59 scenarios. Useful for identifying factors with thin coverage.</li>
+    <li><strong>Coverage heatmap:</strong> Asset class (rows) vs. category (columns). Red cells indicate coverage gaps where no scenarios stress that intersection.</li>
+  </ul>
+
+  <h3>Correlation Map Tab</h3>
+  <ul>
+    <li><strong>Scatter plot:</strong> Each dot = one scenario, plotted on S&P 500 shock (x-axis) vs. UST 10Y move (y-axis). Color = category.</li>
+    <li><strong>Hover:</strong> Hover over any dot to see the scenario name and exact shock values.</li>
+    <li><strong>Quadrant labels:</strong> Stagflation (top-left), Risk-Off (bottom-left), Goldilocks (bottom-right), Reflation (top-right).</li>
+  </ul>
+</div>
+
+<!-- 9. SCENARIO SUB-CATEGORIES -->
+<div class="section">
+  <h2><span class="num">9</span> Scenario Sub-Category Taxonomy</h2>
+  <p>Each scenario is assigned a <strong>sub-category</strong> reflecting the primary risk driver. The inventory covers 10 distinct sub-types:</p>
+  <div class="grid-3">
+    <div class="card"><div class="card-title">Equity Crash</div><p>Primary driver is a sharp equity drawdown. Growth sectors, index-level, or factor-specific (e.g., value rotation).</p></div>
+    <div class="card"><div class="card-title">Rates Shock</div><p>Driven by yield curve moves — parallel shifts, steepeners, flatteners, or breakeven repricing.</p></div>
+    <div class="card"><div class="card-title">Credit Blowout</div><p>Spread widening across IG, HY, EM, or structured credit. May include fallen angel events.</p></div>
+    <div class="card"><div class="card-title">FX Crisis</div><p>Currency devaluations, carry-trade unwinds, EM contagion, or DXY dislocation.</p></div>
+    <div class="card"><div class="card-title">Vol Explosion</div><p>VIX/MOVE spikes. Vol surface repricing. Structured product hedging stress. Gamma squeeze dynamics.</p></div>
+    <div class="card"><div class="card-title">Liquidity Freeze</div><p>Funding markets seize. Repo, prime brokerage, or settlement failures. Bid-ask spreads blow out.</p></div>
+    <div class="card"><div class="card-title">Geopolitical</div><p>Military conflict, trade wars, sanctions, terrorism. Non-economic shock origination with market contagion.</p></div>
+    <div class="card"><div class="card-title">Sovereign</div><p>Government debt/rating stress. Fiscal crises. Eurozone redenomination risk.</p></div>
+    <div class="card"><div class="card-title">Contagion</div><p>Multi-vector crisis where the defining feature is cascading cross-market transmission.</p></div>
+    <div class="card"><div class="card-title">Stagflation</div><p>Simultaneous growth contraction and inflation acceleration. Monetary policy paralysis.</p></div>
+  </div>
+</div>
+
+<!-- 10. GOVERNANCE -->
+<div class="section">
+  <h2><span class="num">10</span> Governance, Review &amp; Approval</h2>
+  <p>Each scenario carries metadata reflecting its governance lifecycle:</p>
+  <ul>
+    <li><strong>Status:</strong> <code>Active</code> (production-ready), <code>Under Review</code> (pending approval — e.g., CCAR 2026 proposed), <code>Retired</code> (archived, no longer run).</li>
+    <li><strong>Approval:</strong> Approved by MRC (Market Risk Committee), Approved by CRO, Approved by Board — reflects the seniority of sign-off required based on scenario severity and scope.</li>
+    <li><strong>Last Run:</strong> The date the scenario was last executed against the firm's portfolio. Staleness beyond 90 days should trigger a review.</li>
+    <li><strong>Review Frequency:</strong> How often the scenario's calibration is reviewed — Quarterly, Semi-Annual, or Annual. Regulatory scenarios align with submission cycles.</li>
+    <li><strong>Run Frequency:</strong> How often the scenario is executed against the firm's current positions — Daily, Weekly, Monthly, Quarterly, or Annual.</li>
+    <li><strong>Owner:</strong> The risk function responsible for maintaining the scenario and its calibration (e.g., Market Risk - Equities, Enterprise Risk, Treasury/ALM).</li>
+  </ul>
+
+  <div class="callout-red callout">
+    <strong>Review Cadence:</strong> Scenarios should be recalibrated when: (1) significant market events render shocks unrealistic, (2) regulatory parameters change, (3) the firm's portfolio composition shifts materially, or (4) model validation identifies calibration drift. The CRO must approve all Extreme/Tail tier recalibrations.
+  </div>
+</div>
+
+<!-- 11. KEY SCENARIOS REFERENCE -->
+<div class="section">
+  <h2><span class="num">11</span> Key Scenario Quick Reference</h2>
+  <p>Landmark scenarios that serve as anchors for the severity calibration framework:</p>
+
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Scenario</th><th>Severity</th><th>SPX</th><th>VIX</th><th>10Y</th><th>HY</th><th>Key Theme</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="mono">HIST-001</td><td>Black Monday 1987</td><td><span class="tag t-ext">Extreme</span></td><td class="mono">&minus;22.6%</td><td class="mono">150</td><td class="mono">&minus;50bp</td><td class="mono">+120bp</td><td>Single-day equity crash record</td></tr>
+      <tr><td class="mono">HIST-009</td><td>GFC / Lehman 2008</td><td><span class="tag t-ext">Extreme</span></td><td class="mono">&minus;46%</td><td class="mono">80</td><td class="mono">&minus;130bp</td><td class="mono">+1200bp</td><td>Systemic credit + equity crisis</td></tr>
+      <tr><td class="mono">HIST-018</td><td>COVID-19 Crash 2020</td><td><span class="tag t-ext">Extreme</span></td><td class="mono">&minus;34%</td><td class="mono">82</td><td class="mono">&minus;80bp</td><td class="mono">+700bp</td><td>Fastest bear market in history</td></tr>
+      <tr><td class="mono">HIST-020</td><td>2022 Rate Shock</td><td><span class="tag t-ext">Extreme</span></td><td class="mono">&minus;25%</td><td class="mono">35</td><td class="mono">+270bp</td><td class="mono">+200bp</td><td>60/40 correlation breakdown</td></tr>
+      <tr><td class="mono">REG-001</td><td>CCAR 2025 Severely Adverse</td><td><span class="tag t-sev">Severe</span></td><td class="mono">&minus;33%</td><td class="mono">70</td><td class="mono">&minus;150bp</td><td class="mono">+580bp</td><td>Regulatory capital baseline</td></tr>
+      <tr><td class="mono">HYPO-001</td><td>China-Taiwan Kinetic</td><td><span class="tag t-tail">Tail</span></td><td class="mono">&minus;30%</td><td class="mono">75</td><td class="mono">&minus;50bp</td><td class="mono">+500bp</td><td>Semiconductor supply chain collapse</td></tr>
+      <tr><td class="mono">REV-001</td><td>Capital Breach</td><td><span class="tag t-tail">Tail</span></td><td class="mono">&minus;45%</td><td class="mono">85</td><td class="mono">+100bp</td><td class="mono">+900bp</td><td>Reverse-engineered CET1 breach</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 12. GLOSSARY -->
+<div class="section">
+  <h2><span class="num">12</span> Glossary of Key Terms</h2>
+  <div class="grid-2">
+    <div>
+      <table>
+        <tbody>
+          <tr><td><strong>BAU</strong></td><td>Business-as-Usual — recurring, scheduled stress testing programme</td></tr>
+          <tr><td><strong>CCAR</strong></td><td>Comprehensive Capital Analysis and Review (Fed)</td></tr>
+          <tr><td><strong>DFAST</strong></td><td>Dodd-Frank Act Stress Test</td></tr>
+          <tr><td><strong>FRTB</strong></td><td>Fundamental Review of the Trading Book (Basel)</td></tr>
+          <tr><td><strong>CET1</strong></td><td>Common Equity Tier 1 capital ratio</td></tr>
+          <tr><td><strong>ICAAP</strong></td><td>Internal Capital Adequacy Assessment Process</td></tr>
+          <tr><td><strong>ACS</strong></td><td>Annual Cyclical Scenario (Bank of England)</td></tr>
+          <tr><td><strong>DV01</strong></td><td>Dollar Value of 1 basis point (rate sensitivity)</td></tr>
+          <tr><td><strong>OAS</strong></td><td>Option-Adjusted Spread</td></tr>
+          <tr><td><strong>SOFR</strong></td><td>Secured Overnight Financing Rate</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <table>
+        <tbody>
+          <tr><td><strong>LDI</strong></td><td>Liability-Driven Investment (UK pension strategy)</td></tr>
+          <tr><td><strong>MOVE</strong></td><td>Merrill Lynch Option Volatility Estimate (rates vol)</td></tr>
+          <tr><td><strong>TED Spread</strong></td><td>Treasury-Eurodollar spread (interbank stress)</td></tr>
+          <tr><td><strong>CDX</strong></td><td>Credit Default Swap Index (IG/HY/EM)</td></tr>
+          <tr><td><strong>CLO</strong></td><td>Collateralized Loan Obligation</td></tr>
+          <tr><td><strong>MBS / CMBS</strong></td><td>Mortgage / Commercial Mortgage Backed Securities</td></tr>
+          <tr><td><strong>CRE</strong></td><td>Commercial Real Estate</td></tr>
+          <tr><td><strong>HTM</strong></td><td>Held-to-Maturity (accounting classification)</td></tr>
+          <tr><td><strong>BTFP</strong></td><td>Bank Term Funding Program (Fed emergency facility)</td></tr>
+          <tr><td><strong>TARGET2</strong></td><td>Trans-European Automated Real-time Settlement System</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  BAU Stress Testing Scenario Inventory &middot; Companion Guide &middot; Enterprise Risk Management &middot; Confidential &amp; Proprietary<br/>
+  <span id="yearStamp"></span> &middot; For internal use only &middot; Not for distribution
+</div>
+
+</div>
+<script>
+document.getElementById('dateStamp').textContent=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+document.getElementById('yearStamp').textContent=new Date().getFullYear();
+</script>
+</body>
+</html>
